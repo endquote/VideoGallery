@@ -14,21 +14,36 @@ class WebServer {
     });
 
     app.get('/videos', (req, res) => {
-      database.getVideos().then((doc) => {
-        res.send(JSON.stringify(doc));
+      database.getVideos().then((result) => {
+        res.json(result);
       });
     });
 
     app.post('/video', (req, res) => {
-
+      database.addVideo(req.query.url)
+        .then(() => {
+          res.sendStatus(200);
+        }).catch(() => {
+          res.sendStatus(500);
+        });
     });
 
     app.delete('/video', (req, res) => {
-
+      database.deleteVideo(req.query.url)
+        .then(() => {
+          res.sendStatus(200);
+        }).catch(() => {
+          res.sendStatus(500);
+        });
     });
 
-    app.post('/selectVideo', (req, res) => {
-
+    app.put('/selectVideo', (req, res) => {
+      database.selectVideo(req.query.url)
+        .then(() => {
+          res.sendStatus(200);
+        }).catch(() => {
+          res.sendStatus(500);
+        });
     });
   }
 }
