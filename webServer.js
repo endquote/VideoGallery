@@ -29,7 +29,7 @@ class WebServer {
     });
 
     app.delete('/video', (req, res) => {
-      database.deleteVideo(req.query.url)
+      database.removeVideo(req.query.url)
         .then(() => {
           res.sendStatus(200);
         }).catch(() => {

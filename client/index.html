@@ -4,5 +4,14 @@
   socket.on('videos', function(data) {
     console.log(data);
   });
+  socket.on('videoAdded', function(data) {
+    console.log(data);
+  });
+  socket.on('videoRemoved', function(data) {
+    console.log(data);
+  });
+  socket.on('videoSelected', function(data) {
+    console.log(data);
+  });
 
 </script>

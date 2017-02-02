@@ -1,3 +1,6 @@
+const util = require('util');
+const EventEmitter = require('events').EventEmitter;
+
 const mongoose = require('mongoose');
 
 class Database {
@@ -5,7 +8,7 @@ class Database {
     mongoose.connect(url);
     mongoose.Promise = global.Promise;
 
-    this.Video = mongoose.model('video', new mongoose.Schema({
+    const videoSchema = new mongoose.Schema({
       url: {
         required: true,
         type: String,
@@ -20,8 +23,11 @@ class Database {
       selected: {
         type: Boolean,
         index: true,
+        default: false,
       },
-    }));
+    });
+
+    this.Video = mongoose.model('video', videoSchema);
   }
 
   getVideos() {
@@ -29,31 +35,35 @@ class Database {
   }
 
   addVideo(url) {
-    return new this.Video({
-      url,
-      selected: false,
-    }).save();
+    return new this.Video({ url, selected: false })
+      .save()
+      .then((doc) => {
+        if (doc) {
+          this.emit('videoAdded', doc);
+        }
+      });
   }
 
-  deleteVideo(url) {
-    return this.Video.remove({
-      url,
-    });
+  removeVideo(url) {
+    return this.Video.findOneAndRemove({ url })
+      .then((doc) => {
+        if (doc) {
+          this.emit('videoRemoved', doc);
+        }
+      });
   }
 
   selectVideo(url) {
-    return this.Video.updateMany({
-      selected: true,
-    }, {
-      selected: false,
-    }).then(() => {
-      this.Video.updateOne({
-        url,
-      }, {
-        selected: true,
-      }).exec();
-    });
+    return this.Video.updateMany({ selected: true }, { selected: false })
+      .then(() => this.Video.findOneAndUpdate({ url }, { selected: true }, { new: true }))
+      .then((doc) => {
+        if (doc) {
+          this.emit('videoSelected', doc);
+        }
+      });
   }
 }
+
+util.inherits(Database, EventEmitter);
 
 module.exports = Database;
