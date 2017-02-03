@@ -1,17 +1,46 @@
-<script src="/socket.io/socket.io.js"></script>
-<script>
-  var socket = io.connect();
-  socket.on('videos', function(data) {
-    console.log(data);
-  });
-  socket.on('videoAdded', function(data) {
-    console.log(data);
-  });
-  socket.on('videoRemoved', function(data) {
-    console.log(data);
-  });
-  socket.on('videoSelected', function(data) {
-    console.log(data);
-  });
+<!DOCTYPE html>
+<html>
 
-</script>
+<head>
+  <title>player</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    var socket = io.connect();
+    socket.on('videos', function(data) {
+      console.log(data);
+    });
+    socket.on('videoAdded', function(data) {
+      console.log(data);
+    });
+    socket.on('videoRemoved', function(data) {
+      console.log(data);
+    });
+    socket.on('videoSelected', function(data) {
+      console.log(data);
+    });
+
+    function addVideo() {
+      socket.emit('addVideo', { url: document.getElementById('url').value });
+    }
+
+    function removeVideo() {
+      socket.emit('removeVideo', { url: document.getElementById('url').value });
+    }
+
+    function selectVideo() {
+      socket.emit('selectVideo', { url: document.getElementById('url').value });
+    }
+
+  </script>
+</head>
+
+<body>
+
+  <input type="text" id="url" /><br/>
+  <button onclick="addVideo()">add</button>
+  <button onclick="removeVideo()">remove</button>
+  <button onclick="selectVideo()">select</button>
+
+</body>
+
+</html>
