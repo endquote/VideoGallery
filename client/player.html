@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>player</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    var socket = io.connect();
+
+    socket.on('videos', function(videos) {
+      playVideo(videos.filter(v => v.selected)[0]);
+    });
+
+    socket.on('videoSelected', function(video) {
+      playVideo(video);
+    });
+
+    function playVideo(video) {
+      document.getElementById('url').value = video ? video.url : '';
+    }
+
+  </script>
+</head>
+
+<body>
+
+  <input type="text" id="url" /><br/>
+
+</body>
+
+</html>
