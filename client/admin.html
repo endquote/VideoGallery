@@ -3,33 +3,11 @@
 
 <head>
   <title>admin</title>
+  <script src="/reload/reload.js"></script>
   <script src="/socket.io/socket.io.js"></script>
+  <script src="bundle.js"></script>
   <script>
-    var socket = io.connect();
-    socket.on('videos', function(data) {
-      console.log(data);
-    });
-    socket.on('videoAdded', function(data) {
-      console.log(data);
-    });
-    socket.on('videoRemoved', function(data) {
-      console.log(data);
-    });
-    socket.on('videoSelected', function(data) {
-      console.log(data);
-    });
-
-    function addVideo() {
-      socket.emit('addVideo', { url: document.getElementById('url').value });
-    }
-
-    function removeVideo() {
-      socket.emit('removeVideo', { url: document.getElementById('url').value });
-    }
-
-    function selectVideo() {
-      socket.emit('selectVideo', { url: document.getElementById('url').value });
-    }
+    document.addEventListener('DOMContentLoaded', () => AdminPage.init());
 
   </script>
 </head>

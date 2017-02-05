@@ -1,0 +1,8 @@
+{
+  "watch": [
+    "./",
+    "../client"
+  ],
+  "ext": "js json html css",
+  "verbose": true
+}

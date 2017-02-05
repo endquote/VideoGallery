@@ -1,4 +1,3 @@
-// Place your settings in this file to overwrite default and user settings.
 {
   "editor.formatOnSave": true,
   "files.exclude": {
@@ -8,6 +7,7 @@
     "**/.DS_Store": true,
     "**/downloads": true,
     "node_modules": true,
+    "**/bundle.js*": true,
     "output": true
   }
 }

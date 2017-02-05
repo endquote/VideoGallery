@@ -8,7 +8,7 @@ program
   .option('--database [mongodb://localhost/]', 'database connection', 'mongodb://localhost/')
   .parse(process.argv);
 
-require('./server/database').init(program.database);
-require('./server/webServer').init(program.port);
-require('./server/socketServer').init();
-require('./server/downloader').init(program.downloads);
+require('./database').init(program.database);
+require('./webServer').init(program.port);
+require('./socketServer').init();
+require('./downloader').init(program.downloads);

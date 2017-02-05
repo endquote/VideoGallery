@@ -1,6 +1,7 @@
 const express = require('express');
 const http = require('http');
 const path = require('path');
+const reload = require('reload');
 
 const Database = require('./database');
 
@@ -11,6 +12,10 @@ class WebServer {
     const httpServer = this.httpServer = http.Server(app);
     httpServer.listen(port);
 
+    // Reload browser when server restarts
+    // https://www.npmjs.com/package/reload
+    reload(httpServer, app);
+
     // Routes for static content.
     app.get('/', (req, res) => {
       res.sendFile(path.join(__dirname, '../client/player.html'));
@@ -18,7 +23,7 @@ class WebServer {
     app.get('/admin', (req, res) => {
       res.sendFile(path.join(__dirname, '../client/admin.html'));
     });
-    app.use(express.static(path.join(__dirname, 'client')));
+    app.use(express.static(path.join(__dirname, '../client')));
 
     // Get all videos.
     app.get('/videos', (req, res) => {
