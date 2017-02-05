@@ -13,10 +13,10 @@ class WebServer {
 
     // Routes for static content.
     app.get('/', (req, res) => {
-      res.sendFile(path.join(__dirname, 'client', 'player.html'));
+      res.sendFile(path.join(__dirname, '../client/player.html'));
     });
     app.get('/admin', (req, res) => {
-      res.sendFile(path.join(__dirname, 'client', 'admin.html'));
+      res.sendFile(path.join(__dirname, '../client/admin.html'));
     });
     app.use(express.static(path.join(__dirname, 'client')));
 

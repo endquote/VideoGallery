@@ -6,7 +6,7 @@ const Database = require('./database');
 
 class Downloader {
   static init(target) {
-    this.target = target || path.join(__dirname, 'downloads');
+    this.target = target || path.join(__dirname, '../downloads');
 
     // https://github.com/rg3/youtube-dl/blob/master/README.md
     this.infoCmd = 'youtube-dl --dump-json --playlist-items 1';

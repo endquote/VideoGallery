@@ -1,4 +1,4 @@
-require('./database').init(); // can pass connection string
-require('./webServer').init(); // can pass port
-require('./socketServer').init();
-require('./downloader').init(); // can pass target dir
+require('./server/database').init(); // can pass connection string
+require('./server/webServer').init(); // can pass port
+require('./server/socketServer').init();
+require('./server/downloader').init(); // can pass target dir
