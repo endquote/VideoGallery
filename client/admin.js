@@ -3,7 +3,7 @@ const superagent = require('superagent');
 
 class AdminPage {
   static init() {
-    var x = 5;
+    var x = 6;
   }
 }
 
