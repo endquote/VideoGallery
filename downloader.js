@@ -68,6 +68,7 @@ class Downloader {
   }
 
   static removeVideo(doc) {
+    console.info(`Deleting video ${doc.url}`);
     try {
       fs.unlinkSync(path.join(this.target, doc.file));
       fs.unlinkSync(path.join(this.target, doc.thumbnail));
