@@ -1,12 +1,14 @@
-const util = require('util');
 const EventEmitter = require('events').EventEmitter;
 
 const mongoose = require('mongoose');
 
 class Database {
-  constructor(url = 'mongodb://localhost/videoGallery') {
+  static init(url = 'mongodb://localhost/videoGallery') {
     mongoose.connect(url);
     mongoose.Promise = global.Promise;
+
+    this.emitter = new EventEmitter();
+    Database.on = this.emitter.on.bind(this.emitter);
 
     const videoSchema = new mongoose.Schema({
       url: {
@@ -34,15 +36,15 @@ class Database {
   }
 
   // Get all of the videos in the collection.
-  getVideos() {
+  static getVideos() {
     return this.Video.find();
   }
 
   // Add a video to the collection by URL.
-  addVideo(url) {
+  static addVideo(url) {
     return new this.Video({ url, selected: false, added: new Date() })
       .save()
-      .then(doc => this.emit('videoAdded', doc))
+      .then(doc => this.emitter.emit('videoAdded', doc))
       .then(this.ensureSelection())
       .catch((err) => {
         // Already exists, don't care.
@@ -53,26 +55,26 @@ class Database {
   }
 
   // Remove a video from the collection by URL.
-  removeVideo(url) {
+  static removeVideo(url) {
     return this.Video.findOneAndRemove({ url })
-      .then(doc => this.emit('videoRemoved', doc))
+      .then(doc => this.emitter.emit('videoRemoved', doc))
       .then(this.ensureSelection());
   }
 
   // Select a video from the collection by URL.
-  selectVideo(url) {
+  static selectVideo(url) {
     return this.Video.updateMany({ selected: true }, { selected: false })
       .then(() => this.Video.findOneAndUpdate({ url }, { selected: true }, { new: true }))
-      .then(doc => this.emit('videoSelected', doc));
+      .then(doc => this.emitter.emit('videoSelected', doc));
   }
 
   // Get the currently selected video.
-  selectedVideo() {
+  static selectedVideo() {
     return this.Video.findOne({ selected: true });
   }
 
   // Make sure a video is selected, doesn't matter which.
-  ensureSelection() {
+  static ensureSelection() {
     this.selectedVideo().then((selectedDoc) => {
       if (selectedDoc) {
         return;
@@ -81,13 +83,11 @@ class Database {
         if (doc) {
           this.selectVideo(doc.url);
         } else {
-          this.emit('videoSelected', null);
+          this.emitter.emit('videoSelected', null);
         }
       });
     });
   }
 }
-
-util.inherits(Database, EventEmitter);
 
 module.exports = Database;

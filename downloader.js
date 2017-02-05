@@ -2,9 +2,10 @@ const path = require('path');
 const fs = require('fs-extra');
 const childProcess = require('child_process');
 
+const Database = require('./database');
+
 class Downloader {
-  static init(database, target) {
-    this.database = database;
+  static init(target) {
     this.target = target || path.join(__dirname, 'downloads');
 
     // https://github.com/rg3/youtube-dl/blob/master/README.md
@@ -12,8 +13,8 @@ class Downloader {
     this.downloadCmd = 'youtube-dl --write-thumbnail --no-progress --playlist-items 1 -o';
 
     fs.ensureDirSync(this.target);
-    database.on('videoAdded', doc => this.addVideo(doc));
-    database.on('videoRemoved', doc => this.removeVideo(doc));
+    Database.on('videoAdded', doc => this.addVideo(doc));
+    Database.on('videoRemoved', doc => this.removeVideo(doc));
   }
 
   static addVideo(doc) {
@@ -22,14 +23,14 @@ class Downloader {
 
   static _getVideoInfo(doc) {
     console.info(`Getting info for ${doc.url}`);
-    childProcess.exec(`${this.infoCmd} ${doc.url}`,
+    childProcess.exec(`${this.infoCmd} ${doc.url}`, { maxBuffer: 1024 * 500 },
       (err, stdout, stderr) => this._onVideoInfo(err, stdout, stderr, doc));
   }
 
   static _onVideoInfo(err, stdout, stderr, doc) {
     if (err || stderr) {
       console.warn(err || stderr);
-      this.database.removeVideo(doc.url);
+      Database.removeVideo(doc.url);
       return;
     }
 
@@ -51,14 +52,14 @@ class Downloader {
 
   static _downloadVideo(doc) {
     console.info(`Downloading video ${doc.url}`);
-    childProcess.exec(`${this.downloadCmd} "${this.target}/${doc.id}" ${doc.url}`,
+    childProcess.exec(`${this.downloadCmd} "${this.target}/${doc.id}" ${doc.url}`, { maxBuffer: 1024 * 500 },
       (err, stdout, stderr) => this._onVideoLoaded(err, stdout, stderr, doc));
   }
 
   static _onVideoLoaded(err, stdout, stderr, doc) {
     if (err || stderr) {
       console.warn(err || stderr);
-      this.database.removeVideo(doc.url);
+      Database.removeVideo(doc.url);
       return;
     }
 

@@ -1,22 +1,25 @@
 const socketio = require('socket.io');
 
+const Database = require('./database');
+const WebServer = require('./webServer');
+
 class SocketServer {
-  static init(httpServer, database) {
-    const io = socketio(httpServer);
+  static init() {
+    const io = socketio(WebServer.httpServer);
 
     io.on('connection', (socket) => {
       // Send the full list when connected.
-      database.getVideos().then(doc => socket.emit('videos', doc));
+      Database.getVideos().then(doc => socket.emit('videos', doc));
 
       // Send events to the client when anything on the database changes.
-      database.on('videoAdded', doc => socket.emit('videoAdded', doc));
-      database.on('videoRemoved', doc => socket.emit('videoRemoved', doc));
-      database.on('videoSelected', doc => socket.emit('videoSelected', doc));
+      Database.on('videoAdded', doc => socket.emit('videoAdded', doc));
+      Database.on('videoRemoved', doc => socket.emit('videoRemoved', doc));
+      Database.on('videoSelected', doc => socket.emit('videoSelected', doc));
 
       // Change things in the database when the client requests it.
-      socket.on('addVideo', data => database.addVideo(data.url));
-      socket.on('removeVideo', data => database.removeVideo(data.url));
-      socket.on('selectVideo', data => database.selectVideo(data.url));
+      socket.on('addVideo', data => Database.addVideo(data.url));
+      socket.on('removeVideo', data => Database.removeVideo(data.url));
+      socket.on('selectVideo', data => Database.selectVideo(data.url));
     });
   }
 }

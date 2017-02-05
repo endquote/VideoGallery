@@ -1,9 +1,4 @@
-const Database = require('./database');
-const WebServer = require('./webServer');
-const SocketServer = require('./socketServer');
-const Downloader = require('./downloader');
-
-const database = new Database(); // can pass connection string
-WebServer.init(database); // can pass port
-SocketServer.init(WebServer.httpServer, database);
-Downloader.init(database); // can pass target dir
+require('./database').init(); // can pass connection string
+require('./webServer').init(); // can pass port
+require('./socketServer').init();
+require('./downloader').init(); // can pass target dir
