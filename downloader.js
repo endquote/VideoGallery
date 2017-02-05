@@ -9,7 +9,7 @@ class Downloader {
 
     // https://github.com/rg3/youtube-dl/blob/master/README.md
     this.infoCmd = 'youtube-dl --dump-json --playlist-items 1';
-    this.downloadCmd = 'youtube-dl --write-thumbnail --playlist-items 1 -o';
+    this.downloadCmd = 'youtube-dl --write-thumbnail --no-progress --playlist-items 1 -o';
 
     fs.ensureDirSync(this.target);
     database.on('videoAdded', doc => this.addVideo(doc));
@@ -21,18 +21,20 @@ class Downloader {
   }
 
   static _getVideoInfo(doc) {
+    console.info(`Getting info for ${doc.url}`);
     childProcess.exec(`${this.infoCmd} ${doc.url}`,
       (err, stdout, stderr) => this._onVideoInfo(err, stdout, stderr, doc));
   }
 
   static _onVideoInfo(err, stdout, stderr, doc) {
     if (err || stderr) {
+      console.warn(err || stderr);
       this.database.removeVideo(doc.url);
       return;
     }
 
+    console.info(`Saving info for ${doc.url}`);
     const info = JSON.parse(stdout);
-
     doc.created = new Date(
       parseInt(info.upload_date.substr(0, 4), 10),
       parseInt(info.upload_date.substr(4, 2), 10) - 1,
@@ -48,15 +50,19 @@ class Downloader {
   }
 
   static _downloadVideo(doc) {
+    console.info(`Downloading video ${doc.url}`);
     childProcess.exec(`${this.downloadCmd} "${this.target}/${doc.id}" ${doc.url}`,
       (err, stdout, stderr) => this._onVideoLoaded(err, stdout, stderr, doc));
   }
 
   static _onVideoLoaded(err, stdout, stderr, doc) {
     if (err || stderr) {
+      console.warn(err || stderr);
       this.database.removeVideo(doc.url);
       return;
     }
+
+    console.info(stdout);
     doc.loaded = true;
     doc.save();
   }
