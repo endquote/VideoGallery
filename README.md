@@ -21,6 +21,7 @@ Downloads videos from the web and plays them in a random order.
 
 1. Start mongodb: `mongod --config /usr/local/etc/mongod.conf`
 2. From `server`, run `npm start`
+
    * Optional arguments: `npm start -- --port=8080 --downloads=./downloads/ --database=mongodb://localhost/`
 3. Video Player: [http://localhost:8080](http://localhost:8080)
 4. Admin: [http://localhost:8080/admin](http://localhost:8080/admin)
