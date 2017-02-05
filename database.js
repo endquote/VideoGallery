@@ -16,10 +16,13 @@ class Database {
         unique: true,
       },
       file: String,
+      thumbnail: String,
       added: Date,
       created: Date,
       author: String,
       title: String,
+      description: String,
+      loaded: Boolean,
       selected: {
         type: Boolean,
         index: true,
@@ -37,15 +40,12 @@ class Database {
 
   // Add a video to the collection by URL.
   addVideo(url) {
-    return new this.Video({ url, selected: false })
+    return new this.Video({ url, selected: false, added: new Date() })
       .save()
-      .then((doc) => {
-        if (doc) {
-          this.emit('videoAdded', doc);
-          this.ensureSelection();
-        }
-      }).catch((err) => {
-        // Already exists
+      .then(doc => this.emit('videoAdded', doc))
+      .then(this.ensureSelection())
+      .catch((err) => {
+        // Already exists, don't care.
         if (err.code !== 11000) {
           throw err;
         }
@@ -55,21 +55,15 @@ class Database {
   // Remove a video from the collection by URL.
   removeVideo(url) {
     return this.Video.findOneAndRemove({ url })
-      .then((doc) => {
-        if (doc) {
-          this.emit('videoRemoved', doc);
-          this.ensureSelection();
-        }
-      });
+      .then(doc => this.emit('videoRemoved', doc))
+      .then(this.ensureSelection());
   }
 
   // Select a video from the collection by URL.
   selectVideo(url) {
     return this.Video.updateMany({ selected: true }, { selected: false })
       .then(() => this.Video.findOneAndUpdate({ url }, { selected: true }, { new: true }))
-      .then((doc) => {
-        this.emit('videoSelected', doc);
-      });
+      .then(doc => this.emit('videoSelected', doc));
   }
 
   // Get the currently selected video.
@@ -83,7 +77,7 @@ class Database {
       if (selectedDoc) {
         return;
       }
-      this.Video.findOne().then((doc) => {
+      this.Video.findOne({ loaded: true }).then((doc) => {
         if (doc) {
           this.selectVideo(doc.url);
         } else {
