@@ -6,6 +6,7 @@
     "**/.svn": true,
     "**/.hg": true,
     "**/.DS_Store": true,
+    "**/downloads": true,
     "node_modules": true,
     "output": true
   }
