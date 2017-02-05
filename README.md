@@ -15,6 +15,7 @@ Downloads videos from the web and plays them in a random order.
 4. Install [ffmpeg](http://ffmpeg.org)
 5. Install [youtube-dl](http://rg3.github.io/youtube-dl/)
 6. Update youtube-dl: set up a task that runs `youtube-dl --update` daily.
+7. Download the package, run `npm install` from the root.
 
 ## Execution
 
