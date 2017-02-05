@@ -3,7 +3,8 @@ const EventEmitter = require('events').EventEmitter;
 const mongoose = require('mongoose');
 
 class Database {
-  static init(url = 'mongodb://localhost/videoGallery') {
+  static init(url = 'mongodb://localhost/') {
+    url += 'videoGallery';
     mongoose.connect(url);
     mongoose.Promise = global.Promise;
 
@@ -37,7 +38,7 @@ class Database {
 
   // Get all of the videos in the collection.
   static getVideos() {
-    return this.Video.find();
+    return this.Video.find().sort({ added: -1 });
   }
 
   // Add a video to the collection by URL.

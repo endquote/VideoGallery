@@ -15,11 +15,7 @@ class SocketServer {
       Database.on('videoAdded', doc => socket.emit('videoAdded', doc));
       Database.on('videoRemoved', doc => socket.emit('videoRemoved', doc));
       Database.on('videoSelected', doc => socket.emit('videoSelected', doc));
-
-      // Change things in the database when the client requests it.
-      socket.on('addVideo', data => Database.addVideo(data.url));
-      socket.on('removeVideo', data => Database.removeVideo(data.url));
-      socket.on('selectVideo', data => Database.selectVideo(data.url));
+      Database.on('videoUpdated', doc => socket.emit('videoUpdated', doc));
     });
   }
 }

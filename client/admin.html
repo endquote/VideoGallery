@@ -3,22 +3,33 @@
 
 <head>
   <title>admin</title>
+  <link rel="stylesheet" type="text/css" href="styles.css" />
+
   <script src="/reload/reload.js"></script>
   <script src="/socket.io/socket.io.js"></script>
   <script src="bundle.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => AdminPage.init());
 
+  <script type="text/x-template" id="video-template">
+    <li class="video-item" v-bind:class="{ selected: video.selected }">
+      {{ video.title }}
+      <button v-on:click="selectVideo">select</button>
+      <button v-on:click="removeVideo">remove</button>
+    </li>
   </script>
 </head>
 
 <body>
 
-  <input type="text" id="url" /><br/>
-  <button onclick="addVideo()">add</button>
-  <button onclick="removeVideo()">remove</button>
-  <button onclick="selectVideo()">select</button>
+  <div id="app">
+    <ul>
+      <video-item v-for="item in videos" v-bind:video="item"></todo-item>
+    </ul>
+  </div>
 
+  <script>
+    AdminPage.init();
+
+  </script>
 </body>
 
 </html>

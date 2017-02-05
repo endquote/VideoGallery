@@ -16,7 +16,10 @@
     "watchify": "^3.9.0"
   },
   "dependencies": {
-    "superagent": "^3.4.1",
-    "vue": "^2.1.10"
+    "vue": "^2.1.10",
+    "vue-resource": "^1.2.0"
+  },
+  "browser": {
+    "vue": "vue/dist/vue.common"
   }
 }
