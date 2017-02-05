@@ -7,7 +7,8 @@
   "license": "MIT",
   "scripts": {
     "start": "node ./node_modules/watchify/bin/cmd.js main.js -o 'node ./node_modules/exorcist/bin/exorcist.js bundle.js.map > bundle.js' -v -d",
-    "build": "node ./node_modules/browserify/bin/cmd.js --entry main.js --debug | node ./node_modules/exorcist/bin/exorcist.js bundle.js.map > bundle.js"
+    "build": "node ./node_modules/browserify/bin/cmd.js --entry main.js --debug | node ./node_modules/exorcist/bin/exorcist.js bundle.js.map > bundle.js",
+    "postinstall": "npm run build"
   },
   "devDependencies": {
     "browserify": "^14.0.0",
