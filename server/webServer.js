@@ -7,7 +7,9 @@ const reload = require('reload');
 const Database = require('./database');
 
 class WebServer {
-  static init(port = 8080) {
+  static init(port = 8080, target) {
+    this.target = target || path.join(__dirname, '../downloads');
+
     // Set up web server.
     const app = express();
     app.use(bodyParser.json());
@@ -26,6 +28,7 @@ class WebServer {
       res.sendFile(path.join(__dirname, '../client/admin.html'));
     });
     app.use(express.static(path.join(__dirname, '../client')));
+    app.use('/downloads', express.static(this.target));
 
     // Get all videos.
     app.get('/videos', (req, res) => {
