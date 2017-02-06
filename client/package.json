@@ -16,6 +16,7 @@
     "watchify": "^3.9.0"
   },
   "dependencies": {
+    "socket.io-client": "^1.7.2",
     "vue": "^2.1.10",
     "vue-resource": "^1.2.0"
   },

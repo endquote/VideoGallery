@@ -3,6 +3,9 @@
     "./",
     "../client"
   ],
+  "ignore": [
+    "../downloads"
+  ],
   "ext": "js json html css",
   "verbose": true
 }

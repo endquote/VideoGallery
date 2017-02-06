@@ -9,20 +9,32 @@
   <script src="/socket.io/socket.io.js"></script>
   <script src="bundle.js"></script>
 
-  <script type="text/x-template" id="video-template">
-    <li class="video-item" v-bind:class="{ selected: video.selected }">
-      {{ video.title }}
-      <button v-on:click="selectVideo">select</button>
-      <button v-on:click="removeVideo">remove</button>
-    </li>
-  </script>
 </head>
 
 <body>
 
   <div id="app">
+    <video-add inline-template>
+      <div>
+        <form v-on:submit.prevent="submit">
+          <input type="text" class="video-add-url" />
+        </form>
+      </div>
+    </video-add>
     <ul>
-      <video-item v-for="item in videos" v-bind:video="item"></todo-item>
+      <video-item inline-template v-for="item in videos" v-bind:video="item">
+        <li class="video-item" v-bind:class="{ selected: video.selected }">
+          <a v-bind:href="video.url">{{ video.title ? video.title : 'Loading...' }}</a>
+          <button v-on:click="selectVideo">select</button>
+          <button v-on:click="removeVideo">remove</button>
+          <span v-if="video.loaded">
+            <a v-bind:href="'/downloads/' + video.file">
+              <img v-bind:src="'/downloads/' + video.thumbnail" height="50"/>
+            </a>
+          </span>
+          <span v-if="!video.loaded">loading...</span>
+        </li>
+      </video-item>
     </ul>
   </div>
 

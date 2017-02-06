@@ -74,6 +74,12 @@ class Database {
     return this.Video.findOne({ selected: true });
   }
 
+  static saveVideo(doc) {
+    return doc.save()
+      .then(this.emitter.emit('videoUpdated', doc))
+      .then(this.ensureSelection());
+  }
+
   // Make sure a video is selected, doesn't matter which.
   static ensureSelection() {
     this.selectedVideo().then((selectedDoc) => {

@@ -28,8 +28,8 @@ class Downloader {
   }
 
   static _onVideoInfo(err, stdout, stderr, doc) {
-    if (err || stderr) {
-      console.warn(err || stderr);
+    if (err) {
+      console.warn(err);
       Database.removeVideo(doc.url);
       return;
     }
@@ -46,7 +46,7 @@ class Downloader {
     doc.file = doc.id + path.parse(info._filename).ext;
     doc.thumbnail = `${doc.id}.jpg`;
     doc.url = info.webpage_url;
-    doc.save()
+    Database.saveVideo(doc)
       .then(() => this._downloadVideo(doc));
   }
 
@@ -57,15 +57,15 @@ class Downloader {
   }
 
   static _onVideoLoaded(err, stdout, stderr, doc) {
-    if (err || stderr) {
-      console.warn(err || stderr);
+    if (err) {
+      console.warn(err);
       Database.removeVideo(doc.url);
       return;
     }
 
     console.info(stdout);
     doc.loaded = true;
-    doc.save();
+    Database.saveVideo(doc);
   }
 
   static removeVideo(doc) {
