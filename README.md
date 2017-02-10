@@ -17,21 +17,25 @@ Downloads videos from the web and plays them in a random order.
 6. Update youtube-dl: set up a task that runs `youtube-dl --update` daily.
 7. Download the package, run `npm install` from the root.
 
+### Powermate Setup
+
+The app can be controlled with a [PowerMate Bluetooth](https://griffintechnology.com/us/powermate-bluetooth) device.
+
+1. Make sure nothing is accessing the controller.
+2. In `scanner`, run `npm install` then `npm start`.
+3. Spin the controller. The PowerMate MAC address should appear. Ctrl-C.
+4. `npm install -g node-red`
+5. `node-red /path/to/node-red.json`
+6. Browse to [http://127.0.0.1:1880/](http://127.0.0.1:1880/)
+7. Open up the PowerMate node and set the MAC address, hit deploy.
+
 ## Execution
 
-1. Start mongodb: `mongod --config /usr/local/etc/mongod.conf`
-2. From `server`, run `npm start`
+See `start.sh` and `start-dev.sh`.
 
-   * Optional arguments: `npm start -- --port=8080 --downloads=./downloads/ --database=mongodb://localhost/`
-
-3. Video Player: [http://localhost:8080](http://localhost:8080)
-4. Admin: [http://localhost:8080/admin](http://localhost:8080/admin)
+* Video Player: [http://localhost:8080](http://localhost:8080)
+* Admin: [http://localhost:8080/admin](http://localhost:8080/admin)
 
 ## Development
-
-1. Start mongodb
-2. From root, `npm install`
-3. From `server`, run `npm install; npm run dev`
-4. From `client`, run `npm install; npm start`
 
 The project is set up to take advantage of the [VS Code](https://code.visualstudio.com) debugger and extensions.

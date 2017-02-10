@@ -6,6 +6,7 @@
     "**/downloads": true,
     "**/node_modules": true,
     "**/bundle.js*": true,
+    "**/*.backup": true,
     "output": true
   }
 }
