@@ -4,3 +4,4 @@ bin
 **/downloads
 **/bundle.js*
 *.backup
+**/etc

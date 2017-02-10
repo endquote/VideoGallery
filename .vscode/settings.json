@@ -4,6 +4,7 @@
     "**/.git": true,
     "**/.DS_Store": true,
     "**/downloads": true,
+    "**/etc": true,
     "**/node_modules": true,
     "**/bundle.js*": true,
     "**/*.backup": true,
