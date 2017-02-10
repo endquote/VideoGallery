@@ -3,29 +3,24 @@
 
 <head>
   <title>player</title>
+  <link rel="stylesheet" type="text/css" href="styles.css" />
+
+  <script src="/reload/reload.js"></script>
   <script src="/socket.io/socket.io.js"></script>
-  <script>
-    var socket = io.connect();
+  <script src="bundle.js"></script>
 
-    socket.on('videos', function(videos) {
-      playVideo(videos.filter(v => v.selected)[0]);
-    });
-
-    socket.on('videoSelected', function(video) {
-      playVideo(video);
-    });
-
-    function playVideo(video) {
-      document.getElementById('url').value = video ? video.url : '';
-    }
-
-  </script>
 </head>
 
 <body>
 
-  <input type="text" id="url" /><br/>
+  <div id="app">
 
+  </div>
+
+  <script>
+    PlayerPage.init();
+
+  </script>
 </body>
 
 </html>
