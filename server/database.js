@@ -5,8 +5,8 @@ const mongoose = require('mongoose');
 class Database {
   static init(url = 'mongodb://localhost/') {
     url += 'videoGallery';
-    mongoose.connect(url);
     mongoose.Promise = global.Promise;
+    mongoose.connect(url).catch(() => console.error('Database connection failed'));
 
     this.emitter = new EventEmitter();
     Database.on = this.emitter.on.bind(this.emitter);
