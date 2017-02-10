@@ -15,7 +15,9 @@ class WebServer {
     app.use(bodyParser.json());
 
     const httpServer = this.httpServer = http.Server(app);
-    httpServer.listen(port);
+    httpServer.listen(port, () => {
+      console.log(`HTTP server listening on ${port}`);
+    });
 
     // Reload browser when server restarts: npmjs.com/reload
     reload(httpServer, app);
