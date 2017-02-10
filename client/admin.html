@@ -14,6 +14,7 @@
 <body>
 
   <div id="app">
+
     <video-add inline-template>
       <div>
         <form v-on:submit.prevent="submit">
@@ -21,6 +22,7 @@
         </form>
       </div>
     </video-add>
+
     <ul>
       <video-item inline-template v-for="item in videos" v-bind:video="item">
         <li class="video-item" v-bind:class="{ selected: video.selected }">
@@ -36,6 +38,7 @@
         </li>
       </video-item>
     </ul>
+
   </div>
 
   <script>
