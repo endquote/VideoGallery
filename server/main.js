@@ -12,4 +12,4 @@ require('./database').init(program.database);
 require('./webServer').init(program.port, program.downloads);
 require('./socketServer').init();
 require('./downloader').init(program.downloads);
-require('./udpServer').init();
+require('./powermate').init();

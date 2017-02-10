@@ -1,9 +1,0 @@
-{
-  "name": "scanner",
-  "scripts": {
-    "start": "node index.js"
-  },
-  "dependencies": {
-    "noble": "^1.7.0"
-  }
-}

@@ -18,6 +18,7 @@
     "express": "^4.14.1",
     "fs-extra": "^2.0.0",
     "mongoose": "^4.8.1",
+    "noble": "^1.7.0",
     "reload": "^1.1.1",
     "socket.io": "^1.7.2"
   }
