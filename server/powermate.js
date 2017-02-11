@@ -5,14 +5,31 @@ const SocketServer = require('./socketServer');
 // Ported from: https://github.com/circuitbeard/node-red-contrib-powermateble/blob/master/src/powermate-device.js
 class PowerMate {
   static init() {
+    // Constants
     this.SERVICE_UUID = '25598cf7424040a69910080f19f91ebc';
     this.BATTERY_CHAR_UUID = '50f09cc9fe1d4c79a962b3a7cd3e5584';
     this.KNOB_CHAR_UUID = '9cf53570ddd947f3ba6309acefc60415';
     this.LED_CHAR_UUID = '847d189e86ee4bd2966f800832b1259d';
 
-    this.LED_BRIGHTNESS_MIN = 161;
-    this.LED_BRIGHTNESS_MAX = 191;
+    this.LED_MIN = 161;
+    this.LED_MAX = 191;
 
+    this.KNOB_ACTIONS = {
+      101: 'release',
+      102: 'holdrelease',
+      103: 'anticlockwise',
+      104: 'clockwise',
+      105: 'holdanticlockwise',
+      112: 'holdclockwise',
+      114: 'hold1',
+      115: 'hold2',
+      116: 'hold3',
+      117: 'hold4',
+      118: 'hold5',
+      119: 'hold6',
+    };
+
+    // Reference to the actual device
     this._peripheral = null;
 
     // Defining handlers up front so they can be removed on disconnection.
@@ -27,7 +44,7 @@ class PowerMate {
     noble.on('stateChange', this._onStateChangeHandler);
   }
 
-  // When bluetooth comes on, start scanning.
+  // When Bluetooth comes on, start scanning.
   static _onStateChange(state) {
     if (state === 'poweredOn') {
       console.log('Scanning for PowerMate');
@@ -60,6 +77,7 @@ class PowerMate {
       console.error(err);
       return;
     }
+
     console.log('PowerMate connected');
     SocketServer.emit('controller', { status: 'connected' });
 
@@ -76,20 +94,9 @@ class PowerMate {
         this._service = services[0];
 
         // Store the chars
-        for (let i = 0; i < characteristics.length; i += 1) {
-          switch (characteristics[i].uuid) {
-            case this.BATTERY_CHAR_UUID:
-              this._batteryChar = characteristics[i];
-              break;
-            case this.KNOB_CHAR_UUID:
-              this._knobChar = characteristics[i];
-              break;
-            case this.LED_CHAR_UUID:
-              this._ledChar = characteristics[i];
-              break;
-            default:
-          }
-        }
+        this._batteryChar = characteristics.find(c => c.uuid === this.BATTERY_CHAR_UUID);
+        this._knobChar = characteristics.find(c => c.uuid === this.KNOB_CHAR_UUID);
+        this._ledChar = characteristics.find(c => c.uuid === this.LED_CHAR_UUID);
 
         // Subscribe to battery
         this._batteryChar.notify(true, () => console.log('PowerMateBleDevice: Signed up for battery notifications'));
@@ -109,44 +116,44 @@ class PowerMate {
 
   static _onKnobRead(data) {
     const value = parseInt(data.toString('hex'), 16);
-    let parsedValue;
-
-    switch (value) {
-      case 101:
-        parsedValue = 'release';
-        break;
-      case 104:
-        parsedValue = 'clockwise';
-        break;
-      case 103:
-        parsedValue = 'anticlockwise';
-        break;
-      case 114:
-      case 115:
-      case 116:
-      case 117:
-      case 118:
-      case 119:
-        parsedValue = `hold${(value - 113)}`;
-        break;
-      case 112:
-        parsedValue = 'holdClockwise';
-        break;
-      case 105:
-        parsedValue = 'holdAnticlockwise';
-        break;
-      case 102:
-        parsedValue = 'holdRelease';
-        break;
-      default:
-    }
-
+    const parsedValue = this.KNOB_ACTIONS[value];
     if (!parsedValue) {
       return;
     }
 
+    // For some reason 'holdRelease' comes in pairs
+    if (parsedValue === 'holdrelease' && this._peripheral.lastKnobAction === 'holdrelease') {
+      this._peripheral.lastKnobAction = null;
+      return;
+    }
+    this._peripheral.lastKnobAction = parsedValue;
+
     console.log(`PowerMate knob: ${parsedValue}`);
     SocketServer.emit('controller', { knob: parsedValue });
+  }
+
+  // Set LED brightness, 0-100
+  static setLedBrightness(level) {
+    if (!this._ledChar) {
+      return;
+    }
+
+    // Map percentage to min/max range
+    let mappedLevel = 160;
+    if (level >= 0) {
+      mappedLevel = Math.round(this._map(level, 0, 100, this.LED_MIN, this.LED_MAX));
+    }
+
+    // Write the value
+    this._ledChar.write(new Buffer([mappedLevel]), true, (err) => {
+      if (err) {
+        console.error(err);
+      }
+    });
+  }
+
+  static _map(x, inMin, inMax, outMin, outMax) {
+    return (((x - inMin) * (outMax - outMin)) / (inMax - inMin)) + outMin;
   }
 
   // Clean up on disconnection.
