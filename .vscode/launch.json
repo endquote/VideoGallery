@@ -22,12 +22,6 @@
     "cwd": "${workspaceRoot}/server"
   }, {
     "type": "node",
-    "request": "launch",
-    "name": "PowerMate Dev",
-    "program": "${workspaceRoot}/scanner/powermate.js",
-    "cwd": "${workspaceRoot}/scanner"
-  }, {
-    "type": "node",
     "request": "attach",
     "name": "Attach to Process",
     "port": 5858

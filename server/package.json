@@ -7,7 +7,7 @@
   "license": "MIT",
   "scripts": {
     "start": "node main.js",
-    "dev": "node ./node_modules/nodemon/bin/nodemon.js main.js"
+    "dev": "node ./node_modules/nodemon/bin/nodemon.js --debug=5858 main.js"
   },
   "devDependencies": {
     "nodemon": "^1.11.0"
