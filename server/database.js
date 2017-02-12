@@ -19,8 +19,6 @@ class Database {
         index: true,
         unique: true,
       },
-      file: String,
-      thumbnail: String,
       added: Date,
       created: Date,
       author: String,

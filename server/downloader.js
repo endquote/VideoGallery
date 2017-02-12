@@ -1,5 +1,5 @@
 const path = require('path');
-const fs = require('fs-extra');
+const fs = require('fs-extra-promise');
 const childProcess = require('child_process');
 
 const Database = require('./database');
@@ -43,8 +43,6 @@ class Downloader {
     doc.author = info.uploader;
     doc.title = info.title;
     doc.description = info.description;
-    doc.file = doc.id + path.parse(info._filename).ext;
-    doc.thumbnail = `${doc.id}.jpg`;
     doc.url = info.webpage_url;
     Database.saveVideo(doc)
       .then(() => this._downloadVideo(doc));
@@ -68,13 +66,20 @@ class Downloader {
     Database.saveVideo(doc);
   }
 
+  // Remove any files with the same name as the doc id.
   static removeVideo(doc) {
     console.info(`Deleting video ${doc.url}`);
     try {
+      fs.readdirAsync(this.target, (err, files) => {
+        if (err) {
+          console.error(err);
+        }
+        files.filter(f => path.parse(f).name === doc.id)
+          .forEach(f => fs.unlinkAsync(path.join(this.target, f)));
+      });
       fs.unlinkSync(path.join(this.target, doc.file));
-      fs.unlinkSync(path.join(this.target, doc.thumbnail));
-    } catch (e) {
-      // ignore
+    } catch (err) {
+      console.error(err);
     }
   }
 }

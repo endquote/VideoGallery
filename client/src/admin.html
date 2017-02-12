@@ -3,7 +3,7 @@
 
 <head>
   <title>admin</title>
-  <link rel="stylesheet" type="text/css" href="styles/main.css" />
+  <link rel="stylesheet" type="text/css" href="styles/admin.css" />
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="scripts/main.js"></script>
@@ -29,8 +29,8 @@
           <button v-on:click="selectVideo">select</button>
           <button v-on:click="removeVideo">remove</button>
           <span v-if="video.loaded">
-            <a v-bind:href="'/downloads/' + video.file">
-              <img v-bind:src="'/downloads/' + video.thumbnail" height="50"/>
+            <a v-bind:href="'/content/video/' + video._id">
+              <img v-bind:src="'/content/thumbnail/' + video._id" height="50"/>
             </a>
           </span>
           <span v-if="!video.loaded">loading...</span>
