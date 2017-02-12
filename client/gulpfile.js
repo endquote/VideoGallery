@@ -23,11 +23,11 @@ gulp.task('html', () => {
   ]);
 });
 
-gulp.task('js', () => {
+gulp.task('scripts', () => {
   return pump([
     gulp.src(['./src/scripts/main.js']),
-    sourcemaps.init(),
-    browserify(),
+    browserify({ debug: true }),
+    sourcemaps.init({ loadMaps: true }),
     minifier({}, uglifyjs),
     sourcemaps.write('.'),
     gulp.dest('./dist/scripts/'),
@@ -59,14 +59,11 @@ gulp.task('browser-sync', () => {
   });
 });
 
-gulp.task('build', sequence('clean', ['html', 'js', 'styles', 'images']));
+gulp.task('default', sequence('clean', ['html', 'scripts', 'styles', 'images']));
 
-gulp.task('watch', ['build', 'browser-sync'], () => {
+gulp.task('dev', ['default', 'browser-sync'], () => {
   gulp.watch('./src/**/*.html', ['html', browserSync.reload]);
-  gulp.watch('./src/scripts/**/*', ['js', browserSync.reload]);
+  gulp.watch('./src/scripts/**/*', ['scripts', browserSync.reload]);
   gulp.watch('./src/styles/**/*', ['styles', browserSync.reload]);
   gulp.watch('./src/images/**/*', ['images', browserSync.reload]);
 });
-
-gulp.task('default', ['build']);
-gulp.task('dev', ['watch']);
