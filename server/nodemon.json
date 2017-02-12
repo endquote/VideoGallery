@@ -1,11 +1,6 @@
 {
-  "watch": [
-    "./",
-    "../client"
-  ],
-  "ignore": [
-    "../downloads"
-  ],
-  "ext": "js json html css",
+  "watch": ["./"],
+  "ignore": ["../downloads"],
+  "ext": "js",
   "verbose": true
 }

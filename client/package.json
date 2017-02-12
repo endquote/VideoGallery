@@ -6,14 +6,24 @@
   "description": "Client for the Video Gallery application.",
   "license": "MIT",
   "scripts": {
-    "dev": "node ./node_modules/watchify/bin/cmd.js main.js -o 'node ./node_modules/exorcist/bin/exorcist.js bundle.js.map > bundle.js' -v -d",
-    "build": "node ./node_modules/browserify/bin/cmd.js --entry main.js --debug | node ./node_modules/exorcist/bin/exorcist.js bundle.js.map > bundle.js",
+    "dev": "node ./node_modules/gulp/bin/gulp.js dev",
+    "build": "node ./node_modules/gulp/bin/gulp.js",
     "postinstall": "npm run build"
   },
   "devDependencies": {
+    "browser-sync": "^2.18.7",
     "browserify": "^14.0.0",
-    "exorcist": "^0.4.0",
-    "watchify": "^3.9.0"
+    "del": "^2.2.2",
+    "gulp": "^3.9.1",
+    "gulp-batch": "^1.0.5",
+    "gulp-browserify": "^0.5.1",
+    "gulp-imagemin": "^3.1.1",
+    "gulp-sequence": "^0.4.6",
+    "gulp-sourcemaps": "^2.4.1",
+    "gulp-uglify": "^2.0.1",
+    "gulp-watch": "^4.3.11",
+    "pump": "^1.0.2",
+    "uglify-js": "git+https://github.com/mishoo/UglifyJS2.git#harmony"
   },
   "dependencies": {
     "socket.io-client": "^1.7.2",

@@ -2,7 +2,6 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const http = require('http');
 const path = require('path');
-const reload = require('reload');
 
 const Database = require('./database');
 
@@ -19,17 +18,14 @@ class WebServer {
       console.log(`HTTP server listening on ${port}`);
     });
 
-    // Reload browser when server restarts: npmjs.com/reload
-    reload(httpServer, app);
-
     // Routes for static content.
     app.get('/', (req, res) => {
-      res.sendFile(path.join(__dirname, '../client/player.html'));
+      res.sendFile(path.join(__dirname, '../client/dist/player.html'));
     });
     app.get('/admin', (req, res) => {
-      res.sendFile(path.join(__dirname, '../client/admin.html'));
+      res.sendFile(path.join(__dirname, '../client/dist/admin.html'));
     });
-    app.use(express.static(path.join(__dirname, '../client')));
+    app.use(express.static(path.join(__dirname, '../client/dist')));
     app.use('/downloads', express.static(this.target));
 
     // Get all videos.
