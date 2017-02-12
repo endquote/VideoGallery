@@ -9,6 +9,7 @@ class Database {
     mongoose.connect(url).catch(() => console.error('Database connection failed'));
 
     this.emitter = new EventEmitter();
+    this.emitter.setMaxListeners(0);
     Database.on = this.emitter.on.bind(this.emitter);
 
     const videoSchema = new mongoose.Schema({
