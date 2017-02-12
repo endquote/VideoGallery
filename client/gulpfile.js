@@ -10,6 +10,7 @@ const browserSync = require('browser-sync');
 const uglifyjs = require('uglify-js');
 const minifier = require('gulp-uglify/minifier');
 const pump = require('pump');
+const stylus = require('gulp-stylus');
 
 gulp.task('clean', () => {
   return del('./dist');
@@ -28,7 +29,7 @@ gulp.task('js', () => {
     sourcemaps.init(),
     browserify(),
     minifier({}, uglifyjs),
-    sourcemaps.write('./'),
+    sourcemaps.write('.'),
     gulp.dest('./dist/scripts/'),
   ]);
 });
@@ -36,6 +37,9 @@ gulp.task('js', () => {
 gulp.task('styles', () => {
   return pump([
     gulp.src('./src/styles/**/*'),
+    sourcemaps.init(),
+    stylus({ compress: true }),
+    sourcemaps.write('.'),
     gulp.dest('./dist/styles/'),
   ]);
 });
@@ -51,6 +55,7 @@ gulp.task('images', () => {
 gulp.task('browser-sync', () => {
   browserSync.init({
     proxy: 'localhost:8080',
+    open: false,
   });
 });
 
