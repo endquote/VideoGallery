@@ -77,7 +77,6 @@ class Downloader {
         files.filter(f => path.parse(f).name === doc.id)
           .forEach(f => fs.unlinkAsync(path.join(this.target, f)));
       });
-      fs.unlinkSync(path.join(this.target, doc.file));
     } catch (err) {
       console.error(err);
     }
