@@ -99,11 +99,11 @@ class PowerMate {
         this._ledChar = characteristics.find(c => c.uuid === this.LED_CHAR_UUID);
 
         // Subscribe to battery
-        this._batteryChar.notify(true, () => console.log('PowerMateBleDevice: Signed up for battery notifications'));
+        this._batteryChar.notify(true, () => console.log('Signed up for battery notifications'));
         this._batteryChar.on('read', this._onBatteryReadHandler);
 
         // Subscribe to knob
-        this._knobChar.notify(true, () => console.log('PowerMateBleDevice: Signed up for knob notifications'));
+        this._knobChar.notify(true, () => console.log('Signed up for knob notifications'));
         this._knobChar.on('read', this._onKnobReadHandler);
       });
   }
