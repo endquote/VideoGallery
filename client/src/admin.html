@@ -27,7 +27,7 @@
         <li class="video-item" v-bind:class="{ selected: video.selected }">
           <a v-bind:href="video.url">{{ video.title ? video.title : 'Loading...' }}</a>
           <button v-on:click="selectVideo" v-bind:disabled="!video.loaded">select</button>
-          <button v-on:click="removeVideo" v-bind:disabled="!video.loaded">remove</button>
+          <button v-on:click="removeVideo">remove</button>
           <span v-if="video.loaded">
             <a v-bind:href="'/content/video/' + video._id">
               <img v-bind:src="'/content/thumbnail/' + video._id" height="50"/>
