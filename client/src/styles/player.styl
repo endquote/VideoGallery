@@ -1,27 +1,72 @@
 @import "main.styl"
 
-html, body
-    width: 100%
-    height: 100%
-    margin: 0
-    padding: 0
+progress-height = 1vh
 
 #video-player
-    background-color: black
-    position: absolute
-    top: 0
-    left: 0
-    bottom: 0
-    right: 0
+    background-color black
+    position absolute
+    top 0
+    left 0
+    bottom 0
+    right 0
 
 #video-info
-    background-color: rgba(1,1,1,.5)
-    color: white
+    background-color rgba(1,1,1,.5)
+    color white
+    position absolute
+    left 0
+    right 0
+    bottom -25vh - progress-height
+    height 25vh + progress-height
+
+#video-info-content
     position: absolute
-    left: 0
-    right: 0
-    bottom: 0
+    left: 30px
+    top: @left
+    right: @left
+    bottom @left
+    overflow hidden
+
+#video-info.shown
+    bottom 0
+
+#video-progress
+    background-color white
+    position absolute
+    left 0
+    bottom 0
+    height progress-height
+    opacity .5
+
+#video-qr-code
+    float right
+
+#controller-status
+    position absolute
+    right 0
+    bottom 0px
+    left 0px
+    width 10px
+    height (progress-height / 2)
+    background-color black
+    visibility hidden
+
+#controller-status.shown
+    visibility visible
+
+#controller-battery
+    height 100%
+    width 0
+    background-color white
+
+#click-target
+    background-color transparent
+    position absolute
+    top 0
+    left 0
+    bottom 0
+    right 0
 
 video
-    width: 100%
-    height: 100%
+    width 100%
+    height 100%

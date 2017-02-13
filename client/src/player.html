@@ -8,6 +8,8 @@
   <script src="/socket.io/socket.io.js"></script>
   <script src="scripts/main.js"></script>
 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
 </head>
 
 <body>
@@ -16,17 +18,34 @@
 
     <video-player inline-template v-bind:video="video">
       <div id="video-player">
-        <video v-bind:src="'/content/video/' + video._id" autoplay muted />
+        <video autoplay v-bind:src="'/content/video/' + video._id" v-on:loadstart="onLoadStart" v-on:timeupdate="onTimeUpdate" v-on:durationchange="onTimeUpdate"></video>
       </div>
     </video-player>
 
-    <video-info inline-template v-bind:video="video">
-      <div id="video-info">
-        <h1>{{ video.title }}</h1>
-        <h2>{{ video.author }}</h2>
-        <p>{{ video.description }}</p>
+    <video-info inline-template v-bind:video="video" v-bind:show-info="showInfo">
+      <div id="video-info" v-bind:class="{ shown: showInfo }">
+        <div id="video-info-content">
+          <img id="video-qr-code" v-bind:src="qrcode" />
+          <h1>{{ video.title }}</h1>
+          <h2>{{ video.author }}</h2>
+          <p>{{ video.description }}</p>
+        </div>
       </div>
     </video-info>
+
+    <video-progress inline-template v-bind:progress="progress">
+      <div id="video-progress" v-bind:style="'width:' + (progress * 100) + 'vw'"></div>
+    </video-progress>
+
+    <controller-status inline-template v-bind:connected="controllerConnected" v-bind:battery="controllerBattery">
+      <div id="controller-status" v-bind:class="{ shown: connected }">
+        <div id="controller-battery" v-bind:style="'width:' + battery + '%'"></div>
+      </div>
+    </controller-status>
+
+    <click-target inline-template>
+      <div id="click-target" v-on:pointerup="onPointerUp"></div>
+    </click-target>
 
   </div>
 

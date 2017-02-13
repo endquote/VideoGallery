@@ -31,6 +31,8 @@ class PowerMate {
 
     // Reference to the actual device
     this._peripheral = null;
+    this.connected = false;
+    this.battery = 0;
 
     // Defining handlers up front so they can be removed on disconnection.
     this._onDiscoverHandler = this._onDiscover.bind(this);
@@ -42,6 +44,8 @@ class PowerMate {
 
     noble.on('discover', this._onDiscoverHandler);
     noble.on('stateChange', this._onStateChangeHandler);
+
+    setInterval(() => this.emitStatus(), 3000);
   }
 
   // When Bluetooth comes on, start scanning.
@@ -79,6 +83,7 @@ class PowerMate {
     }
 
     console.log('PowerMate connected');
+    this.connected = true;
     SocketServer.emit('controller', { status: 'connected' });
 
     // Discover services and characteristics (filter serial data service)
@@ -111,6 +116,7 @@ class PowerMate {
   static _onBatteryRead(data) {
     const value = parseInt(data.toString('hex'), 16);
     console.log(`PowerMate battery: ${value}`);
+    this.battery = value;
     SocketServer.emit('controller', { battery: value });
   }
 
@@ -159,6 +165,7 @@ class PowerMate {
   // Clean up on disconnection.
   static _onDisconnect(err) {
     console.log('PowerMate disconnected');
+    this.connected = false;
     SocketServer.emit('controller', { status: 'disconnected' });
     if (err) {
       console.error(err);
@@ -195,6 +202,11 @@ class PowerMate {
     noble.stopScanning();
     noble.removeListener('stateChange', this._onStateChangeHandler);
     noble.removeListener('discover', this._onDiscoverHandler);
+  }
+
+  static emitStatus() {
+    SocketServer.emit('controller', { status: this.connected ? 'connected' : 'disconnected' });
+    SocketServer.emit('controller', { battery: this.battery });
   }
 }
 
