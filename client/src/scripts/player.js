@@ -9,7 +9,6 @@ class PlayerPage {
   static init() {
     this.knobRate = 1; // Time in seconds to move when the knob turns
     this.doubleTapDelay = 300; // Time in ms to consider a double tap
-    this.hideInfoDelay = 10000; // Time in ms to automatically hide info panel
 
     Vue.resource('/videos')
       .get()
@@ -33,6 +32,7 @@ class PlayerPage {
         videos,
         progress: 0,
         showInfo: false,
+        playSound: false,
         controllerConnected: false,
         controllerBattery: 0,
       },
@@ -43,17 +43,9 @@ class PlayerPage {
           newValue.selected = true;
         },
 
-        showInfo(newValue) {
+        playSound(newValue) {
           // TODO: Tween this
           this.$videoNode.volume = newValue ? 1 : 0;
-
-          // Hide the info after a while
-          clearTimeout(this.$hideInfoTimeout);
-          if (newValue) {
-            this.$hideInfoTimeout = setTimeout(() => {
-              this.showInfo = false;
-            }, PlayerPage.hideInfoDelay);
-          }
         },
       },
 
@@ -113,7 +105,15 @@ class PlayerPage {
                 this.$tapTimeout = setTimeout(() => {
                   // Single tap, toggle info
                   this.$tapTimeout = null;
-                  this.$parent.showInfo = !this.$parent.showInfo;
+                  if (!this.$parent.showInfo && !this.$parent.playSound) {
+                    this.$parent.showInfo = true;
+                  } else if (this.$parent.showInfo && !this.$parent.playSound) {
+                    this.$parent.playSound = true;
+                  } else if (this.$parent.showInfo && this.$parent.playSound) {
+                    this.$parent.showInfo = false;
+                  } else if (!this.$parent.showInfo && this.$parent.playSound) {
+                    this.$parent.playSound = false;
+                  }
                 }, PlayerPage.doubleTapDelay);
               }
             },
