@@ -60,9 +60,9 @@ class PlayerPage {
           props: ['video', 'progress'],
           methods: {
 
-            // Set the volume to zero to start.
+            // Set the volume on start.
             onLoadStart() {
-              this.$parent.$videoNode.volume = 0;
+              this.$parent.$videoNode.volume = this.$parent.playSound ? 1 : 0;
             },
 
             // Update the progress bar.
