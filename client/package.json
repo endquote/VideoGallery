@@ -16,7 +16,6 @@
     "del": "^2.2.2",
     "gulp": "^3.9.1",
     "gulp-batch": "^1.0.5",
-    "gulp-browserify": "^0.5.1",
     "gulp-imagemin": "^3.1.1",
     "gulp-sequence": "^0.4.6",
     "gulp-sourcemaps": "^2.4.1",
@@ -24,7 +23,9 @@
     "gulp-uglify": "^2.0.1",
     "gulp-watch": "^4.3.11",
     "pump": "^1.0.2",
-    "uglify-js": "git+https://github.com/mishoo/UglifyJS2.git#harmony"
+    "uglify-js": "git+https://github.com/mishoo/UglifyJS2.git#harmony",
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-source-stream": "^1.1.0"
   },
   "dependencies": {
     "qrious": "^2.2.0",
