@@ -64,7 +64,7 @@ class Database {
   // Select a video from the collection by URL.
   static selectVideo(url) {
     return this.Video.updateMany({ selected: true }, { selected: false })
-      .then(() => this.Video.findOneAndUpdate({ url }, { selected: true }, { new: true }))
+      .then(() => this.Video.findOneAndUpdate({ url, loaded: true }, { selected: true }, { new: true }))
       .then(doc => this.emitter.emit('videoSelected', doc));
   }
 
