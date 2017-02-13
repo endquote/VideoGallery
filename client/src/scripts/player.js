@@ -16,18 +16,21 @@ class PlayerPage {
       .catch(() => window.alert('Couldn\'t load data. Is the database server running?'))
       .then((res) => {
         const videos = res.body;
+        videos.forEach((v) => {
+          v.played = v.selected;
+        });
         this._buildApp(videos);
-        this._getUpdates();
+        this._getUpdates(videos);
       });
   }
 
   static _buildApp(videos) {
-    const hideInfoDelay = this.hideInfoDelay;
     this.app = new Vue({
       el: '#app',
 
       data: {
-        video: videos.find(v => v.selected) || {},
+        selectedVideo: videos.find(v => v.selected) || {},
+        videos,
         progress: 0,
         showInfo: false,
         controllerConnected: false,
@@ -35,23 +38,28 @@ class PlayerPage {
       },
 
       watch: {
-        showInfo(newValue, oldValue) {
+        selectedVideo(newValue) {
+          newValue.played = true;
+          newValue.selected = true;
+        },
+
+        showInfo(newValue) {
           // TODO: Tween this
-          this.$video.volume = newValue ? 1 : 0;
+          this.$videoNode.volume = newValue ? 1 : 0;
 
           // Hide the info after a while
           clearTimeout(this.$hideInfoTimeout);
           if (newValue) {
             this.$hideInfoTimeout = setTimeout(() => {
               this.showInfo = false;
-            }, hideInfoDelay);
+            }, PlayerPage.hideInfoDelay);
           }
         },
       },
 
       // Save a reference to the <video> so we don't have to look for it all the time.
       mounted() {
-        this.$video = this.$el.getElementsByTagName('video')[0];
+        this.$videoNode = this.$el.getElementsByTagName('video')[0];
       },
 
       components: {
@@ -62,12 +70,16 @@ class PlayerPage {
 
             // Set the volume to zero to start.
             onLoadStart() {
-              this.$parent.$video.volume = 0;
+              this.$parent.$videoNode.volume = 0;
             },
 
             // Update the progress bar.
             onTimeUpdate() {
-              this.$parent.progress = this.$parent.$video.currentTime / this.$parent.$video.duration;
+              this.$parent.progress = this.$parent.$videoNode.currentTime / this.$parent.$videoNode.duration;
+            },
+
+            onEnded() {
+              PlayerPage.nextVideo();
             },
           },
         },
@@ -96,12 +108,13 @@ class PlayerPage {
                 // Double tap, go to next video
                 clearTimeout(this.$tapTimeout);
                 this.$tapTimeout = null;
+                PlayerPage.nextVideo();
               } else {
                 this.$tapTimeout = setTimeout(() => {
                   // Single tap, toggle info
                   this.$tapTimeout = null;
                   this.$parent.showInfo = !this.$parent.showInfo;
-                }, this.doubleTapDelay);
+                }, PlayerPage.doubleTapDelay);
               }
             },
           },
@@ -110,7 +123,7 @@ class PlayerPage {
     });
   }
 
-  static _getUpdates() {
+  static _getUpdates(videos) {
     const player = document.getElementsByTagName('video')[0];
 
     const socket = io.connect();
@@ -132,10 +145,60 @@ class PlayerPage {
       }
     });
 
-    // Update the selected video.
+    // Update the selected video
     socket.on('videoSelected', (video) => {
-      this.app.video = video || {};
+      videos.forEach((v) => {
+        v.selected = v._id === video._id;
+        if (v.selected) {
+          this.app.selectedVideo = v;
+        }
+      });
     });
+
+    // Get new videos
+    socket.on('videoAdded', (video) => {
+      videos.push(video);
+    });
+
+    // Remove videos
+    socket.on('videoRemoved', (video) => {
+      const index = videos.findIndex(v => v._id === video._id);
+      if (index === -1) {
+        return;
+      }
+      videos.splice(index, 1);
+    });
+
+    // Update existing videos
+    socket.on('videoUpdated', (video) => {
+      const index = videos.findIndex(v => v._id === video._id);
+      if (index === -1) {
+        return;
+      }
+      Vue.set(videos, index, video);
+      if (video.selected) {
+        videos.forEach((v) => {
+          v.selected = v._id === video._id;
+        });
+        this.app.selectedVideo = video;
+      }
+    });
+  }
+
+  // Select another random video
+  static nextVideo() {
+    let unplayed = this.app.videos.filter(v => !v.played && v.loaded);
+
+    if (!unplayed.length) {
+      // All videos played
+      this.app.videos.forEach((v) => {
+        v.played = false;
+      });
+      unplayed = this.app.videos.filter(v => !v.played && v.loaded);
+    }
+
+    const random = unplayed[Math.floor(Math.random() * unplayed.length)];
+    this.app.$http.put('/video', { url: random.url });
   }
 }
 

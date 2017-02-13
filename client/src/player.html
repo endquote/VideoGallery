@@ -16,13 +16,13 @@
 
   <div id="app">
 
-    <video-player inline-template v-bind:video="video">
+    <video-player inline-template v-bind:video="selectedVideo">
       <div id="video-player">
-        <video autoplay v-bind:src="'/content/video/' + video._id" v-on:loadstart="onLoadStart" v-on:timeupdate="onTimeUpdate" v-on:durationchange="onTimeUpdate"></video>
+        <video autoplay v-bind:src="'/content/video/' + video._id" v-on:loadstart="onLoadStart" v-on:timeupdate="onTimeUpdate" v-on:durationchange="onTimeUpdate" v-on:ended="onEnded"></video>
       </div>
     </video-player>
 
-    <video-info inline-template v-bind:video="video" v-bind:show-info="showInfo">
+    <video-info inline-template v-bind:video="selectedVideo" v-bind:show-info="showInfo">
       <div id="video-info" v-bind:class="{ shown: showInfo }">
         <div id="video-info-content">
           <img id="video-qr-code" v-bind:src="qrcode" />
