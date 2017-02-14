@@ -15,11 +15,9 @@ class PlayerPage {
       .catch(() => window.alert('Couldn\'t load data. Is the database server running?'))
       .then((res) => {
         const videos = res.body;
-        videos.forEach((v) => {
-          v.played = v.selected;
-        });
         this._buildApp(videos);
         this._getUpdates(videos);
+        this.nextVideo();
       });
   }
 
@@ -28,7 +26,7 @@ class PlayerPage {
       el: '#app',
 
       data: {
-        selectedVideo: videos.find(v => v.selected) || {},
+        selectedVideo: {},
         videos,
         progress: 0,
         showInfo: false,
@@ -49,11 +47,6 @@ class PlayerPage {
         },
       },
 
-      // Save a reference to the <video> so we don't have to look for it all the time.
-      mounted() {
-        this.$videoNode = this.$el.getElementsByTagName('video')[0];
-      },
-
       components: {
 
         'video-player': {
@@ -62,12 +55,14 @@ class PlayerPage {
 
             // Set the volume on start.
             onLoadStart() {
-              this.$parent.$videoNode.volume = this.$parent.playSound ? 1 : 0;
+              const videoNode = this.$el.getElementsByTagName('video')[0];
+              videoNode.volume = this.$parent.playSound ? 1 : 0;
             },
 
             // Update the progress bar.
             onTimeUpdate() {
-              this.$parent.progress = this.$parent.$videoNode.currentTime / this.$parent.$videoNode.duration;
+              const videoNode = this.$el.getElementsByTagName('video')[0];
+              this.$parent.progress = videoNode.currentTime / videoNode.duration;
             },
 
             onEnded() {
@@ -80,7 +75,7 @@ class PlayerPage {
           props: ['video', 'showInfo'],
           computed: {
             qrcode() {
-              return new QRious({ value: this.video.url }).toDataURL();
+              return this.video.url ? new QRious({ value: this.video.url }).toDataURL() : '';
             },
           },
         },
@@ -126,10 +121,10 @@ class PlayerPage {
   static _getUpdates(videos) {
     const player = document.getElementsByTagName('video')[0];
 
-    const socket = io.connect();
+    this.socket = io.connect();
 
     // Handle events from the hardware controller.
-    socket.on('controller', (data) => {
+    this.socket.on('controller', (data) => {
       if (data.knob === 'clockwise') {
         player.currentTime += this.knobRate;
       } else if (data.knob === 'anticlockwise') {
@@ -146,9 +141,9 @@ class PlayerPage {
     });
 
     // Update the selected video
-    socket.on('videoSelected', (video) => {
+    this.socket.on('videoSelected', (video) => {
       videos.forEach((v) => {
-        v.selected = v._id === video._id;
+        v.selected = v.url === video.url;
         if (v.selected) {
           this.app.selectedVideo = v;
         }
@@ -156,29 +151,30 @@ class PlayerPage {
     });
 
     // Get new videos
-    socket.on('videoAdded', (video) => {
+    this.socket.on('videoAdded', (video) => {
       videos.push(video);
     });
 
     // Remove videos
-    socket.on('videoRemoved', (video) => {
-      const index = videos.findIndex(v => v._id === video._id);
+    this.socket.on('videoRemoved', (video) => {
+      const index = videos.findIndex(v => v.url === video.url);
       if (index === -1) {
         return;
       }
       videos.splice(index, 1);
+      PlayerPage.nextVideo();
     });
 
     // Update existing videos
-    socket.on('videoUpdated', (video) => {
-      const index = videos.findIndex(v => v._id === video._id);
+    this.socket.on('videoUpdated', (video) => {
+      const index = videos.findIndex(v => v.url === video.url);
       if (index === -1) {
         return;
       }
       Vue.set(videos, index, video);
       if (video.selected) {
         videos.forEach((v) => {
-          v.selected = v._id === video._id;
+          v.selected = v.url === video.url;
         });
         this.app.selectedVideo = video;
       }
@@ -198,7 +194,7 @@ class PlayerPage {
     }
 
     const random = unplayed[Math.floor(Math.random() * unplayed.length)];
-    this.app.$http.put('/video', { url: random.url });
+    this.socket.emit('selectVideo', { url: random.url });
   }
 }
 

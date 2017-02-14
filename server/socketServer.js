@@ -14,8 +14,11 @@ class SocketServer {
       // Send events to the client when anything on the database changes.
       Database.on('videoAdded', doc => socket.emit('videoAdded', doc));
       Database.on('videoRemoved', doc => socket.emit('videoRemoved', doc));
-      Database.on('videoSelected', doc => socket.emit('videoSelected', doc));
       Database.on('videoUpdated', doc => socket.emit('videoUpdated', doc));
+
+      socket.on('selectVideo', (data) => {
+        this.io.emit('videoSelected', data);
+      });
     });
   }
 

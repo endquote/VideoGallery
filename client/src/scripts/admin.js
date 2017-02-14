@@ -41,7 +41,7 @@ class AdminPage {
           props: ['video'],
           methods: {
             selectVideo() {
-              this.$http.put('/video', { url: this.video.url });
+              AdminPage.socket.emit('selectVideo', { url: this.video.url });
             },
             removeVideo() {
               this.$http.delete('/video', { body: { url: this.video.url } });
@@ -54,15 +54,15 @@ class AdminPage {
 
   // Handle updates to the list from the server.
   static _getUpdates(videos) {
-    const socket = io.connect();
+    this.socket = io.connect();
 
     // Add new videos to the beginning of the list.
-    socket.on('videoAdded', (video) => {
+    this.socket.on('videoAdded', (video) => {
       videos.unshift(video);
     });
 
     // Remove videos from the list.
-    socket.on('videoRemoved', (video) => {
+    this.socket.on('videoRemoved', (video) => {
       const index = videos.findIndex(v => v.url === video.url);
       if (index === -1) {
         return;
@@ -71,14 +71,14 @@ class AdminPage {
     });
 
     // Update the selected video.
-    socket.on('videoSelected', (video) => {
+    this.socket.on('videoSelected', (video) => {
       videos.forEach((v) => {
         v.selected = video && v.url === video.url;
       });
     });
 
     // Update the entire video record.
-    socket.on('videoUpdated', (video) => {
+    this.socket.on('videoUpdated', (video) => {
       const index = videos.findIndex(v => v.url === video.url);
       Vue.set(videos, index, video);
     });

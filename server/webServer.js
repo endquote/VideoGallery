@@ -77,13 +77,6 @@ class WebServer {
         .then(() => res.sendStatus(200))
         .catch(() => res.sendStatus(500));
     });
-
-    // Put to select a video.
-    app.put('/video', (req, res) => {
-      Database.selectVideo(req.body.url)
-        .then(() => res.sendStatus(200))
-        .catch(() => res.sendStatus(500));
-    });
   }
 }
 
