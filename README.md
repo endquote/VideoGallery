@@ -16,7 +16,7 @@ Downloads videos from the web and plays them in a random order.
 5. Install [youtube-dl](http://rg3.github.io/youtube-dl/)
 6. Update youtube-dl: set up a task that runs `youtube-dl --update` daily.
 7. On Windows, for the PowerMate controller
-    1. Get [a compatible USB Bluetooth adapter](https://github.com/sandeepmistry/node-bluetooth-hci-socket)
+    1. Get [a compatible USB Bluetooth adapter](https://github.com/sandeepmistry/node-bluetooth-hci-socket). I bought [this one](https://www.asus.com/us/Networking/USBBT400/) [from Amazon](https://www.amazon.com/gp/product/B00DJ83070).
     1. `npm install -g windows-build-tools`
     2. Install [Zadig](http://zadig.akeo.ie) as shown [here](https://youtu.be/mL9B8wuEdms?t=2m7s)
 8. Download the package, run `npm install` from the root.
