@@ -44,8 +44,8 @@
       </div>
     </controller-status>
 
-    <click-target inline-template v-bind:play-sound="playSound" v-bind:show-info="showInfo" v-on:play-mode-changed="onPlayModeChanged">
-      <div id="click-target" v-on:pointerup="onPointerUp"></div>
+    <click-target inline-template v-on:play-mode-changed="onPlayModeChanged">
+      <div id="click-target" v-on:pointerup="onPointerUp" v-on:keyup="onKeyPress" tabindex="0"></div>
     </click-target>
 
   </div>

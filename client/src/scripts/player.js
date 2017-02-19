@@ -47,9 +47,16 @@ class PlayerPage {
           this.progress = progress;
         },
 
-        onPlayModeChanged(settings) {
-          this.playSound = settings.playSound;
-          this.showInfo = settings.showInfo;
+        onPlayModeChanged() {
+          if (!this.showInfo && !this.playSound) {
+            this.showInfo = true;
+          } else if (this.showInfo && !this.playSound) {
+            this.playSound = true;
+          } else if (this.showInfo && this.playSound) {
+            this.showInfo = false;
+          } else if (!this.showInfo && this.playSound) {
+            this.playSound = false;
+          }
         },
       },
 
@@ -102,8 +109,15 @@ class PlayerPage {
         },
 
         'click-target': {
-          props: ['playSound', 'showInfo'],
+          mounted() {
+            document.getElementById('click-target').focus();
+          },
+
           methods: {
+            onKeyPress() {
+              this.$emit('play-mode-changed');
+            },
+
             onPointerUp() {
               if (this.$tapTimeout) {
                 // Double tap, go to next video
@@ -114,15 +128,7 @@ class PlayerPage {
                 this.$tapTimeout = setTimeout(() => {
                   // Single tap, toggle info
                   this.$tapTimeout = null;
-                  if (!this.showInfo && !this.playSound) {
-                    this.$emit('play-mode-changed', { showInfo: true, playSound: false });
-                  } else if (this.showInfo && !this.playSound) {
-                    this.$emit('play-mode-changed', { showInfo: true, playSound: true });
-                  } else if (this.showInfo && this.playSound) {
-                    this.$emit('play-mode-changed', { showInfo: false, playSound: true });
-                  } else if (!this.showInfo && this.playSound) {
-                    this.$emit('play-mode-changed', { showInfo: false, playSound: false });
-                  }
+                  this.$emit('play-mode-changed');
                 }, PlayerPage.doubleTapDelay);
               }
             },
