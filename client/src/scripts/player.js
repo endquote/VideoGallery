@@ -40,33 +40,46 @@ class PlayerPage {
           newValue.played = true;
           newValue.selected = true;
         },
+      },
 
-        playSound(newValue) {
-          // TODO: Tween this
-          this.$videoNode.volume = newValue ? 1 : 0;
+      methods: {
+        onProgressChanged(progress) {
+          this.progress = progress;
+        },
+
+        onPlayModeChanged(settings) {
+          this.playSound = settings.playSound;
+          this.showInfo = settings.showInfo;
         },
       },
 
       components: {
 
         'video-player': {
-          props: ['video', 'progress'],
+          props: ['video', 'progress', 'playSound'],
           methods: {
 
             // Set the volume on start.
             onLoadStart() {
               const videoNode = this.$el.getElementsByTagName('video')[0];
-              videoNode.volume = this.$parent.playSound ? 1 : 0;
+              videoNode.volume = this.playSound ? 1 : 0;
             },
 
             // Update the progress bar.
             onTimeUpdate() {
               const videoNode = this.$el.getElementsByTagName('video')[0];
-              this.$parent.progress = videoNode.currentTime / videoNode.duration;
+              this.$emit('progress-changed', videoNode.currentTime / videoNode.duration);
             },
 
             onEnded() {
               PlayerPage.nextVideo();
+            },
+          },
+
+          watch: {
+            playSound(newValue) {
+              const videoNode = this.$el.getElementsByTagName('video')[0];
+              videoNode.volume = newValue ? 1 : 0;
             },
           },
         },
@@ -89,6 +102,7 @@ class PlayerPage {
         },
 
         'click-target': {
+          props: ['playSound', 'showInfo'],
           methods: {
             onPointerUp() {
               if (this.$tapTimeout) {
@@ -100,14 +114,14 @@ class PlayerPage {
                 this.$tapTimeout = setTimeout(() => {
                   // Single tap, toggle info
                   this.$tapTimeout = null;
-                  if (!this.$parent.showInfo && !this.$parent.playSound) {
-                    this.$parent.showInfo = true;
-                  } else if (this.$parent.showInfo && !this.$parent.playSound) {
-                    this.$parent.playSound = true;
-                  } else if (this.$parent.showInfo && this.$parent.playSound) {
-                    this.$parent.showInfo = false;
-                  } else if (!this.$parent.showInfo && this.$parent.playSound) {
-                    this.$parent.playSound = false;
+                  if (!this.showInfo && !this.playSound) {
+                    this.$emit('play-mode-changed', { showInfo: true, playSound: false });
+                  } else if (this.showInfo && !this.playSound) {
+                    this.$emit('play-mode-changed', { showInfo: true, playSound: true });
+                  } else if (this.showInfo && this.playSound) {
+                    this.$emit('play-mode-changed', { showInfo: false, playSound: true });
+                  } else if (!this.showInfo && this.playSound) {
+                    this.$emit('play-mode-changed', { showInfo: false, playSound: false });
                   }
                 }, PlayerPage.doubleTapDelay);
               }
