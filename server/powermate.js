@@ -52,11 +52,11 @@ class PowerMate {
   static _onStateChange(state) {
     if (state === 'poweredOn') {
       console.log('Scanning for PowerMate');
-      noble.startScanning([], false);
+      noble.startScanning([this.SERVICE_UUID], true);
     }
   }
 
-  // When the device is discovered, connect to it.
+  // When the device is discovered, connct to it.
   static _onDiscover(peripheral) {
     console.log(`Found ${peripheral.advertisement.localName} ${peripheral.address}`);
 
