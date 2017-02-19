@@ -1,4 +1,5 @@
 const express = require('express');
+const basicAuth = require('express-basic-auth')
 const bodyParser = require('body-parser');
 const http = require('http');
 const path = require('path');
@@ -7,12 +8,20 @@ const fs = require('fs-extra-promise');
 const Database = require('./database');
 
 class WebServer {
-  static init(port = 8080, target) {
+  static init(port = 8080, target, username = '', password = '') {
     this.target = target || path.join(__dirname, '../downloads');
 
     // Set up web server.
     const app = express();
     app.use(bodyParser.json());
+
+    if (username !== '' || password !== '') {
+      app.use(basicAuth({
+        authorizer: (u, p) => u === username && p === password,
+        challenge: true,
+        realm: 'Imb4T3st4px',
+      }));
+    }
 
     const httpServer = this.httpServer = http.Server(app);
     httpServer.listen(port, () => {

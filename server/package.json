@@ -16,6 +16,7 @@
     "body-parser": "^1.16.0",
     "commander": "^2.9.0",
     "express": "^4.14.1",
+    "express-basic-auth": "^1.0.0",
     "fs-extra-promise": "^0.4.1",
     "mongoose": "^4.8.1",
     "noble": "^1.7.0",
