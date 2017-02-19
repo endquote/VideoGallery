@@ -23,7 +23,9 @@ class SocketServer {
   }
 
   static emit(msg, data) {
-    this.io.emit(msg, data);
+    if (this.io) {
+      this.io.emit(msg, data);
+    }
   }
 }
 

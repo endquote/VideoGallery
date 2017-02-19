@@ -10,7 +10,8 @@
   "rules": {
     "no-underscore-dangle": "off",
     "no-param-reassign": "off",
-    "no-console": "off"
+    "no-console": "off",
+    "linebreak-style": "off"
   },
   "globals": {}
 }
