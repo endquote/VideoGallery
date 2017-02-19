@@ -13,21 +13,25 @@ class Database {
     Database.on = this.emitter.on.bind(this.emitter);
 
     const videoSchema = new mongoose.Schema({
-      url: {
-        required: true,
-        type: String,
-        index: true,
-        unique: true,
-      },
-      added: Date,
-      created: Date,
-      author: String,
-      title: String,
-      description: String,
-      loaded: Boolean,
+      url: { required: true, type: String, index: true, unique: true },
+      added: { required: true, type: Date },
+      created: { required: false, type: Date },
+      author: { required: false, type: String },
+      title: { required: false, type: String },
+      description: { required: false, type: String },
+      loaded: { required: true, type: Boolean, default: false },
     });
 
     this.Video = mongoose.model('video', videoSchema);
+  }
+
+  // On startup, delete any videos which previously failed to load.
+  static cleanup() {
+    this.Video
+      .find({ loaded: false })
+      .then((docs) => {
+        docs.forEach(d => this.removeVideo(d.url));
+      });
   }
 
   // Get all of the videos in the collection.

@@ -73,7 +73,9 @@ class AdminPage {
 
     // Update the selected video.
     this.socket.on('videoSelected', (video) => {
-      this.app.selectedVideo = videos.find(v => v.url === video.url);
+      if (video) {
+        this.app.selectedVideo = videos.find(v => v.url === video.url);
+      }
     });
 
     // Update the entire video record.

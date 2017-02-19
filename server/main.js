@@ -1,6 +1,12 @@
 const program = require('commander');
 const fs = require('fs-extra-promise');
 
+const Database = require('./database');
+const WebServer = require('./webServer');
+const SocketServer = require('./socketServer');
+const Downloader = require('./downloader');
+const PowerMate = require('./powermate');
+
 program
   .version(JSON.parse(fs.readFileSync('package.json')).version)
   .option('--port [8080]', 'web server port', 8080)
@@ -10,8 +16,10 @@ program
   .option('--password [password]', 'password', '')
   .parse(process.argv);
 
-require('./database').init(program.database);
-require('./webServer').init(program.port, program.downloads, program.username, program.password);
-require('./socketServer').init();
-require('./downloader').init(program.downloads);
-require('./powermate').init();
+
+Database.init(program.database);
+WebServer.init(program.port, program.downloads, program.username, program.password);
+SocketServer.init();
+Downloader.init(program.downloads);
+PowerMate.init();
+Database.cleanup();
