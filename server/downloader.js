@@ -51,6 +51,11 @@ class Downloader {
   // Save the video info to the database.
   static _onVideoInfo(doc, info) {
     console.info(`Saving info for ${doc.url}`);
+    if (!info || !info.upload_date) {
+      Database.removeVideo(doc.url);
+      return;
+    }
+
     doc.created = new Date(
       parseInt(info.upload_date.substr(0, 4), 10),
       parseInt(info.upload_date.substr(4, 2), 10) - 1,
