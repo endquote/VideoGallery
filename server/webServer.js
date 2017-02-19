@@ -57,6 +57,10 @@ class WebServer {
       } else if (type === 'video') {
         // Videos have unknown file extensions
         fs.readdirAsync(path.join(this.target, id), (err, files) => {
+          if (err) {
+            res.sendStatus(404);
+            return;
+          }
           const file = files.find((f) => {
             const parsed = path.parse(f);
             return parsed.ext !== '.jpg' && parsed.name === id;
