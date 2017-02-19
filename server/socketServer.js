@@ -16,8 +16,11 @@ class SocketServer {
       Database.on('videoRemoved', doc => socket.emit('videoRemoved', doc));
       Database.on('videoUpdated', doc => socket.emit('videoUpdated', doc));
 
+      socket.emit('videoSelected', this.selectedVideo);
+
       socket.on('selectVideo', (data) => {
-        this.io.emit('videoSelected', data);
+        this.selectedVideo = data;
+        this.io.emit('videoSelected', this.selectedVideo);
       });
     });
   }

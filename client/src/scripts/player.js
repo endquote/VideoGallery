@@ -23,7 +23,7 @@ class PlayerPage {
   }
 
   static _buildApp(videos) {
-    this.app = new Vue({
+    PlayerPage.app = new Vue({
       el: '#app',
 
       data: {
@@ -38,6 +38,10 @@ class PlayerPage {
 
       watch: {
         selectedVideo(newValue) {
+          if (!newValue) {
+            this.selectedVideo = {};
+            return;
+          }
           newValue.played = true;
         },
       },
@@ -159,17 +163,29 @@ class PlayerPage {
       } else if (data.knob === 'release') {
         document.getElementById('click-target').dispatchEvent(new Event('pointerup'));
       } else if (data.status === 'connected') {
-        this.app.controllerConnected = true;
+        PlayerPage.app.controllerConnected = true;
       } else if (data.status === 'disconnected') {
-        this.app.controllerConnected = false;
+        PlayerPage.app.controllerConnected = false;
       } else if (data.battery) {
-        this.app.controllerBattery = data.battery;
+        PlayerPage.app.controllerBattery = data.battery;
       }
     });
 
     // Update the selected video
     this.socket.on('videoSelected', (video) => {
-      this.app.selectedVideo = videos.find(v => v.url === video.url);
+      if (!video) {
+        PlayerPage.app.selectedVideo = null;
+        return;
+      }
+
+      if (PlayerPage.app.selectedVideo.url === video.url) {
+        // If it's the same video (like if there's only one video in the list), just replay
+        document.getElementsByTagName('video')[0].currentTime = 0;
+        document.getElementsByTagName('video')[0].play();
+        return;
+      }
+
+      PlayerPage.app.selectedVideo = videos.find(v => v.url === video.url);
     });
 
     // Get new videos
@@ -180,11 +196,12 @@ class PlayerPage {
     // Remove videos
     this.socket.on('videoRemoved', (video) => {
       const index = videos.findIndex(v => v.url === video.url);
-      if (index === -1) {
-        return;
+      if (index !== -1) {
+        videos.splice(index, 1);
       }
-      videos.splice(index, 1);
-      PlayerPage.nextVideo();
+      if (PlayerPage.app.selectedVideo.url === video.url) {
+        PlayerPage.nextVideo();
+      }
     });
 
     // Update existing videos
@@ -194,22 +211,29 @@ class PlayerPage {
         return;
       }
       Vue.set(videos, index, video);
-      if (video.selected) {
-        this.app.selectedVideo = video;
+
+      // If a video was loaded and nothing is selected, select the new one
+      if (video.selected || (video.loaded && !PlayerPage.app.selectedVideo.url)) {
+        this.socket.emit('selectVideo', { url: video.url });
       }
     });
   }
 
   // Select another random video
   static nextVideo() {
-    let unplayed = this.app.videos.filter(v => !v.played && v.loaded);
+    if (!PlayerPage.app.videos.length) {
+      this.socket.emit('selectVideo', null);
+      return;
+    }
+
+    let unplayed = PlayerPage.app.videos.filter(v => !v.played && v.loaded);
 
     if (!unplayed.length) {
       // All videos played
-      this.app.videos.forEach((v) => {
-        v.played = false;
+      PlayerPage.app.videos.forEach((v) => {
+        v.played = v.url === PlayerPage.app.selectedVideo.url;
       });
-      unplayed = this.app.videos.filter(v => !v.played && v.loaded);
+      unplayed = PlayerPage.app.videos.filter(v => !v.played && v.loaded);
     }
 
     const random = unplayed[Math.floor(Math.random() * unplayed.length)];
