@@ -47,6 +47,7 @@ class PlayerPage {
           this.progress = progress;
         },
 
+        // Cycle through every combination of info/audio.
         onPlayModeChanged() {
           if (!this.showInfo && !this.playSound) {
             this.showInfo = true;
@@ -62,6 +63,7 @@ class PlayerPage {
 
       components: {
 
+        // Component containing the actual <video> tag.
         'video-player': {
           props: ['video', 'playSound'],
           methods: {
@@ -78,6 +80,7 @@ class PlayerPage {
               this.$emit('progress-changed', videoNode.currentTime / videoNode.duration);
             },
 
+            // Go to the next video when the current one ends.
             onEnded() {
               PlayerPage.nextVideo();
             },
@@ -91,6 +94,7 @@ class PlayerPage {
           },
         },
 
+        // Component which shows the video metadata and QR code.
         'video-info': {
           props: ['video', 'showInfo'],
           computed: {
@@ -100,14 +104,17 @@ class PlayerPage {
           },
         },
 
+        // Component which shows a progress bar.
         'video-progress': {
           props: ['progress'],
         },
 
+        // Component which shows the battery level of a connected controller.
         'controller-status': {
           props: ['connected', 'battery'],
         },
 
+        // Component on top of everything, trapping clicks and keypresses to change play mode.
         'click-target': {
           mounted() {
             document.getElementById('click-target').focus();
