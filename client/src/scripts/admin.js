@@ -23,6 +23,7 @@ class AdminPage {
 
       data: {
         videos,
+        selectedVideo: {},
       },
 
       components: {
@@ -38,7 +39,7 @@ class AdminPage {
 
         // Each item in the video list
         'video-item': {
-          props: ['video'],
+          props: ['video', 'selectedVideo'],
           methods: {
             selectVideo() {
               AdminPage.socket.emit('selectVideo', { url: this.video.url });
@@ -72,9 +73,7 @@ class AdminPage {
 
     // Update the selected video.
     this.socket.on('videoSelected', (video) => {
-      videos.forEach((v) => {
-        v.selected = video && v.url === video.url;
-      });
+      this.app.selectedVideo = videos.find(v => v.url === video.url);
     });
 
     // Update the entire video record.

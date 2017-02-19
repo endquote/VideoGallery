@@ -24,8 +24,8 @@
     </video-add>
 
     <ul>
-      <video-item inline-template v-for="item in videos" v-bind:video="item">
-        <li class="video-item" v-bind:class="{ selected: video.selected }">
+      <video-item inline-template v-for="item in videos" v-bind:video="item" v-bind:selected-video="selectedVideo">
+        <li class="video-item" v-bind:class="{ selected: video === selectedVideo }">
           <a v-bind:href="video.url">{{ video.title ? video.title : 'Loading...' }}</a>
           <button v-on:click="selectVideo" v-bind:disabled="!video.loaded">select</button>
           <button v-on:click="removeVideo">remove</button>

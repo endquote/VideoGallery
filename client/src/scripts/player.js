@@ -10,6 +10,7 @@ class PlayerPage {
     this.knobRate = 1; // Time in seconds to move when the knob turns
     this.doubleTapDelay = 300; // Time in ms to consider a double tap
 
+    // Get the list of videos
     Vue.resource('/videos')
       .get()
       .catch(() => window.alert('Couldn\'t load data. Is the database server running?'))
@@ -38,7 +39,6 @@ class PlayerPage {
       watch: {
         selectedVideo(newValue) {
           newValue.played = true;
-          newValue.selected = true;
         },
       },
 
@@ -63,7 +63,7 @@ class PlayerPage {
       components: {
 
         'video-player': {
-          props: ['video', 'progress', 'playSound'],
+          props: ['video', 'playSound'],
           methods: {
 
             // Set the volume on start.
@@ -162,12 +162,7 @@ class PlayerPage {
 
     // Update the selected video
     this.socket.on('videoSelected', (video) => {
-      videos.forEach((v) => {
-        v.selected = v.url === video.url;
-        if (v.selected) {
-          this.app.selectedVideo = v;
-        }
-      });
+      this.app.selectedVideo = videos.find(v => v.url === video.url);
     });
 
     // Get new videos
@@ -193,9 +188,6 @@ class PlayerPage {
       }
       Vue.set(videos, index, video);
       if (video.selected) {
-        videos.forEach((v) => {
-          v.selected = v.url === video.url;
-        });
         this.app.selectedVideo = video;
       }
     });
