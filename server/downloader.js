@@ -6,7 +6,11 @@ const Database = require('./database');
 
 class Downloader {
   static init(target) {
-    this.target = target || path.join(__dirname, '../downloads');
+    this.target = target || '../downloads';
+    this.target = path.resolve(target);
+
+    this._infoProcs = {};
+    this._downloadProcs = {};
 
     // https://github.com/rg3/youtube-dl/blob/master/README.md
     this.infoCmd = 'youtube-dl --dump-json --playlist-items 1';
@@ -21,21 +25,32 @@ class Downloader {
     this._getVideoInfo(doc);
   }
 
+  // Spawn a youtube-dl process to get metadata about the video.
   static _getVideoInfo(doc) {
     console.info(`Getting info for ${doc.url}`);
-    childProcess.exec(`${this.infoCmd} ${doc.url}`, { maxBuffer: 1024 * 500 },
-      (err, stdout, stderr) => this._onVideoInfo(err, stdout, stderr, doc));
+    const cmd = this.infoCmd.split(' ')[0];
+    const args = this.infoCmd.split(' ').slice(1);
+    args.push(doc.url);
+    const opts = { shell: false };
+    const ps = this._infoProcs[doc.id] = childProcess.spawn(cmd, args, opts);
+    ps.stdoutBuffer = '';
+    ps.stderrBuffer = '';
+    ps.stdout.on('data', data => (ps.stdoutBuffer += data.toString()));
+    ps.stderr.on('data', data => (ps.stderrBuffer += data.toString()));
+    ps.on('exit', (code) => {
+      if (code === 0) {
+        this._onVideoInfo(doc, JSON.parse(ps.stdoutBuffer));
+      } else {
+        console.warn(ps.stderrBuffer);
+        Database.removeVideo(doc.url);
+      }
+      delete this._infoProcs[doc.id];
+    });
   }
 
-  static _onVideoInfo(err, stdout, stderr, doc) {
-    if (err) {
-      console.warn(err);
-      Database.removeVideo(doc.url);
-      return;
-    }
-
+  // Save the video info to the database.
+  static _onVideoInfo(doc, info) {
     console.info(`Saving info for ${doc.url}`);
-    const info = JSON.parse(stdout);
     doc.created = new Date(
       parseInt(info.upload_date.substr(0, 4), 10),
       parseInt(info.upload_date.substr(4, 2), 10) - 1,
@@ -48,38 +63,43 @@ class Downloader {
       .then(() => this._downloadVideo(doc));
   }
 
+  // Spawn a youtube-dl process to download the video.
   static _downloadVideo(doc) {
     console.info(`Downloading video ${doc.url}`);
-    childProcess.exec(`${this.downloadCmd} "${this.target}/${doc.id}" ${doc.url}`, { maxBuffer: 1024 * 500 },
-      (err, stdout, stderr) => this._onVideoLoaded(err, stdout, stderr, doc));
+    const cmd = this.downloadCmd.split(' ')[0];
+    const args = this.downloadCmd.split(' ').slice(1);
+    args.push(`${this.target}/${doc.id}/${doc.id}`);
+    args.push(doc.url);
+    const opts = { shell: false };
+    const ps = this._downloadProcs[doc.id] = childProcess.spawn(cmd, args, opts);
+    ps.stdout.on('data', data => console.info(data.toString()));
+    ps.stderr.on('data', data => console.warn(data.toString()));
+    ps.on('exit', (code) => {
+      if (code === 0) {
+        this._onVideoLoaded(doc);
+      } else {
+        Database.removeVideo(doc.url);
+      }
+      delete this._downloadProcs[doc.id];
+    });
   }
 
-  static _onVideoLoaded(err, stdout, stderr, doc) {
-    if (err) {
-      console.warn(err);
-      Database.removeVideo(doc.url);
-      return;
-    }
-
-    console.info(stdout);
+  // Save that the video has been loaded.
+  static _onVideoLoaded(doc) {
     doc.loaded = true;
     Database.saveVideo(doc);
   }
 
-  // Remove any files with the same name as the doc id.
+  // Kill any download processes and delete any files related to a deleted record.
   static removeVideo(doc) {
     console.info(`Deleting video ${doc.url}`);
-    try {
-      fs.readdirAsync(this.target, (err, files) => {
-        if (err) {
-          console.error(err);
-        }
-        files.filter(f => path.parse(f).name === doc.id)
-          .forEach(f => fs.unlinkAsync(path.join(this.target, f)));
-      });
-    } catch (err) {
-      console.error(err);
+    if (this._infoProcs[doc.id]) {
+      this._infoProcs[doc.id].kill();
     }
+    if (this._downloadProcs[doc.id]) {
+      this._downloadProcs[doc.id].kill();
+    }
+    fs.removeSync(path.join(this.target, doc.id), err => console.warn(err));
   }
 }
 

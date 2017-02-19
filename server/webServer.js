@@ -9,7 +9,8 @@ const Database = require('./database');
 
 class WebServer {
   static init(port = 8080, target, username = '', password = '') {
-    this.target = target || path.join(__dirname, '../downloads');
+    this.target = target || '../downloads';
+    this.target = path.resolve(target);
 
     // Set up web server.
     const app = express();
@@ -39,31 +40,38 @@ class WebServer {
 
     // Routes for video content.
     app.use('/content', (req, res) => {
-      try {
-        const type = req.originalUrl.split('/')[2].toLowerCase();
-        const id = req.originalUrl.split('/')[3];
+      const type = req.originalUrl.split('/')[2].toLowerCase();
+      const id = req.originalUrl.split('/')[3];
+      if (!id || id === 'undefined') {
+        res.sendStatus(404);
+        return;
+      }
 
+      if (type === 'thumbnail') {
         // Thumbnails are the ID + jpg
-        if (type === 'thumbnail') {
-          res.sendFile(path.join(__dirname, target, `${id}.jpg`));
-
-          // Videos have unknown file extensions
-        } else if (type === 'video') {
-          fs.readdirAsync(path.join(__dirname, target), (err, files) => {
-            const file = files.find((f) => {
-              const parsed = path.parse(f);
-              return parsed.ext !== '.jpg' && parsed.name === id;
-            });
-            if (!file) {
-              res.sendStatus(404);
-            } else {
-              res.sendFile(path.join(__dirname, target, file));
-            }
-          });
-        } else {
+        try {
+          res.sendFile(path.join(this.target, id, `${id}.jpg`));
+        } catch (e) {
           res.sendStatus(404);
         }
-      } catch (e) {
+      } else if (type === 'video') {
+        // Videos have unknown file extensions
+        fs.readdirAsync(path.join(this.target, id), (err, files) => {
+          const file = files.find((f) => {
+            const parsed = path.parse(f);
+            return parsed.ext !== '.jpg' && parsed.name === id;
+          });
+          if (!file) {
+            res.sendStatus(404);
+          } else {
+            try {
+              res.sendFile(path.join(this.target, id, file));
+            } catch (e) {
+              res.sendStatus(404);
+            }
+          }
+        });
+      } else {
         res.sendStatus(404);
       }
     });
