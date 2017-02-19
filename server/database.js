@@ -51,7 +51,11 @@ class Database {
   // Remove a video from the collection by URL.
   static removeVideo(url) {
     return this.Video.findOneAndRemove({ url })
-      .then(doc => this.emitter.emit('videoRemoved', doc));
+      .then((doc) => {
+        if (doc) {
+          this.emitter.emit('videoRemoved', doc);
+        }
+      });
   }
 
   static saveVideo(doc) {
