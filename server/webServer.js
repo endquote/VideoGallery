@@ -94,7 +94,7 @@ class WebServer {
 
     // Delete to delete a video.
     app.delete('/video', (req, res) => {
-      Database.removeVideo(req.body.url)
+      Database.removeVideo(req.body._id)
         .then(() => res.sendStatus(200))
         .catch(() => res.sendStatus(500));
     });

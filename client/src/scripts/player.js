@@ -103,7 +103,7 @@ class PlayerPage {
           props: ['video', 'showInfo'],
           computed: {
             qrcode() {
-              return this.video.url ? new QRious({ value: this.video.url }).toDataURL() : '';
+              return this.video._id ? new QRious({ value: this.video.url }).toDataURL() : '';
             },
           },
         },
@@ -178,14 +178,14 @@ class PlayerPage {
         return;
       }
 
-      if (PlayerPage.app.selectedVideo.url === video.url) {
+      if (PlayerPage.app.selectedVideo._id && PlayerPage.app.selectedVideo._id === video._id) {
         // If it's the same video (like if there's only one video in the list), just replay
         document.getElementsByTagName('video')[0].currentTime = 0;
         document.getElementsByTagName('video')[0].play();
         return;
       }
 
-      PlayerPage.app.selectedVideo = videos.find(v => v.url === video.url);
+      PlayerPage.app.selectedVideo = videos.find(v => v._id === video._id);
     });
 
     // Get new videos
@@ -195,26 +195,26 @@ class PlayerPage {
 
     // Remove videos
     this.socket.on('videoRemoved', (video) => {
-      const index = videos.findIndex(v => v.url === video.url);
+      const index = videos.findIndex(v => v._id === video._id);
       if (index !== -1) {
         videos.splice(index, 1);
       }
-      if (PlayerPage.app.selectedVideo.url === video.url) {
+      if (PlayerPage.app.selectedVideo._id === video._id) {
         PlayerPage.nextVideo();
       }
     });
 
     // Update existing videos
     this.socket.on('videoUpdated', (video) => {
-      const index = videos.findIndex(v => v.url === video.url);
+      const index = videos.findIndex(v => v._id === video._id);
       if (index === -1) {
         return;
       }
       Vue.set(videos, index, video);
 
       // If a video was loaded and nothing is selected, select the new one
-      if (video.selected || (video.loaded && !PlayerPage.app.selectedVideo.url)) {
-        this.socket.emit('selectVideo', { url: video.url });
+      if (video.selected || (video.loaded && !PlayerPage.app.selectedVideo._id)) {
+        this.socket.emit('selectVideo', { _id: video._id });
       }
     });
   }
@@ -231,13 +231,13 @@ class PlayerPage {
     if (!unplayed.length) {
       // All videos played
       PlayerPage.app.videos.forEach((v) => {
-        v.played = v.url === PlayerPage.app.selectedVideo.url;
+        v.played = v._id === PlayerPage.app.selectedVideo._id;
       });
       unplayed = PlayerPage.app.videos.filter(v => !v.played && v.loaded);
     }
 
     const random = unplayed[Math.floor(Math.random() * unplayed.length)];
-    this.socket.emit('selectVideo', { url: random.url });
+    this.socket.emit('selectVideo', { _id: random._id });
   }
 }
 

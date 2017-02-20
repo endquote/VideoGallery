@@ -42,10 +42,10 @@ class AdminPage {
           props: ['video', 'selectedVideo'],
           methods: {
             selectVideo() {
-              AdminPage.socket.emit('selectVideo', { url: this.video.url });
+              AdminPage.socket.emit('selectVideo', { _id: this.video._id });
             },
             removeVideo() {
-              this.$http.delete('/video', { body: { url: this.video.url } });
+              this.$http.delete('/video', { body: { _id: this.video._id } });
             },
           },
         },
@@ -64,7 +64,7 @@ class AdminPage {
 
     // Remove videos from the list.
     this.socket.on('videoRemoved', (video) => {
-      const index = videos.findIndex(v => v.url === video.url);
+      const index = videos.findIndex(v => v._id === video._id);
       if (index === -1) {
         return;
       }
@@ -74,13 +74,13 @@ class AdminPage {
     // Update the selected video.
     this.socket.on('videoSelected', (video) => {
       if (video) {
-        this.app.selectedVideo = videos.find(v => v.url === video.url);
+        this.app.selectedVideo = videos.find(v => v._id === video._id);
       }
     });
 
     // Update the entire video record.
     this.socket.on('videoUpdated', (video) => {
-      const index = videos.findIndex(v => v.url === video.url);
+      const index = videos.findIndex(v => v._id === video._id);
       Vue.set(videos, index, video);
     });
   }
