@@ -11,10 +11,13 @@ class Downloader {
 
     this._infoProcs = {};
     this._downloadProcs = {};
+    this._resizeProcs = {};
 
     // https://github.com/rg3/youtube-dl/blob/master/README.md
     this.infoCmd = 'youtube-dl --dump-json --playlist-items 1';
     this.downloadCmd = 'youtube-dl --write-thumbnail --no-progress --playlist-items 1 -o';
+
+    this.thumbnailWidth = 200;
 
     fs.ensureDirSync(this.target);
     Database.on('videoAdded', doc => this.addVideo(doc));
@@ -89,8 +92,27 @@ class Downloader {
     });
   }
 
-  // Save that the video has been loaded.
+  // Resize the thumbnail image.
   static _onVideoLoaded(doc) {
+    const cmd = 'convert';
+    const file = path.join(this.target, doc.id, `${doc.id}.jpg`);
+    const args = [file, '-resize', this.thumbnailWidth, file];
+    const opts = { shell: false };
+    const ps = this._resizeProcs[doc.id] = childProcess.spawn(cmd, args, opts);
+    ps.stdout.on('data', data => console.info(data.toString()));
+    ps.stderr.on('data', data => console.warn(data.toString()));
+    ps.on('exit', (code) => {
+      if (code === 0) {
+        this._onResized(doc);
+      } else {
+        Database.removeVideo(doc.url);
+      }
+      delete this._resizeProcs[doc.id];
+    });
+  }
+
+  // Save that the video has been loaded.
+  static _onResized(doc) {
     doc.loaded = true;
     Database.saveVideo(doc);
   }
@@ -103,6 +125,9 @@ class Downloader {
     }
     if (this._downloadProcs[doc.id]) {
       this._downloadProcs[doc.id].kill();
+    }
+    if (this._resizeProcs[doc.id]) {
+      this._resizeProcs[doc.id].kill();
     }
     fs.removeSync(path.join(this.target, doc.id), err => console.warn(err));
   }
