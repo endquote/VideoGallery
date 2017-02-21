@@ -29,9 +29,7 @@ class Database {
   static cleanup() {
     this.Video
       .find({ loaded: false })
-      .then((docs) => {
-        docs.forEach(d => this.removeVideo(d.url));
-      });
+      .then(docs => docs.forEach(d => this.removeVideo(d.id)));
   }
 
   // Get all of the videos in the collection.
@@ -43,13 +41,7 @@ class Database {
   static addVideo(url) {
     return new this.Video({ url, added: new Date() })
       .save()
-      .then(doc => this.emitter.emit('videoAdded', doc))
-      .catch((err) => {
-        // Already exists, don't care.
-        if (err.code !== 11000) {
-          throw err;
-        }
-      });
+      .then(doc => this.emitter.emit('videoAdded', doc));
   }
 
   // Remove a video from the collection by URL.

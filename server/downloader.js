@@ -87,7 +87,10 @@ class Downloader {
     doc.url = info.webpage_url;
 
     Database.saveVideo(doc)
-      .then(() => this._downloadVideo(doc, bestVideo, compatAudio));
+      .then(() => this._downloadVideo(doc, bestVideo, compatAudio))
+      .catch(() => {
+        this.removeVideo(doc);
+      });
   }
 
   // Spawn a youtube-dl process to download the video.
@@ -152,6 +155,7 @@ class Downloader {
       delete this._childProcesses[doc.id];
     }
     fs.removeSync(path.join(this.target, doc.id), err => console.warn(err));
+    Database.removeVideo(doc.id);
   }
 }
 

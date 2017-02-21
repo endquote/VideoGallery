@@ -32,7 +32,9 @@ class AdminPage {
         'video-add': {
           methods: {
             submit() {
-              this.$http.post('/video', { url: this.$el.getElementsByClassName('video-add-url')[0].value });
+              this.$http
+                .post('/video', { url: this.$el.getElementsByClassName('video-add-url')[0].value })
+                .catch(() => false); // Video already added. Alert?
             },
           },
         },
