@@ -58,6 +58,11 @@ class Downloader {
       return;
     }
 
+    // The default behavior of ytdl to download the best audio+video streams is great, but if
+    // the a/v formats are incompatible, it merges them to an MKV, which plays back glitchy in
+    // Chrome. So figure out the best video format and the best audio format compatible with
+    // that. This might be unnecessary in future ytdl versions:
+    // https://github.com/rg3/youtube-dl/issues/10226
     const compatSets = [
       ['mp3', 'mp4', 'm4a', 'm4p', 'm4b', 'm4r', 'm4v', 'ismv', 'isma'],
       ['webm'],
