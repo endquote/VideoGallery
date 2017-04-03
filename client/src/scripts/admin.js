@@ -47,7 +47,7 @@ class AdminPage {
               AdminPage.socket.emit('selectVideo', { _id: this.video._id });
             },
             removeVideo() {
-              if (window.confirm(`Are you sure you want to delete "${this.video.title ? this.video.title : this.video.url}"`)) {
+              if (window.confirm(`Are you sure you want to delete "${this.video.title || this.video.url}"`)) {
                 this.$http.delete('/video', { body: { _id: this.video._id } });
               }
             },
