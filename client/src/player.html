@@ -3,6 +3,8 @@
 
 <head>
   <title>player</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700" rel="stylesheet">
   <link rel="stylesheet" type="text/css" href="styles/player.css" />
 
   <script src="/socket.io/socket.io.js"></script>
@@ -25,11 +27,15 @@
 
     <video-info inline-template v-bind:video="selectedVideo" v-bind:show-info="showInfo">
       <div id="video-info" v-bind:class="{ shown: showInfo }">
-        <div id="video-info-content">
-          <img id="video-qr-code" v-bind:src="qrcode" />
-          <h1>{{ video.title }}</h1>
-          <h2>{{ video.author }}</h2>
-          <p>{{ video.description }}</p>
+        <img id="video-qr-code" v-bind:src="qrcode" />
+        <div id="video-info-content-container">
+          <div id="video-info-content">
+            <div id="video-info-author-title">
+              <h2 id="video-info-author">by {{ video.author }}</h2>
+              <h1 id="video-info-title">{{ video.title }}</h1>
+            </div>
+            <div id="video-info-description" v-html="$options.filters.linebreak(video.description)"></div>
+          </div>
         </div>
       </div>
     </video-info>

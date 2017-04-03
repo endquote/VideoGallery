@@ -106,6 +106,12 @@ class PlayerPage {
               return this.video._id ? new QRious({ value: this.video.url }).toDataURL() : '';
             },
           },
+          filters: {
+            linebreak(value) {
+              return value && value.replace ? value.replace(/[\r\n]/g, '<br>') : value;
+            },
+          },
+
         },
 
         // Component which shows a progress bar.

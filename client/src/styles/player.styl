@@ -1,10 +1,13 @@
 @import "main.styl"
 
 progress-height = 1vh
+info-margin = 30px
+qr-size = 100px
 
 body
     user-select none
     overflow hidden
+    font-family 'Source Sans Pro', sans-serif
 
 #video-player
     background-color black
@@ -15,7 +18,7 @@ body
     right 0
 
 #video-info
-    background-color rgba(1,1,1,.5)
+    background-color rgba(1, 1, 1, .5)
     color white
     position absolute
     left 0
@@ -23,13 +26,47 @@ body
     bottom -25vh - progress-height
     height 25vh + progress-height
 
-#video-info-content
-    position: absolute
-    left: 30px
-    top: @left
-    right: @left
+#video-qr-code
+    position absolute
+    top info-margin
+    right info-margin
+
+#video-info-content-container
+    position absolute
+    left info-margin
+    top @left
+    right @left * 2 + qr-size
     bottom @left
+
+#video-info-content
     overflow hidden
+    column-count 3
+    column-gap (info-margin / 2)
+    column-fill auto
+    height 100%
+
+#video-info-author-title
+    column-span all
+    margin-bottom (info-margin / 2)
+
+#video-info-title
+    text-overflow ellipsis
+    white-space nowrap
+    overflow hidden
+    margin 0
+
+#video-info-author
+    float right
+    margin 0
+    margin-left info-margin
+    margin-top .3em
+    max-width 25%
+    text-overflow ellipsis
+    white-space nowrap
+    overflow hidden
+    
+#video-info-description
+    margin 0
 
 #video-info.shown
     bottom 0
@@ -41,9 +78,6 @@ body
     bottom 0
     height progress-height
     opacity .5
-
-#video-qr-code
-    float right
 
 #controller-status
     position absolute
