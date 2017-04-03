@@ -1,4 +1,36 @@
 @import "main.styl"
 
+#video-list
+  list-style none
+  margin 0
+  padding 0
+
+.video-item
+  padding .5em
+
+.video-item img
+  vertical-align bottom
+
+.video-item:nth-child(odd)
+  background-color #CCC
+
+.video-item:nth-child(even)
+  background-color #EEE
+
 .video-item.selected 
-  background-color red
+  outline 2px dashed black;
+
+button
+  height 50px
+  width 50px
+  background-color white
+  border none
+  margin-left 10px
+
+a.link-source
+  margin-left 10px
+  color black
+
+input
+  font-size 2em
+  width 100%

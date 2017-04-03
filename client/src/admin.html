@@ -3,6 +3,8 @@
 
 <head>
   <title>admin</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700" rel="stylesheet">
   <link rel="stylesheet" type="text/css" href="styles/admin.css" />
 
   <script src="/socket.io/socket.io.js"></script>
@@ -18,23 +20,20 @@
     <video-add inline-template>
       <div>
         <form v-on:submit.prevent="submit">
-          <input type="text" class="video-add-url" />
+          <input type="text" class="video-add-url" placeholder="paste URL to add" />
         </form>
       </div>
     </video-add>
 
-    <ul>
+    <ul id="video-list">
       <video-item inline-template v-for="item in videos" v-bind:video="item" v-bind:selected-video="selectedVideo">
         <li class="video-item" v-bind:class="{ selected: video === selectedVideo }">
-          <a v-bind:href="video.url">{{ video.title ? video.title : 'Loading...' }}</a>
-          <button v-on:click="selectVideo" v-bind:disabled="!video.loaded">select</button>
-          <button v-on:click="removeVideo">remove</button>
-          <span v-if="video.loaded">
-            <a v-bind:href="'/content/video/' + video._id">
-              <img v-bind:src="'/content/thumbnail/' + video._id" height="50"/>
-            </a>
-          </span>
-          <span v-if="!video.loaded">loading...</span>
+          <a class="link-file" v-if="video.loaded" v-bind:href="'/content/video/' + video._id">
+            <img v-bind:src="'/content/thumbnail/' + video._id" height="50" />
+          </a>
+          <button v-if="video.loaded" v-on:click="selectVideo" v-bind:disabled="!video.loaded">▶️</button>
+          <button v-on:click="removeVideo">🗑</button>
+          <a class="link-source" v-bind:href="video.url">{{ video.title ? video.title : 'Loading...' }}</a>
         </li>
       </video-item>
     </ul>
