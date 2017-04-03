@@ -31,8 +31,8 @@
           <a class="link-file" v-if="video.loaded" v-bind:href="'/content/video/' + video._id">
             <img v-bind:src="'/content/thumbnail/' + video._id" height="50" />
           </a>
-          <button v-if="video.loaded" v-on:click="selectVideo" v-bind:disabled="!video.loaded">▶️</button>
-          <button v-on:click="removeVideo">🗑</button>
+          <button v-if="video.loaded" v-on:click="selectVideo" v-bind:disabled="!video.loaded">▶</button>
+          <button v-on:click="removeVideo">✖</button>
           <a class="link-source" v-bind:href="video.url">{{ video.title ? video.title : 'Loading...' }}</a>
         </li>
       </video-item>
