@@ -11,16 +11,16 @@
     "postinstall": "npm run build"
   },
   "devDependencies": {
-    "browser-sync": "^2.18.7",
-    "browserify": "^14.0.0",
+    "browser-sync": "^2.18.8",
+    "browserify": "^14.1.0",
     "del": "^2.2.2",
     "gulp": "^3.9.1",
     "gulp-batch": "^1.0.5",
-    "gulp-imagemin": "^3.1.1",
+    "gulp-imagemin": "^3.2.0",
     "gulp-sequence": "^0.4.6",
-    "gulp-sourcemaps": "^2.4.1",
+    "gulp-sourcemaps": "^2.5.0",
     "gulp-stylus": "^2.6.0",
-    "gulp-uglify": "^2.0.1",
+    "gulp-uglify": "^2.1.2",
     "gulp-watch": "^4.3.11",
     "pump": "^1.0.2",
     "uglify-js": "git+https://github.com/mishoo/UglifyJS2.git#harmony",
@@ -29,9 +29,9 @@
   },
   "dependencies": {
     "qrious": "^2.2.0",
-    "socket.io-client": "^1.7.2",
-    "vue": "^2.1.10",
-    "vue-resource": "^1.2.0"
+    "socket.io-client": "^1.7.3",
+    "vue": "^2.2.6",
+    "vue-resource": "^1.2.1"
   },
   "browser": {
     "vue": "vue/dist/vue.common"
