@@ -64,6 +64,7 @@ class AdminPage {
     // Add new videos to the beginning of the list.
     this.socket.on('videoAdded', (video) => {
       videos.unshift(video);
+      document.getElementsByTagName('input')[0].value = '';
     });
 
     // Remove videos from the list.
