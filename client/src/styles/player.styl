@@ -16,14 +16,23 @@ body
     bottom 0
     right 0
 
-#video-info
+.video-info
     background-color rgba(1, 1, 1, .5)
     color white
     position absolute
     left 0
     right 0
-    bottom -25vh - progress-height
+    bottom 0
     height 25vh + progress-height
+
+.video-info-toggle-enter-active, .video-info-toggle-leave-active
+    transition all .2s ease-out
+
+.video-info-toggle-enter, .video-info-toggle-leave-to
+    bottom -25vh - progress-height
+
+.video-info-toggle-enter-to, .video-info-toggle-leave
+    bottom 0
 
 #video-qr-code
     position absolute

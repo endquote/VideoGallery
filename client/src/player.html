@@ -26,18 +26,20 @@
     </video-player>
 
     <video-info inline-template v-bind:video="selectedVideo" v-bind:show-info="showInfo">
-      <div id="video-info" v-bind:class="{ shown: showInfo }">
-        <img id="video-qr-code" v-bind:src="qrcode" />
-        <div id="video-info-content-container">
-          <div id="video-info-content">
-            <div id="video-info-author-title">
-              <h2 id="video-info-author">by {{ video.author }}</h2>
-              <h1 id="video-info-title">{{ video.title }}</h1>
+      <transition name="video-info-toggle">
+        <div id="video-info" class="video-info" v-if="showInfo">
+          <img id="video-qr-code" v-bind:src="qrcode" />
+          <div id="video-info-content-container">
+            <div id="video-info-content">
+              <div id="video-info-author-title">
+                <h2 id="video-info-author">by {{ video.author }}</h2>
+                <h1 id="video-info-title">{{ video.title }}</h1>
+              </div>
+              <div id="video-info-description" v-html="$options.filters.linebreak(video.description)"></div>
             </div>
-            <div id="video-info-description" v-html="$options.filters.linebreak(video.description)"></div>
           </div>
         </div>
-      </div>
+      </transition>
     </video-info>
 
     <video-progress inline-template v-bind:progress="progress">
