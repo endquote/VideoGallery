@@ -7,13 +7,16 @@ const imagemin = require('gulp-imagemin');
 const sequence = require('gulp-sequence');
 const del = require('del');
 const browserSync = require('browser-sync');
-const uglifyjs = require('uglify-js');
-const minifier = require('gulp-uglify/minifier');
+const uglifyjs = require('uglify-es');
+const minifier = require('gulp-uglify');
 const buffer = require('vinyl-buffer');
 const source = require('vinyl-source-stream');
 const pump = require('pump');
 const stylus = require('gulp-stylus');
 const fs = require('fs');
+
+const composer = require('gulp-uglify/composer');
+const minify = composer(uglifyjs, console);
 
 gulp.task('clean', () => {
   return del('./dist');
@@ -37,7 +40,7 @@ gulp.task('scripts:vendor', () => {
     source('vendor.js'),
     buffer(),
     sourcemaps.init({ loadMaps: true }),
-    minifier({}, uglifyjs),
+    minify({}),
     sourcemaps.write('.'),
     gulp.dest('./dist/scripts/'),
   ]);
@@ -55,7 +58,7 @@ gulp.task('scripts:app', () => {
     source('main.js'),
     buffer(),
     sourcemaps.init({ loadMaps: true }),
-    minifier({}, uglifyjs),
+    minify({}),
     sourcemaps.write('.'),
     gulp.dest('./dist/scripts/'),
   ]);
