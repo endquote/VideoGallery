@@ -22,7 +22,7 @@ Use a touch screen, mouse, or [PowerMate Bluetooth](https://griffintechnology.co
 
 ## Installation
 
-### Mac/Linux
+### Mac
 
 1. Install [Chrome](https://www.google.com/chrome/)
 1. Install [Xcode](https://itunes.apple.com/us/app/xcode/id497799835?mt=12), launch it once to finish install
@@ -30,7 +30,7 @@ Use a touch screen, mouse, or [PowerMate Bluetooth](https://griffintechnology.co
 1. `brew install node imagemagick mongodb ffmpeg youtube-dl`
 1. `brew services start mongodb`
 1. `npm install --prefix ~/VideoGallery https://github.com/endquote/VideoGallery`
-1. Run `scripts\mac\install-update-ytdl.sh` to automatically update youtube-dl daily
+1. Run `~/VideoGallery/node_modules/video-gallery/scripts/mac/install-update-ytdl.sh` to automatically update youtube-dl daily
 
 ### Windows
 
@@ -65,7 +65,8 @@ When the sever is running, the web interfaces are at:
 ### Mac
 
 1. Set up an [automatic login](https://support.apple.com/en-us/HT201476).
-1. Run `~/VideoGallery/scripts/mac/install-kiosk-startup.sh`.
+1. Run `~/VideoGallery/node_modules/video-gallery/scripts/mac/install-kiosk-startup.sh`.
+  * In theory. Currently not working. `launchd` is a MF.
 
 ### Windows
 

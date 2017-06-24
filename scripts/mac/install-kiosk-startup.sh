@@ -1,3 +1,2 @@
-mkdir -p ~/Library/LaunchAgents
-cp com.endquote.launch-videogallery.plist ~/Library/LaunchAgents/com.endquote.launch-videogallery.plist
-launchctl load -w ~/Library/LaunchAgents/com.endquote.launch-videogallery.plist
+# this doesn't work
+#(crontab -l 2>/dev/null; echo "@reboot ~/VideoGallery/node_modules/video-gallery/scripts/mac/start-kiosk.sh ") | crontab -
