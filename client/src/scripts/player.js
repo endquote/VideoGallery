@@ -234,10 +234,10 @@ class PlayerPage {
 
     let unplayed = PlayerPage.app.videos.filter(v => !v.played && v.loaded);
 
-    if (!unplayed.length) {
+    if (unplayed.length === 0) {
       // All videos played
       PlayerPage.app.videos.forEach((v) => {
-        v.played = v._id === PlayerPage.app.selectedVideo._id;
+        v.played = false;
       });
       unplayed = PlayerPage.app.videos.filter(v => !v.played && v.loaded);
     }
