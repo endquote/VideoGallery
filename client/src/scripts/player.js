@@ -184,7 +184,7 @@ class PlayerPage {
         return;
       }
 
-      if (PlayerPage.app.selectedVideo._id && PlayerPage.app.selectedVideo._id === video._id) {
+      if (PlayerPage.app.selectedVideo && PlayerPage.app.selectedVideo._id && PlayerPage.app.selectedVideo._id === video._id) {
         // If it's the same video (like if there's only one video in the list), just replay
         document.getElementsByTagName('video')[0].currentTime = 0;
         document.getElementsByTagName('video')[0].play();
