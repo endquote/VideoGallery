@@ -8,14 +8,13 @@ const sequence = require('gulp-sequence');
 const del = require('del');
 const browserSync = require('browser-sync');
 const uglifyjs = require('uglify-es');
-const minifier = require('gulp-uglify');
 const buffer = require('vinyl-buffer');
 const source = require('vinyl-source-stream');
 const pump = require('pump');
 const stylus = require('gulp-stylus');
 const fs = require('fs');
-
 const composer = require('gulp-uglify/composer');
+
 const minify = composer(uglifyjs, console);
 
 gulp.task('clean', () => {
