@@ -66,7 +66,7 @@ When the sever is running, the web interfaces are at:
 
 1. Set up an [automatic login](https://support.apple.com/en-us/HT201476).
 1. Run `~/VideoGallery/node_modules/video-gallery/scripts/mac/install-kiosk-startup.sh`.
-  * In theory. Currently not working. `launchd` is a MF.
+    * In theory. Currently not working. `launchd` is a MF.
 
 ### Windows
 
