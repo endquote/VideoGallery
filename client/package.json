@@ -5,6 +5,10 @@
   "author": "Josh Santangelo <josh@endquote.com>",
   "description": "Client for the Video Gallery application.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/endquote/VideoGallery.git"
+  },
   "scripts": {
     "dev": "node ./node_modules/gulp/bin/gulp.js dev",
     "build": "node ./node_modules/gulp/bin/gulp.js",

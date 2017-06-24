@@ -5,6 +5,10 @@
   "author": "Josh Santangelo <josh@endquote.com>",
   "description": "Server for the Video Gallery application.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/endquote/VideoGallery.git"
+  },
   "scripts": {
     "start": "node main.js",
     "dev": "node ./node_modules/nodemon/bin/nodemon.js --debug=5858 main.js"

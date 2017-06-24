@@ -5,6 +5,10 @@
   "main": "server/main.js",
   "author": "Josh Santangelo <josh@endquote.com>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/endquote/VideoGallery.git"
+  },
   "devDependencies": {
     "eslint": "^3.15.0",
     "eslint-config-airbnb-base": "^11.0.1",
