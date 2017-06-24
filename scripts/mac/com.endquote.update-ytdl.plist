@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>Label</key>
-	<string>com.endquote.update-youtube-dl</string>
+	<string>com.endquote.update-ytdl</string>
 	<key>ProgramArguments</key>
 	<array>
 		<string>sh</string>

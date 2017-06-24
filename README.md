@@ -30,7 +30,7 @@ Use a touch screen, mouse, or [PowerMate Bluetooth](https://griffintechnology.co
 1. `brew install node imagemagick mongodb ffmpeg youtube-dl`
 1. `brew services start mongodb`
 1. `npm install --prefix ~/VideoGallery https://github.com/endquote/VideoGallery`
-1. Run `scripts\mac\update-youtubedl.sh` to automatically update youtube-dl daily
+1. Run `scripts\mac\install-update-ytdl.sh` to automatically update youtube-dl daily
 
 ### Windows
 
@@ -55,14 +55,19 @@ When the sever is running, the web interfaces are at:
 * Video Player: [http://localhost:8080](http://localhost:8080)
 * Admin: [http://localhost:8080/admin](http://localhost:8080/admin)
 
-### Run on Startup
+## Updates
 
-## Mac
+* Mac: `npm install --prefix ~/VideoGallery https://github.com/endquote/VideoGallery`
+* Windows: `npm install --prefix C:\VideoGallery https://github.com/endquote/VideoGallery`
+
+## Run on Startup
+
+### Mac
 
 1. Set up an [automatic login](https://support.apple.com/en-us/HT201476).
-1. Run `~/VideoGallery/scripts/mac/startup-kiosk.sh`.
+1. Run `~/VideoGallery/scripts/mac/install-kiosk-startup.sh`.
 
-## Windows
+### Windows
 
 1. Set up an [automatic login](https://technet.microsoft.com/en-us/library/ee872306.aspx).
 1. Press `Win+R`
@@ -71,4 +76,4 @@ When the sever is running, the web interfaces are at:
 
 ## Development
 
-The project is set up to take advantage of the [VS Code](https:\/code.visualstudio.com) debugger and extensions.
+The project is set up to take advantage of the [VS Code](https://code.visualstudio.com) debugger and extensions.
