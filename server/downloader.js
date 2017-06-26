@@ -54,7 +54,7 @@ class Downloader {
   static _onVideoInfo(doc, info) {
     console.info(`Saving info for ${doc.url}`);
     if (!info || !info.upload_date) {
-      Database.removeVideo(doc.url);
+      Database.removeVideo(doc.id);
       return;
     }
 
