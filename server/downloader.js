@@ -53,7 +53,7 @@ class Downloader {
   // Save the video info to the database.
   static _onVideoInfo(doc, info) {
     console.info(`Saving info for ${doc.url}`);
-    if (!info || !info.upload_date) {
+    if (!info) {
       Database.removeVideo(doc.id);
       return;
     }
@@ -77,10 +77,13 @@ class Downloader {
       .sort((a, b) => a.filesize - b.filesize)
       .pop();
 
-    doc.created = new Date(
-      parseInt(info.upload_date.substr(0, 4), 10),
-      parseInt(info.upload_date.substr(4, 2), 10) - 1,
-      parseInt(info.upload_date.substr(6, 2), 10));
+    doc.created = new Date();
+    if (info.upload_date) {
+      doc.created = new Date(
+        parseInt(info.upload_date.substr(0, 4), 10),
+        parseInt(info.upload_date.substr(4, 2), 10) - 1,
+        parseInt(info.upload_date.substr(6, 2), 10));
+    }
     doc.author = info.uploader;
     doc.title = info.title;
     doc.description = info.description;
