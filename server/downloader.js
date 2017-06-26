@@ -6,6 +6,11 @@ const Database = require('./database');
 
 class Downloader {
   static init(target) {
+    // Support home folder
+    if (target[0] === '~') {
+      target = path.join(process.env.HOME, target.slice(1));
+    }
+
     this.target = target || '../downloads';
     this.target = path.resolve(target);
 

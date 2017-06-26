@@ -5,7 +5,10 @@
     "request": "launch",
     "name": "Launch Program",
     "program": "${workspaceRoot}/server/main.js",
-    "cwd": "${workspaceRoot}/server"
+    "cwd": "${workspaceRoot}/server",
+    "args": [
+      "--downloads=~/Downloads/VideoGallery"
+    ]
   }, {
     "type": "node",
     "request": "attach",
