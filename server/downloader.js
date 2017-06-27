@@ -76,7 +76,7 @@ class Downloader {
       .filter(f => f.height !== null)
       .sort((a, b) => a.height - b.height)
       .pop();
-    const compatExts = compatSets.filter(s => s.indexOf(bestVideo.ext) !== -1);
+    const compatExts = compatSets.find(s => s.indexOf(bestVideo.ext) !== -1);
     const compatAudio = info.formats
       .filter(f => !f.height && compatExts.indexOf(f.ext) !== -1)
       .sort((a, b) => a.filesize - b.filesize)
