@@ -31,6 +31,8 @@ Use a touch screen, mouse, or [PowerMate Bluetooth](https://griffintechnology.co
 1. `brew services start mongodb`
 1. `npm install --prefix ~/VideoGallery https://github.com/endquote/VideoGallery`
 1. Run `~/VideoGallery/node_modules/video-gallery/scripts/mac/install-update-ytdl.sh` to automatically update youtube-dl daily
+1. Run `~/VideoGallery/node_modules/video-gallery/scripts/mac/install-config.sh` to set up the server config file
+1. `nano ~/.node/local.json` to edit the server config file as needed
 
 ### Windows
 
@@ -40,7 +42,9 @@ Use a touch screen, mouse, or [PowerMate Bluetooth](https://griffintechnology.co
 1. Install [ffmpeg](http://ffmpeg.org)
 1. Install [youtube-dl](http://rg3.github.io/youtube-dl/)
 1. `npm install --prefix C:\VideoGallery https://github.com/endquote/VideoGallery`
-1. Use Task Scheduler to run `youtube-dl --update` daily.
+1. Run `C:\VideoGallery\scripts\windows\install-update-ytdl.bat` to automatically update youtube-dl daily
+1. Run `C:\VideoGallery\scripts\windows\install-config.bat` to set up the server config file
+1. Edit `$HOMEPATH\local.json` to edit the server config file as needed
 
 ## Execution
 
