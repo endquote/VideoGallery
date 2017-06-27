@@ -6,11 +6,18 @@
   <string>com.endquote.launch-videogallery</string>
   <key>ProgramArguments</key>
 	<array>
-		<string>sh</string>
+		<string>/bin/bash</string>
 		<string>-c</string>
 		<string>~/VideoGallery/node_modules/video-gallery/scripts/mac/start-kiosk.sh</string>
 	</array>
   <key>RunAtLoad</key>
   <true/>
+  <key>LaunchOnlyOnce</key>
+  <true/>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+  </dict>
 </dict>
 </plist>
