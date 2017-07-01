@@ -24,9 +24,9 @@ class WebServer {
 
     // Set up authorization, but let localhost through.
     app.use(conditional(
-      (req, res, next) => {
+      (req) => {
         const authConfiged = username !== '' || password !== '';
-        const isRemote = ['127.0.0.1', '::ffff:127.0.0.1', '::1'].indexOf(req.connection.remoteAddress) === -1
+        const isRemote = ['127.0.0.1', '::ffff:127.0.0.1', '::1'].indexOf(req.connection.remoteAddress) === -1;
         return authConfiged && isRemote;
       },
       basicAuth({
@@ -35,7 +35,8 @@ class WebServer {
         realm: 'Imb4T3st4px',
       })));
 
-    const httpServer = this.httpServer = http.Server(app);
+    const httpServer = http.Server(app);
+    this.httpServer = httpServer;
     httpServer.listen(port, () => {
       console.log(`HTTP server listening on ${port}`);
     });
