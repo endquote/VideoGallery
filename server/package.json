@@ -17,14 +17,15 @@
     "nodemon": "^1.11.0"
   },
   "dependencies": {
-    "body-parser": "^1.17.1",
-    "config": "1.26.1",
-    "express": "^4.15.2",
-    "express-basic-auth": "^1.0.1",
+    "body-parser": "^1.17.2",
+    "config": "^1.26.1",
+    "express": "^4.15.3",
+    "express-basic-auth": "^1.1.1",
+    "express-conditional-middleware": "^2.0.0",
     "fs-extra-promise": "^1.0.1",
-    "mongoose": "^4.9.3",
-    "noble": "1.8.1",
-    "reload": "^1.1.1",
+    "mongoose": "^4.11.0",
+    "noble": "^1.8.1",
+    "reload": "^1.1.7",
     "socket.io": "^2.0.3"
   }
 }
