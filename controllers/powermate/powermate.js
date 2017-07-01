@@ -15,18 +15,18 @@ class PowerMate {
     this.LED_MAX = 191;
 
     this.KNOB_ACTIONS = {
-      101: 'release',
-      102: 'holdrelease',
-      103: 'anticlockwise',
-      104: 'clockwise',
-      105: 'holdanticlockwise',
-      112: 'holdclockwise',
-      114: 'hold1',
-      115: 'hold2',
-      116: 'hold3',
-      117: 'hold4',
-      118: 'hold5',
-      119: 'hold6',
+      101: 'nextMode', // release
+      102: '', // holdrelease
+      103: 'seekBack', // anticlockwise
+      104: 'seekForward', // clockwise
+      105: '', // holdanticlockwise
+      112: '', // holdclockwise
+      114: '', // 'hold1',
+      115: '', // 'hold2',
+      116: '', // 'hold3',
+      117: '', // 'hold4',
+      118: '', // 'hold5',
+      119: '', // 'hold6',
     };
 
     // Reference to the actual device
@@ -84,7 +84,7 @@ class PowerMate {
 
     console.log('PowerMate connected');
     this.connected = true;
-    SocketServer.emit('controller', { status: 'connected' });
+    SocketServer.emit('controller', { status: 'connected', type: 'radial' });
 
     // Discover services and characteristics (filter serial data service)
     const serviceIds = [this.SERVICE_UUID];
@@ -117,7 +117,7 @@ class PowerMate {
     const value = parseInt(data.toString('hex'), 16);
     console.log(`PowerMate battery: ${value}`);
     this.battery = value;
-    SocketServer.emit('controller', { battery: value });
+    SocketServer.emit('controller', { battery: value / 100 });
   }
 
   static _onKnobRead(data) {

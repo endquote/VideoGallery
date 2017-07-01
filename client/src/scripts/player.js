@@ -158,15 +158,16 @@ class PlayerPage {
   static _getUpdates(videos) {
     const player = document.getElementsByTagName('video')[0];
 
-    this.socket = io.connect();
+    this.videoSocket = io.connect();
+    this.controllerSocket = io.connect('http://localhost:8181');
 
     // Handle events from the hardware controller.
-    this.socket.on('controller', (data) => {
-      if (data.knob === 'clockwise') {
+    this.controllerSocket.on('controller', (data) => {
+      if (data.knob === 'seekForward') {
         player.currentTime += this.knobRate;
-      } else if (data.knob === 'anticlockwise') {
+      } else if (data.knob === 'seekBack') {
         player.currentTime -= this.knobRate;
-      } else if (data.knob === 'release') {
+      } else if (data.knob === 'nextMode') {
         document.getElementById('click-target').dispatchEvent(new Event('pointerup'));
       } else if (data.status === 'connected') {
         PlayerPage.app.controllerConnected = true;
@@ -178,7 +179,7 @@ class PlayerPage {
     });
 
     // Update the selected video
-    this.socket.on('videoSelected', (video) => {
+    this.videoSocket.on('videoSelected', (video) => {
       if (!video) {
         PlayerPage.app.selectedVideo = null;
         return;
@@ -195,12 +196,12 @@ class PlayerPage {
     });
 
     // Get new videos
-    this.socket.on('videoAdded', (video) => {
+    this.videoSocket.on('videoAdded', (video) => {
       videos.push(video);
     });
 
     // Remove videos
-    this.socket.on('videoRemoved', (video) => {
+    this.videoSocket.on('videoRemoved', (video) => {
       const index = videos.findIndex(v => v._id === video._id);
       if (index !== -1) {
         videos.splice(index, 1);
@@ -211,7 +212,7 @@ class PlayerPage {
     });
 
     // Update existing videos
-    this.socket.on('videoUpdated', (video) => {
+    this.videoSocket.on('videoUpdated', (video) => {
       const index = videos.findIndex(v => v._id === video._id);
       if (index === -1) {
         return;
@@ -220,7 +221,7 @@ class PlayerPage {
 
       // If a video was loaded and nothing is selected, select the new one
       if (video.selected || (video.loaded && !PlayerPage.app.selectedVideo._id)) {
-        this.socket.emit('selectVideo', { _id: video._id });
+        this.videoSocket.emit('selectVideo', { _id: video._id });
       }
     });
   }
@@ -228,7 +229,7 @@ class PlayerPage {
   // Select another random video
   static nextVideo() {
     if (!PlayerPage.app.videos.length) {
-      this.socket.emit('selectVideo', null);
+      this.videoSocket.emit('selectVideo', null);
       return;
     }
 
@@ -243,7 +244,7 @@ class PlayerPage {
     }
 
     const random = unplayed[Math.floor(Math.random() * unplayed.length)];
-    this.socket.emit('selectVideo', { _id: random._id });
+    this.videoSocket.emit('selectVideo', { _id: random._id });
   }
 }
 

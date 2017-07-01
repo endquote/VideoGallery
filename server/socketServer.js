@@ -9,7 +9,7 @@ class SocketServer {
     console.log('Socket server listening');
 
     this.io.on('connection', (socket) => {
-      console.log('Socket connected');
+      console.log('UI socket connected');
 
       // Send events to the client when anything on the database changes.
       Database.on('videoAdded', doc => socket.emit('videoAdded', doc));

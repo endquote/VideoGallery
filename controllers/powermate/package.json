@@ -1,9 +1,9 @@
 {
-  "name": "video-gallery-server",
+  "name": "video-gallery-controllers",
   "version": "1.0.0",
   "main": "main.js",
   "author": "Josh Santangelo <josh@endquote.com>",
-  "description": "Server for the Video Gallery application.",
+  "description": "Hardware controllers for the Video Gallery application.",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -17,14 +17,8 @@
     "nodemon": "^1.11.0"
   },
   "dependencies": {
-    "body-parser": "^1.17.2",
     "config": "^1.26.1",
-    "express": "^4.15.3",
-    "express-basic-auth": "^1.1.1",
-    "express-conditional-middleware": "^2.0.0",
-    "fs-extra-promise": "^1.0.1",
-    "mongoose": "^4.11.0",
-    "reload": "^1.1.7",
+    "noble": "^1.8.1",
     "socket.io": "^2.0.3"
   }
 }
