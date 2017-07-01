@@ -48,7 +48,7 @@
 
     <controller-status inline-template v-bind:connected="controllerConnected" v-bind:battery="controllerBattery">
       <div id="controller-status" v-bind:class="{ shown: connected }">
-        <div id="controller-battery" v-bind:style="'width:' + battery + '%'"></div>
+        <div id="controller-battery" v-bind:style="'width:' + (battery * 100) + '%'"></div>
       </div>
     </controller-status>
 
