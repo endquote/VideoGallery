@@ -6,6 +6,8 @@ Downloads videos from the web and plays them in a random order.
 * [Controls](#features)
 * [Mac Setup](#mac)
 * [Windows Setup](#windows)
+* [Configuration](#config)
+* [Development](#development)
 
 <a name="features"></a>
 # Features
@@ -39,7 +41,7 @@ Use a touch screen, mouse, or [PowerMate Bluetooth](https://griffintechnology.co
 1. `brew services start mongodb`
 1. `npm install --prefix ~/VideoGallery https://github.com/endquote/VideoGallery`
 1. Run `~/VideoGallery/node_modules/video-gallery/scripts/mac/install-config.sh` to set up the server config file
-1. `nano ~/.node/local.json` to edit the server config file as needed
+1. `nano ~/.VideoGallery/local.json` to [edit the server config file](#config) as needed
 
 ## Get Updates
 
@@ -84,7 +86,7 @@ These scripts are in `~/VideoGallery/node_modules/video-gallery/scripts/mac/`.
 1. `npm install --prefix C:\VideoGallery https://github.com/endquote/VideoGallery`
 1. Run `C:\VideoGallery\scripts\windows\install-update-ytdl.bat` to automatically update youtube-dl daily
 1. Run `C:\VideoGallery\scripts\windows\install-config.bat` to set up the server config file
-1. Edit `$HOMEPATH\local.json` to edit the server config file as needed
+1. Edit `$HOMEPATH\local.json` to [edit the server config file](#config) as needed
 
 ## Get Updates
 
@@ -113,6 +115,12 @@ Additional steps to run things at startup.
 * `install-powermate-startup.sh` - Automatically start the Powermate service on login.
 * `install-browser-startup.sh` - Automatically start the browser in kiosk mode on login.
 
-## Development
+<a name="config"></a>
+# Configuration File
+
+Document me.
+
+<a name="development"></a>
+# Development
 
 The project is set up to take advantage of the [VS Code](https://code.visualstudio.com) debugger and extensions.
