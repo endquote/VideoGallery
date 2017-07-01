@@ -2,18 +2,24 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>PATH</key>
+		<string>/usr/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+	</dict>
 	<key>Label</key>
 	<string>com.endquote.videogallery.start-browser</string>
 	<key>ProgramArguments</key>
 	<array>
-		<string>open</string>
-		<string>-a</string>
-		<string>Google Chrome</string>
-		<string>--args</string>
-		<string>--kiosk</string>
-		<string>--app=http://localhost:8080/</string>
+		<string>bash</string>
+		<string>-c</string>
+		<string>~/VideoGallery/node_modules/video-gallery/scripts/mac/start-browser.sh</string>
 	</array>
 	<key>RunAtLoad</key>
 	<true/>
+	<key>StandardErrorPath</key>
+	<string>/tmp/com.endquote.videogallery.start-browser.err</string>
+	<key>StandardOutPath</key>
+	<string>/tmp/com.endquote.videogallery.start-browser.out</string>
 </dict>
 </plist>
