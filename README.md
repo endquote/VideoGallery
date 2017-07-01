@@ -75,6 +75,8 @@ These scripts are in `~/VideoGallery/node_modules/video-gallery/scripts/mac/`.
 
 To disable these behaviors later, remove the relevant files from `~/Library/LaunchAgents`.
 
+To restart the server, such as after getting updates, run `restart-server.sh`.
+
 <a name="windows"></a>
 # Windows Setup
 
