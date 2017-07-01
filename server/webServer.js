@@ -1,5 +1,6 @@
 const express = require('express');
 const basicAuth = require('express-basic-auth');
+const conditional = require('express-conditional-middleware');
 const bodyParser = require('body-parser');
 const http = require('http');
 const path = require('path');
@@ -21,13 +22,18 @@ class WebServer {
     const app = express();
     app.use(bodyParser.json());
 
-    if (username !== '' || password !== '') {
-      app.use(basicAuth({
+    // Set up authorization, but let localhost through.
+    app.use(conditional(
+      (req, res, next) => {
+        const authConfiged = username !== '' || password !== '';
+        const isRemote = ['127.0.0.1', '::ffff:127.0.0.1', '::1'].indexOf(req.connection.remoteAddress) === -1
+        return authConfiged && isRemote;
+      },
+      basicAuth({
         authorizer: (u, p) => u === username && p === password,
         challenge: true,
         realm: 'Imb4T3st4px',
-      }));
-    }
+      })));
 
     const httpServer = this.httpServer = http.Server(app);
     httpServer.listen(port, () => {
