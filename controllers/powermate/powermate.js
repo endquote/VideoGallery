@@ -116,8 +116,8 @@ class PowerMate {
   static _onBatteryRead(data) {
     const value = parseInt(data.toString('hex'), 16);
     console.log(`PowerMate battery: ${value}`);
-    this.battery = value;
-    SocketServer.emit('controller', { battery: value / 100 });
+    this.battery = value / 100;
+    SocketServer.emit('controller', { battery: value });
   }
 
   static _onKnobRead(data) {
