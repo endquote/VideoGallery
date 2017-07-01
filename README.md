@@ -69,9 +69,11 @@ Additional steps to run things at startup.
 These scripts are in `~/VideoGallery/node_modules/video-gallery/scripts/mac/`.
 
 * `install-update-ytdl.sh` - Automatically update youtube-dl daily.
-* `install-server-startup.sh` - Automatically start the server on login.
-* `install-powermate-startup.sh` - Automatically start the Powermate service on login.
-* `install-browser-startup.sh` - Automatically start the browser in kiosk mode on login.
+* `install-start-server.sh` - Automatically start the server on login.
+* `install-start-powermate.sh` - Automatically start the Powermate service on login.
+* `install-start-browser.sh` - Automatically start the browser in kiosk mode on login.
+
+To disable these behaviors later, remove the relevant files from `~/Library/LaunchAgents`.
 
 <a name="windows"></a>
 # Windows Setup

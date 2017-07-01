@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>local.com.endquote.videogallery.start-browser</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>open</string>
+		<string>-a</string>
+		<string>Google Chrome</string>
+		<string>--args</string>
+		<string>--kiosk</string>
+		<string>--app=http://localhost:8080/</string>
+	</array>
+	<key>RunAtLoad</key>
+	<true/>
+</dict>
+</plist>
