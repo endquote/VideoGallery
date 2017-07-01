@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>Label</key>
-	<string>local.com.endquote.videogallery.start-browser</string>
+	<string>com.endquote.videogallery.start-browser</string>
 	<key>ProgramArguments</key>
 	<array>
 		<string>open</string>
