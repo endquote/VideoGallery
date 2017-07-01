@@ -2,14 +2,21 @@
 
 Downloads videos from the web and plays them in a random order.
 
-## Features
+* [Features](#features)
+* [Controls](#features)
+* [Mac Setup](#mac)
+* [Windows Setup](#windows)
+
+<a name="features"></a>
+# Features
 
 * Support for videos from YouTube, Vimeo, and [lots of other places](http://rg3.github.io/youtube-dl/supportedsites.html)
 * Web-based admin page to add/remove/select videos
 * Web-based video player page
 * Overlay with video info, QR code link to video page
 
-### Controls
+<a name="controls"></a>
+# Controls
 
 Use a touch screen, mouse, or [PowerMate Bluetooth](https://griffintechnology.com/us/powermate-bluetooth) (Mac only) to control playback.
 
@@ -20,9 +27,10 @@ Use a touch screen, mouse, or [PowerMate Bluetooth](https://griffintechnology.co
 * Double-tap to play a different video
 * Rotate PowerMate to change playback position
 
-## Installation
+<a name="mac"></a>
+# Mac Setup
 
-### Mac
+## Installation
 
 1. Install [Chrome](https://www.google.com/chrome/)
 1. Install [Xcode](https://itunes.apple.com/us/app/xcode/id497799835?mt=12), launch it once to finish install
@@ -30,11 +38,43 @@ Use a touch screen, mouse, or [PowerMate Bluetooth](https://griffintechnology.co
 1. `brew install node imagemagick mongodb ffmpeg youtube-dl`
 1. `brew services start mongodb`
 1. `npm install --prefix ~/VideoGallery https://github.com/endquote/VideoGallery`
-1. Run `~/VideoGallery/node_modules/video-gallery/scripts/mac/install-update-ytdl.sh` to automatically update youtube-dl daily
 1. Run `~/VideoGallery/node_modules/video-gallery/scripts/mac/install-config.sh` to set up the server config file
 1. `nano ~/.node/local.json` to edit the server config file as needed
 
-### Windows
+## Get Updates
+
+`npm install --prefix ~/VideoGallery https://github.com/endquote/VideoGallery`
+
+## Execution
+
+Startup scripts are in `~/VideoGallery/node_modules/video-gallery/scripts/mac/`.
+
+* `start-server.sh` - Run the database and web servers.
+* `start-server-dev.sh` - Run the database and web servers in a development context, with hot reloading of files and such.
+* `start-powermate.sh` - Run the Powermate controller service.
+
+When the sever is running, the web interfaces are at:
+
+* Video Player: [http://localhost:8080](http://localhost:8080)
+* Admin: [http://localhost:8080/admin](http://localhost:8080/admin)
+
+## Kiosk Setup
+
+Additional steps to run things at startup.
+
+* Set up an [automatic login](https://support.apple.com/en-us/HT201476).
+
+These scripts are in `~/VideoGallery/node_modules/video-gallery/scripts/mac/`.
+
+* `install-update-ytdl.sh` - Automatically update youtube-dl daily.
+* `install-server-startup.sh` - Automatically start the server on login.
+* `install-powermate-startup.sh` - Automatically start the Powermate service on login.
+* `install-browser-startup.sh` - Automatically start the browser in kiosk mode on login.
+
+<a name="windows"></a>
+# Windows Setup
+
+## Installation
 
 1. Install [Chrome](https://www.google.com/chrome/)
 1. Install [node.js](https://nodejs.org)
@@ -46,38 +86,32 @@ Use a touch screen, mouse, or [PowerMate Bluetooth](https://griffintechnology.co
 1. Run `C:\VideoGallery\scripts\windows\install-config.bat` to set up the server config file
 1. Edit `$HOMEPATH\local.json` to edit the server config file as needed
 
+## Get Updates
+
+`npm install --prefix C:\VideoGallery https://github.com/endquote/VideoGallery`
+
 ## Execution
 
-See the `scripts` folder for startup scripts for Mac and Windows.
+Startup scripts are in `C:\VideoGallery\scripts\windows\`.
 
-* `start` to just start the server.
-* `start-dev` to start the server and build the client, with automatic restarting and rebuilding for development.
-* `start-kiosk` to run the server, build the client, and launch Chrome in kiosk mode.
+* `start-server.bat` - Run the database and web servers.
+* `start-server-dev.bat` - Run the database and web servers in a development context, with hot reloading of files and such.
+* `start-powermate.bat` - Run the Powermate controller service.
 
 When the sever is running, the web interfaces are at:
 
 * Video Player: [http://localhost:8080](http://localhost:8080)
 * Admin: [http://localhost:8080/admin](http://localhost:8080/admin)
 
-## Updates
+## Kiosk Setup
 
-* Mac: `npm install --prefix ~/VideoGallery https://github.com/endquote/VideoGallery`
-* Windows: `npm install --prefix C:\VideoGallery https://github.com/endquote/VideoGallery`
+Additional steps to run things at startup.
 
-## Run on Startup
-
-### Mac
-
-1. Set up an [automatic login](https://support.apple.com/en-us/HT201476).
-1. Run `~/VideoGallery/node_modules/video-gallery/scripts/mac/install-kiosk-startup.sh`.
-    * In theory. Currently not working. `launchd` is a MF.
-
-### Windows
-
-1. Set up an [automatic login](https://technet.microsoft.com/en-us/library/ee872306.aspx).
-1. Press `Win+R`
-1. Type `shell:startup`
-1. Place a shortcut to `C:\VideoGallery\scripts\windows\start-kiosk.bat` in the folder.
+* Set up an [automatic login](https://support.apple.com/en-us/HT201476).
+* `install-update-ytdl.sh` - Automatically update youtube-dl daily.
+* `install-server-startup.sh` - Automatically start the server on login.
+* `install-powermate-startup.sh` - Automatically start the Powermate service on login.
+* `install-browser-startup.sh` - Automatically start the browser in kiosk mode on login.
 
 ## Development
 
