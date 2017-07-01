@@ -18,7 +18,6 @@ class PlayerPage {
         const videos = res.body;
         this._buildApp(videos);
         this._getUpdates(videos);
-        this.nextVideo();
       });
   }
 
@@ -159,23 +158,10 @@ class PlayerPage {
     const player = document.getElementsByTagName('video')[0];
 
     this.videoSocket = io.connect();
-    this.controllerSocket = io.connect('http://localhost:8181');
 
-    // Handle events from the hardware controller.
-    this.controllerSocket.on('controller', (data) => {
-      if (data.knob === 'seekForward') {
-        player.currentTime += this.knobRate;
-      } else if (data.knob === 'seekBack') {
-        player.currentTime -= this.knobRate;
-      } else if (data.knob === 'nextMode') {
-        document.getElementById('click-target').dispatchEvent(new Event('pointerup'));
-      } else if (data.status === 'connected') {
-        PlayerPage.app.controllerConnected = true;
-      } else if (data.status === 'disconnected') {
-        PlayerPage.app.controllerConnected = false;
-      } else if (data.battery) {
-        PlayerPage.app.controllerBattery = data.battery;
-      }
+    // Some tuner has to pick the first video.
+    this.videoSocket.on('connect', () => {
+      this.selectFirstVideo = setTimeout(this.nextVideo.bind(this), 1000);
     });
 
     // Update the selected video
@@ -184,6 +170,8 @@ class PlayerPage {
         PlayerPage.app.selectedVideo = null;
         return;
       }
+
+      clearTimeout(this.selectFirstVideo);
 
       if (PlayerPage.app.selectedVideo && PlayerPage.app.selectedVideo._id && PlayerPage.app.selectedVideo._id === video._id) {
         // If it's the same video (like if there's only one video in the list), just replay
@@ -222,6 +210,25 @@ class PlayerPage {
       // If a video was loaded and nothing is selected, select the new one
       if (video.selected || (video.loaded && !PlayerPage.app.selectedVideo._id)) {
         this.videoSocket.emit('selectVideo', { _id: video._id });
+      }
+    });
+
+    this.controllerSocket = io.connect('http://localhost:8181');
+
+    // Handle events from the hardware controller.
+    this.controllerSocket.on('controller', (data) => {
+      if (data.knob === 'seekForward') {
+        player.currentTime += this.knobRate;
+      } else if (data.knob === 'seekBack') {
+        player.currentTime -= this.knobRate;
+      } else if (data.knob === 'nextMode') {
+        document.getElementById('click-target').dispatchEvent(new Event('pointerup'));
+      } else if (data.status === 'connected') {
+        PlayerPage.app.controllerConnected = true;
+      } else if (data.status === 'disconnected') {
+        PlayerPage.app.controllerConnected = false;
+      } else if (data.battery) {
+        PlayerPage.app.controllerBattery = data.battery;
       }
     });
   }

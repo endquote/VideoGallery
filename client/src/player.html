@@ -21,7 +21,7 @@
 
     <video-player inline-template v-bind:video="selectedVideo" v-bind:play-sound="playSound" v-on:progress-changed="onProgressChanged">
       <div id="video-player">
-        <video autoplay v-bind:src="'/content/video/' + video._id" v-on:loadstart="onLoadStart" v-on:timeupdate="onTimeUpdate" v-on:durationchange="onTimeUpdate" v-on:ended="onEnded"></video>
+        <video autoplay v-bind:src="(video && video._id ? '/content/video/' + video._id : '')" v-on:loadstart="onLoadStart" v-on:timeupdate="onTimeUpdate" v-on:durationchange="onTimeUpdate" v-on:ended="onEnded"></video>
       </div>
     </video-player>
 
