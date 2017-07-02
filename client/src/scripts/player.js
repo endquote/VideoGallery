@@ -102,7 +102,7 @@ class PlayerPage {
           props: ['video', 'showInfo'],
           computed: {
             qrcode() {
-              return this.video._id ? new QRious({ value: this.video.url }).toDataURL() : '';
+              return this.video._id ? new QRious({ size: 300, value: this.video.url }).toDataURL() : '';
             },
           },
           filters: {

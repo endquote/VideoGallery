@@ -2,8 +2,9 @@
 
 onepxwide = 0.05208333333vw
 onepxhigh = 0.09259259259vh
-info-margin = 30px
-qr-size = 100px
+info-margin-w = 30 * onepxwide
+info-margin-h = 30 * onepxhigh
+qr-size = 5vw
 
 body
     user-select none
@@ -38,45 +39,53 @@ body
 
 #video-qr-code
     position absolute
-    top info-margin
-    right info-margin
+    top info-margin-h
+    right info-margin-w
+    width qr-size
+    height qr-size
 
 #video-info-content-container
     position absolute
-    left info-margin
-    top @left
-    right @left * 2 + qr-size
-    bottom @left
+    left info-margin-w
+    top info-margin-h
+    right (info-margin-w * 2) + qr-size
+    bottom info-margin-h
 
 #video-info-content
     overflow hidden
     column-count 3
-    column-gap (info-margin / 2)
+    column-gap (info-margin-w / 2)
     column-fill auto
     height 100%
 
 #video-info-author-title
     column-span all
-    margin-bottom (info-margin / 2)
+    margin-bottom (info-margin-h / 2)
 
 #video-info-title
+    font-weight normal
     text-overflow ellipsis
     white-space nowrap
     overflow hidden
     margin 0
+    font-size 3vh
 
 #video-info-author
     float right
     margin 0
-    margin-left info-margin
+    margin-left info-margin-w
     margin-top .3em
     max-width 25%
     text-overflow ellipsis
     white-space nowrap
     overflow hidden
+    font-size 2vh
+    font-weight normal
     
 #video-info-description
+    font-weight normal
     margin 0
+    font-size 1.5vh
 
 #video-info.shown
     bottom 0
