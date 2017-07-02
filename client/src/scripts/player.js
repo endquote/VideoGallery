@@ -164,6 +164,11 @@ class PlayerPage {
       this.selectFirstVideo = setTimeout(this.nextVideo.bind(this), 1000);
     });
 
+    // Reload on reconnect, like when new changes are deployed.
+    this.videoSocket.on('reconnect', () => {
+      window.location.reload(true);
+    });
+
     // Update the selected video
     this.videoSocket.on('videoSelected', (video) => {
       if (!video) {

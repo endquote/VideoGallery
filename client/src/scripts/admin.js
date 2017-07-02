@@ -64,6 +64,11 @@ class AdminPage {
   static _getUpdates(videos) {
     this.socket = io.connect();
 
+    // Reload on reconnect, like when new changes are deployed.
+    this.socket.on('reconnect', () => {
+      window.location.reload(true);
+    });
+
     // Add new videos to the beginning of the list.
     this.socket.on('videoAdded', (video) => {
       videos.unshift(video);
