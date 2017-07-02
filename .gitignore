@@ -6,3 +6,4 @@ bin
 *.backup
 **/etc
 **/dist
+local.json

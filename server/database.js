@@ -6,7 +6,9 @@ class Database {
   static init(url = 'mongodb://localhost/') {
     url += 'videoGallery';
     mongoose.Promise = global.Promise;
-    mongoose.connect(url).catch(() => console.error('Database connection failed'));
+    mongoose.connect(url, { useMongoClient: true })
+      .then(() => console.log('Database connected'))
+      .catch(() => console.error('Database connection failed'));
 
     this.emitter = new EventEmitter();
     this.emitter.setMaxListeners(0);
