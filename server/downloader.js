@@ -20,7 +20,7 @@ class Downloader {
     this.infoCmd = 'youtube-dl --dump-json --playlist-items 1';
     this.downloadCmd = 'youtube-dl --write-thumbnail --no-progress --playlist-items 1 -o';
 
-    this.thumbnailWidth = 200;
+    this.thumbnailWidth = 600;
 
     fs.ensureDirSync(this.target);
     Database.on('videoAdded', doc => this.addVideo(doc));

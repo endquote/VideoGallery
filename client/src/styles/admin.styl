@@ -5,38 +5,49 @@
   margin 0
   padding 0
 
-.video-item
-  white-space nowrap
+h1
   text-overflow ellipsis
   overflow hidden
-  padding .5em
 
-.video-item img
-  vertical-align bottom
+.video-item
+  white-space nowrap
+  overflow hidden
+  float left
+  width 48vw
+  padding 1vw
+  outline 2px solid transparent
 
-.video-item:nth-child(odd)
-  background-color #CCC
+.video-item .video-thumbnail
+  width 100%
+  height 28vw
+  background-size cover
+  background-position center center
+  position relative
 
-.video-item:nth-child(even)
-  background-color #EEE
+.video-delete
+  right 0
+  bottom 0
+  position absolute
+  text-align center
+  background-color white
+  padding .8rem
 
 .video-item.selected 
-  outline 2px dashed black;
+  outline 2px solid black
 
 button
   height 50px
   width 50px
   background-color white
   border none
-  margin-left 10px
   font-size 1.8em
 
 a.link-source
-  margin-left 10px
+  text-overflow ellipsis
   color black
 
 input
-  font-family font-family
+  font-family font-body
   font-size 2em
   width 100%
   
