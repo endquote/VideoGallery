@@ -69,7 +69,7 @@ class Downloader {
     // that. This might be unnecessary in future ytdl versions:
     // https://github.com/rg3/youtube-dl/issues/10226
     const compatSets = [
-      ['mp3', 'mp4', 'm4a', 'm4p', 'm4b', 'm4r', 'm4v', 'ismv', 'isma'],
+      ['mp3', 'mp4', 'm4a', 'm4p', 'm4b', 'm4r', 'm4v', 'ismv', 'isma', 'mov'],
       ['webm'],
     ];
     const bestVideo = info.formats
@@ -77,10 +77,10 @@ class Downloader {
       .sort((a, b) => a.height - b.height)
       .pop();
     const compatExts = compatSets.find(s => s.indexOf(bestVideo.ext) !== -1);
-    const compatAudio = info.formats
+    const compatAudio = compatExts ? info.formats
       .filter(f => !f.height && compatExts.indexOf(f.ext) !== -1)
       .sort((a, b) => a.filesize - b.filesize)
-      .pop();
+      .pop() : null;
 
     doc.created = new Date();
     if (info.upload_date) {
