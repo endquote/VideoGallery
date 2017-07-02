@@ -27,8 +27,8 @@
     "gulp-uglify": "^3.0.0",
     "gulp-watch": "^4.3.11",
     "pump": "^1.0.2",
-    "uglify-es": "3.0.19",
-    "uglify-js": "3.0.19",
+    "uglify-es": "3.0.23",
+    "uglify-js": "3.0.23",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0"
   },
