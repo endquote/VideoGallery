@@ -1,6 +1,7 @@
 @import "main.styl"
 
-progress-height = 1vh
+onepxwide = 0.05208333333vw
+onepxhigh = 0.09259259259vh
 info-margin = 30px
 qr-size = 100px
 
@@ -24,13 +25,13 @@ body
     left 0
     right 0
     bottom 0
-    height 25vh + progress-height
+    height 25vh
 
 .video-info-toggle-enter-active, .video-info-toggle-leave-active
     transition all .2s ease-out
 
 .video-info-toggle-enter, .video-info-toggle-leave-to
-    bottom -25vh - progress-height
+    bottom -25vh - onepxwide
 
 .video-info-toggle-enter-to, .video-info-toggle-leave
     bottom 0
@@ -82,29 +83,28 @@ body
 
 #video-progress
     background-color white
+    border-bottom onepxhigh solid black
     position absolute
     left 0
     bottom 0
-    height progress-height
-    opacity .5
+    height onepxhigh
 
 #controller-status
     position absolute
-    right 0
-    bottom 0px
-    left 0px
-    width 10px
-    height (progress-height / 2)
+    left 0
+    bottom 0
+    width onepxwide * 10
+    height onepxhigh
+    border-bottom onepxhigh solid white
     background-color black
     visibility hidden
 
+#controller-status.lowbatt
+    border-bottom onepxhigh solid black
+    background-color red
+
 #controller-status.shown
     visibility visible
-
-#controller-battery
-    height 100%
-    width 0
-    background-color white
 
 #click-target
     background-color transparent
