@@ -8,6 +8,7 @@
     "**/node_modules": true,
     "**/dist": true,
     "**/*.backup": true,
-    "output": true
+    "output": true,
+    "**/**/package-lock.json": true
   }
 }
