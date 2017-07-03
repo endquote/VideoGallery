@@ -16,6 +16,6 @@
     "js-beautify": "^1.6.8"
   },
   "scripts": {
-    "postinstall": "echo %CD% && npm --version && node --version"
+    "postinstall": "npm --prefix ./server install ./server && npm --prefix ./client install ./client"
   }
 }
