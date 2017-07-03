@@ -15,5 +15,7 @@
     "eslint-plugin-import": "^2.2.0",
     "js-beautify": "^1.6.8"
   },
-  "scripts": {}
+  "scripts": {
+    "postinstall": "echo %CD%"
+  }
 }
