@@ -26,7 +26,7 @@ When the sever is running, the web interfaces are at:
 * Video Player: [http://localhost:8080](http://localhost:8080)
 * Admin: [http://localhost:8080/admin](http://localhost:8080/admin)
 
-...but the port can be changed with the [config file](#config).
+...but the port can be changed with the [config file](config.md).
 
 ## Kiosk Setup
 
