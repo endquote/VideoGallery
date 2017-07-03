@@ -88,7 +88,7 @@ To restart the server, such as after getting updates, run `restart-server.sh`.
 1. Install [youtube-dl](http://rg3.github.io/youtube-dl/)
 1. Install [mongodb](https://www.mongodb.com), and [set up the service](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/#configure-a-windows-service-for-mongodb-community-edition)
 1. `npm install --prefix C:\VideoGallery https://github.com/endquote/VideoGallery`
-1. Run `C:\VideoGallery\scripts\windows\install-config.bat` to set up the server config file
+1. Run `C:\VideoGallery\node_modules\video-gallery\scripts\windows\install-config.bat` to set up the server config file
 1. [Edit the server config file](#config) in your home folder at `.VideoGallery\local.json` as needed
 
 ## Get Updates
@@ -97,11 +97,10 @@ To restart the server, such as after getting updates, run `restart-server.sh`.
 
 ## Execution
 
-Startup scripts are in `C:\VideoGallery\scripts\windows\`.
+Startup scripts are in `C:\VideoGallery\node_modules\video-gallery\scripts\windows`.
 
 * `start-server.bat` - Run the database and web servers.
 * `start-server-dev.bat` - Run the database and web servers in a development context, with hot reloading of files and such.
-* `start-powermate.bat` - Run the Powermate controller service.
 
 When the sever is running, the web interfaces are at:
 

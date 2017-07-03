@@ -52,6 +52,9 @@ class PlayerPage {
 
         // Cycle through every combination of info/audio.
         onPlayModeChanged() {
+          if (!this.selectedVideo) {
+            return;
+          }
           if (!this.showInfo && !this.playSound) {
             this.showInfo = true;
           } else if (this.showInfo && !this.playSound) {

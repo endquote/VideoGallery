@@ -3,16 +3,20 @@
   "configurations": [{
     "type": "node",
     "request": "launch",
-    "name": "Launch Program",
+    "name": "server - mac",
     "program": "${workspaceRoot}/server/main.js",
     "cwd": "${workspaceRoot}/server",
-    "args": [
-      "--downloads=~/Downloads/VideoGallery"
-    ]
+    "env": {
+      "NODE_CONFIG_DIR": "~/VideoGallery"
+    }
   }, {
     "type": "node",
-    "request": "attach",
-    "name": "Attach to Process",
-    "port": 5858
+    "request": "launch",
+    "name": "server - win",
+    "program": "${workspaceRoot}/server/main.js",
+    "cwd": "${workspaceRoot}/server",
+    "env": {
+      "NODE_CONFIG_DIR": "C:\\VideoGallery"
+    }
   }]
 }
