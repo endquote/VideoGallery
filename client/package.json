@@ -10,8 +10,8 @@
     "url": "git://github.com/endquote/VideoGallery.git"
   },
   "scripts": {
-    "dev": "node ./node_modules/gulp/bin/gulp.js dev",
-    "build": "node ./node_modules/gulp/bin/gulp.js",
+    "dev": "node node_modules/gulp/bin/gulp.js dev",
+    "build": "node node_modules/gulp/bin/gulp.js",
     "postinstall": "npm run build"
   },
   "devDependencies": {
