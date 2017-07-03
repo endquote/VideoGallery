@@ -7,7 +7,6 @@ Downloads videos from the web and plays them in a random order.
 * [Mac Setup](#mac)
 * [Windows Setup](#windows)
 * [Configuration](#config)
-* [Development](#development)
 
 <a name="features"></a>
 # Features
@@ -51,8 +50,7 @@ Use a touch screen, mouse, or [PowerMate Bluetooth](https://griffintechnology.co
 
 Startup scripts are in `~/VideoGallery/node_modules/video-gallery/scripts/mac/`.
 
-* `start-server.sh` - Run the database and web servers.
-* `start-server-dev.sh` - Run the database and web servers in a development context, with hot reloading of files and such.
+* `start-server.sh` - Run the application server.
 * `start-powermate.sh` - Run the Powermate controller service.
 
 When the sever is running, the web interfaces are at:
@@ -77,6 +75,15 @@ To disable these behaviors later, remove the relevant files from `~/Library/Laun
 
 To restart the server, such as after getting updates, run `restart-server.sh`.
 
+## Development
+
+Startup scripts are in `~/VideoGallery/node_modules/video-gallery/scripts/mac/`.
+
+* `start-server-dev.sh` - Run application server in a development context, restarting when code files changes.
+* `start-client-dev.sh` - Run a client development process with [Browser Sync](https://browsersync.io)
+
+The project is set up to take advantage of the [VS Code](https://code.visualstudio.com) debugger and extensions.
+
 <a name="windows"></a>
 # Windows Setup
 
@@ -100,7 +107,6 @@ To restart the server, such as after getting updates, run `restart-server.sh`.
 Startup scripts are in `C:\VideoGallery\node_modules\video-gallery\scripts\windows`.
 
 * `start-server.bat` - Run the database and web servers.
-* `start-server-dev.bat` - Run the database and web servers in a development context, with hot reloading of files and such.
 
 When the sever is running, the web interfaces are at:
 
@@ -117,12 +123,16 @@ Additional steps to run things at startup.
 * `install-powermate-startup.sh` - Automatically start the Powermate service on login.
 * `install-browser-startup.sh` - Automatically start the browser in kiosk mode on login.
 
+## Development
+
+Startup scripts are in `C:\VideoGallery\node_modules\video-gallery\scripts\windows`.
+
+* `start-server-dev.bat` - Run application server in a development context, restarting when code files changes.
+* `start-client-dev.bat` - Run a client development process with [Browser Sync](https://browsersync.io)
+
+The project is set up to take advantage of the [VS Code](https://code.visualstudio.com) debugger and extensions.
+
 <a name="config"></a>
 # Configuration File
 
 Document me.
-
-<a name="development"></a>
-# Development
-
-The project is set up to take advantage of the [VS Code](https://code.visualstudio.com) debugger and extensions.
