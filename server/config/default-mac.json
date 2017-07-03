@@ -1,0 +1,7 @@
+{
+  "port": 8080,
+  "downloads": "~/VideoGallery/downloads",
+  "database": "mongodb://localhost/",
+  "username": "username",
+  "password": "password"
+}

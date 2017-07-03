@@ -1,6 +1,6 @@
 {
   "port": 8080,
-  "downloads": "~/Downloads/VideoGallery",
+  "downloads": "C:\\VideoGallery\\downloads",
   "database": "mongodb://localhost/",
   "username": "username",
   "password": "password"

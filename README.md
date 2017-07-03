@@ -84,13 +84,12 @@ To restart the server, such as after getting updates, run `restart-server.sh`.
 
 1. Install [Chrome](https://www.google.com/chrome/)
 1. Install [node.js](https://nodejs.org)
-1. Install [mongodb](https://www.mongodb.com)
-1. Install [ffmpeg](http://ffmpeg.org)
+1. Install [ImageMagick](http://www.imagemagick.org/script/download.php#windows)
 1. Install [youtube-dl](http://rg3.github.io/youtube-dl/)
+1. Install [mongodb](https://www.mongodb.com), and [set up the service](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/#configure-a-windows-service-for-mongodb-community-edition)
 1. `npm install --prefix C:\VideoGallery https://github.com/endquote/VideoGallery`
-1. Run `C:\VideoGallery\scripts\windows\install-update-ytdl.bat` to automatically update youtube-dl daily
 1. Run `C:\VideoGallery\scripts\windows\install-config.bat` to set up the server config file
-1. Edit `$HOMEPATH\local.json` to [edit the server config file](#config) as needed
+1. [Edit the server config file](#config) in your home folder at `.VideoGallery\local.json` as needed
 
 ## Get Updates
 
