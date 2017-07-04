@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 
 class Database {
   static init(url = 'mongodb://localhost/') {
-    url += 'videoGallery';
+    url += 'rgbtv';
     mongoose.Promise = global.Promise;
     mongoose.connect(url, { useMongoClient: true })
       .then(() => console.log('Database connected'))

@@ -7,7 +7,7 @@
     "program": "${workspaceRoot}/server/main.js",
     "cwd": "${workspaceRoot}/server",
     "env": {
-      "NODE_CONFIG_DIR": "~/VideoGallery"
+      "NODE_CONFIG_DIR": "${env:HOME}/rgbtv"
     }
   }, {
     "type": "node",
@@ -16,7 +16,7 @@
     "program": "${workspaceRoot}/server/main.js",
     "cwd": "${workspaceRoot}/server",
     "env": {
-      "NODE_CONFIG_DIR": "C:\\VideoGallery"
+      "NODE_CONFIG_DIR": "C:\\rgbtv"
     }
   }]
 }

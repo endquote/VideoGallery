@@ -1,5 +1,5 @@
 {
-  "name": "video-gallery-controllers",
+  "name": "rgbtv-controllers",
   "version": "1.0.0",
   "main": "main.js",
   "author": "Josh Santangelo <josh@endquote.com>",
@@ -7,7 +7,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git://github.com/endquote/VideoGallery.git"
+    "url": "git://github.com/endquote/rgbtv.git"
   },
   "scripts": {
     "start": "node main.js",

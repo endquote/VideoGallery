@@ -1,2 +1,2 @@
-launchctl unload ~/Library/LaunchAgents/com.endquote.videogallery.start-server.plist 
-launchctl load ~/Library/LaunchAgents/com.endquote.videogallery.start-server.plist 
+launchctl unload ~/Library/LaunchAgents/tv.rgbtv.start-server.plist 
+launchctl load ~/Library/LaunchAgents/tv.rgbtv.start-server.plist 

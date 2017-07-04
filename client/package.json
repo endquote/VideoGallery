@@ -1,5 +1,5 @@
 {
-  "name": "video-gallery-client",
+  "name": "rgbtv-client",
   "version": "1.0.0",
   "main": "main.js",
   "author": "Josh Santangelo <josh@endquote.com>",
@@ -7,7 +7,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git://github.com/endquote/VideoGallery.git"
+    "url": "git://github.com/endquote/rgbtv.git"
   },
   "scripts": {
     "dev": "node node_modules/gulp/bin/gulp.js dev",

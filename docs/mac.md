@@ -7,17 +7,17 @@
 1. Install [Homebrew](https://brew.sh)
 1. `brew install node imagemagick mongodb ffmpeg youtube-dl`
 1. `brew services start mongodb`
-1. `npm install --prefix ~/VideoGallery https://github.com/endquote/VideoGallery`
-1. Run `~/VideoGallery/node_modules/video-gallery/scripts/mac/install-config.sh` to set up the server config file
-1. `nano ~/.VideoGallery/local.json` to [edit the server config file](config.md) as needed
+1. `npm install --prefix ~/rgbtv https://github.com/endquote/rgbtv`
+1. Run `~/rgbtv/node_modules/rgbtv/scripts/mac/install-config.sh` to set up the server config file
+1. `nano ~/.rgbtv/local.json` to [edit the server config file](config.md) as needed
 
 ## Get Updates
 
-`npm install --prefix ~/VideoGallery https://github.com/endquote/VideoGallery`
+`npm install --prefix ~/rgbtv https://github.com/endquote/rgbtv`
 
 ## Execution
 
-Startup scripts are in `~/VideoGallery/node_modules/video-gallery/scripts/mac/`.
+Startup scripts are in `~/rgbtv/node_modules/rgbtv/scripts/mac/`.
 
 * `start-server.sh` - Run the application server.
 * `start-powermate.sh` - Run the Powermate controller service.
@@ -35,7 +35,7 @@ Additional steps to run things at startup.
 
 * Set up an [automatic login](https://support.apple.com/en-us/HT201476).
 
-These scripts are in `~/VideoGallery/node_modules/video-gallery/scripts/mac/`.
+These scripts are in `~/rgbtv/node_modules/rgbtv/scripts/mac/`.
 
 * `install-update-ytdl.sh` - Automatically update youtube-dl daily.
 * `install-start-server.sh` - Automatically start the server on login.
@@ -48,7 +48,7 @@ To restart the server, such as after getting updates, run `restart-server.sh`.
 
 ## Development
 
-Development scripts are in `~/VideoGallery/node_modules/video-gallery/scripts/mac/`.
+Development scripts are in `~/rgbtv/node_modules/rgbtv/scripts/mac/`.
 
 * `start-server-dev.sh` - Run application server in a development context, restarting when code is modified.
 * `start-client-dev.sh` - Run a client development process, rebuilding when files are modified, and with [Browser Sync](https://browsersync.io) features.

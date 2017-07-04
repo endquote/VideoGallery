@@ -8,18 +8,18 @@
 		<string>/usr/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
 	</dict>
 	<key>Label</key>
-	<string>com.endquote.videogallery.start-browser</string>
+	<string>tv.rgbtv.start-powermate</string>
 	<key>ProgramArguments</key>
 	<array>
 		<string>bash</string>
 		<string>-c</string>
-		<string>~/VideoGallery/node_modules/video-gallery/scripts/mac/start-browser.sh</string>
+		<string>~/rgbtv/node_modules/rgbtv/scripts/mac/start-powermate.sh</string>
 	</array>
 	<key>RunAtLoad</key>
 	<true/>
 	<key>StandardErrorPath</key>
-	<string>/tmp/com.endquote.videogallery.start-browser.err</string>
+	<string>/tmp/tv.rgbtv.start-powermate.err</string>
 	<key>StandardOutPath</key>
-	<string>/tmp/com.endquote.videogallery.start-browser.out</string>
+	<string>/tmp/tv.rgbtv.start-powermate.out</string>
 </dict>
 </plist>

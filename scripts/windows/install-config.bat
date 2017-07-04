@@ -1,5 +1,5 @@
 SET DIR=%~dp0
 cd %DIR%
-mkdir C:\VideoGallery
-copy ..\..\server\config\default-windows.json C:\VideoGallery\default.json
-copy ..\..\server\config\default-windows.json C:\VideoGallery\local.json
+mkdir C:\rgbtv
+copy ..\..\server\config\default-windows.json C:\rgbtv\default.json
+copy ..\..\server\config\default-windows.json C:\rgbtv\local.json
