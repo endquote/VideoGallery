@@ -112,6 +112,7 @@ class Downloader {
     doc.title = info.title;
     doc.description = info.description;
     doc.url = info.webpage_url;
+    doc.duration = info.duration;
 
     Database.saveVideo(doc)
       .then(() => this._downloadVideo(doc, bestVideo, compatAudio))
