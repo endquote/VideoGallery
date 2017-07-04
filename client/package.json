@@ -17,7 +17,6 @@
   "devDependencies": {
     "browser-sync": "^2.18.8",
     "browserify": "^14.1.0",
-    "config": "1.26.1",
     "del": "^3.0.0",
     "gulp": "^3.9.1",
     "gulp-batch": "^1.0.5",
@@ -34,6 +33,7 @@
     "vinyl-source-stream": "^1.1.0"
   },
   "dependencies": {
+    "config": "1.26.1",
     "qrious": "^4.0.2",
     "socket.io-client": "^2.0.3",
     "vue": "^2.2.6",
