@@ -146,8 +146,9 @@ class Downloader {
   // Resize the thumbnail image.
   static _onVideoLoaded(doc) {
     const cmd = 'convert';
-    const file = path.join(this.target, doc.id, `${doc.id}.jpg`);
-    const args = [file, '-resize', this.thumbnailWidth, file];
+    const inFile = path.join(this.target, doc.id, `${doc.id}.jpg`);
+    const outFile = path.join(this.target, doc.id, `${doc.id}-resized.jpg`);
+    const args = [inFile, '-resize', this.thumbnailWidth, outFile];
     const opts = { shell: false };
     const ps = childProcess.spawn(cmd, args, opts);
     this._childProcesses[doc.id].push(ps);

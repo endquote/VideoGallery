@@ -63,7 +63,7 @@ class WebServer {
       if (type === 'thumbnail') {
         // Thumbnails are the ID + jpg
         try {
-          res.sendFile(path.join(this.target, id, `${id}.jpg`));
+          res.sendFile(path.join(this.target, id, `${id}-resized.jpg`));
         } catch (e) {
           res.sendStatus(404);
         }
