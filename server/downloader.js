@@ -50,7 +50,9 @@ class Downloader {
         this._onVideoInfo(doc, JSON.parse(ps.stdoutBuffer));
       } else {
         console.warn(ps.stderrBuffer);
-        Database.removeVideo(doc.id);
+        if (!doc.loaded) {
+          Database.removeVideo(doc.id);
+        }
       }
     });
   }
@@ -58,7 +60,7 @@ class Downloader {
   // Save the video info to the database.
   static _onVideoInfo(doc, info) {
     console.info(`Saving info for ${doc.url}`);
-    if (!info) {
+    if (!info && !doc.loaded) {
       Database.removeVideo(doc.id);
       return;
     }
@@ -96,9 +98,7 @@ class Downloader {
 
     Database.saveVideo(doc)
       .then(() => this._downloadVideo(doc, bestVideo, compatAudio))
-      .catch(() => {
-        this.removeVideo(doc);
-      });
+      .catch(() => this.removeVideo(doc));
   }
 
   // Spawn a youtube-dl process to download the video.
@@ -121,7 +121,10 @@ class Downloader {
       if (code === 0) {
         this._onVideoLoaded(doc);
       } else {
-        Database.removeVideo(doc.id);
+        console.warn(ps.stderrBuffer);
+        if (!doc.loaded) {
+          Database.removeVideo(doc.id);
+        }
       }
     });
   }
@@ -140,7 +143,10 @@ class Downloader {
       if (code === 0) {
         this._onResized(doc);
       } else {
-        Database.removeVideo(doc.id);
+        console.warn(ps.stderrBuffer);
+        if (!doc.loaded) {
+          Database.removeVideo(doc.id);
+        }
       }
     });
   }
