@@ -50,6 +50,6 @@ To restart the server, such as after getting updates, run `restart-server.sh`.
 
 Development scripts are in `~/rgbtv/node_modules/rgbtv/scripts/mac/`.
 
-* `start-server-dev.sh` - Run application server in a development context, restarting when code is modified.
+* `start-server-dev.sh` - Run application server in a development context, restarting when code is modified with [nodemon](https://nodemon.io).
 * `start-client-dev.sh` - Run a client development process, rebuilding when files are modified, and with [Browser Sync](https://browsersync.io) features.
 

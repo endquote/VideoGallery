@@ -44,7 +44,7 @@ Additional steps to run things at startup.
 
 Development scripts are in `C:\rgbtv\node_modules\rgbtv\scripts\windows`.
 
-* `start-server-dev.bat` - Run application server in a development context, restarting when code is modified.
+* `start-server-dev.bat` - Run application server in a development context, restarting when code is modified with [nodemon](https://nodemon.io).
 * `start-client-dev.bat` - Run a client development process, rebuilding when files are modified, and with [Browser Sync](https://browsersync.io) features.
 
 The project is set up to take advantage of the [VS Code](https://code.visualstudio.com) debugger and extensions.
