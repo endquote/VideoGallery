@@ -22,6 +22,7 @@ class Database {
       title: { required: false, type: String },
       description: { required: false, type: String },
       loaded: { required: true, type: Boolean, default: false },
+      duration: { require: true, type: Number, default: 0 },
     });
 
     this.Video = mongoose.model('video', videoSchema);
