@@ -7,6 +7,7 @@ const path = require('path');
 const fs = require('fs-extra-promise');
 
 const Database = require('./database');
+const Downloader = require('./downloader');
 
 class WebServer {
   static init(port = 8080, target, username = '', password = '') {
@@ -109,6 +110,14 @@ class WebServer {
       Database.removeVideo(req.body._id)
         .then(() => res.sendStatus(200))
         .catch(() => res.sendStatus(500));
+    });
+
+    // Re-download everything.
+    app.get('/reprocess', (req, res) => {
+      Database.getVideos().then((result) => {
+        result.forEach(doc => Downloader.addVideo(doc));
+        return res.sendStatus(200);
+      });
     });
   }
 }
