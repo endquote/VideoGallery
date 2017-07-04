@@ -16,6 +16,12 @@ class Downloader {
 
     this._childProcesses = {};
 
+    // The video currently being loaded
+    this._adding = null;
+
+    // A queue of additional videos to load
+    this._addQueue = [];
+
     // https://github.com/rg3/youtube-dl/blob/master/README.md
     this.infoCmd = 'youtube-dl --dump-json --playlist-items 1';
     this.downloadCmd = 'youtube-dl --write-thumbnail --no-progress --playlist-items 1 -o';
@@ -28,8 +34,22 @@ class Downloader {
   }
 
   static addVideo(doc) {
-    this._childProcesses[doc.id] = [];
-    this._getVideoInfo(doc);
+    this._addQueue.push(doc);
+    this._nextAdd();
+  }
+
+  // Queue downloads and do them one at a time.
+  static _nextAdd() {
+    if (this._adding) {
+      return;
+    }
+    if (!this._addQueue.length) {
+      console.info('Downloads complete.');
+      return;
+    }
+    this._adding = this._addQueue.shift();
+    this._childProcesses[this._adding.id] = [];
+    this._getVideoInfo(this._adding);
   }
 
   // Spawn a youtube-dl process to get metadata about the video.
@@ -49,10 +69,7 @@ class Downloader {
       if (code === 0) {
         this._onVideoInfo(doc, JSON.parse(ps.stdoutBuffer));
       } else {
-        console.warn(ps.stderrBuffer);
-        if (!doc.loaded) {
-          Database.removeVideo(doc.id);
-        }
+        this._failed(doc, ps.stderrBuffer);
       }
     });
   }
@@ -60,8 +77,8 @@ class Downloader {
   // Save the video info to the database.
   static _onVideoInfo(doc, info) {
     console.info(`Saving info for ${doc.url}`);
-    if (!info && !doc.loaded) {
-      Database.removeVideo(doc.id);
+    if (!info) {
+      this._failed(doc);
       return;
     }
 
@@ -98,7 +115,7 @@ class Downloader {
 
     Database.saveVideo(doc)
       .then(() => this._downloadVideo(doc, bestVideo, compatAudio))
-      .catch(() => this.removeVideo(doc));
+      .catch(() => this._failed(doc));
   }
 
   // Spawn a youtube-dl process to download the video.
@@ -121,10 +138,7 @@ class Downloader {
       if (code === 0) {
         this._onVideoLoaded(doc);
       } else {
-        console.warn(ps.stderrBuffer);
-        if (!doc.loaded) {
-          Database.removeVideo(doc.id);
-        }
+        this._failed(doc, ps.stderrBuffer);
       }
     });
   }
@@ -143,10 +157,7 @@ class Downloader {
       if (code === 0) {
         this._onResized(doc);
       } else {
-        console.warn(ps.stderrBuffer);
-        if (!doc.loaded) {
-          Database.removeVideo(doc.id);
-        }
+        this._failed(doc, ps.stderrBuffer);
       }
     });
   }
@@ -159,6 +170,19 @@ class Downloader {
       this._childProcesses[doc.id].forEach(p => p.kill());
       delete this._childProcesses[doc.id];
     }
+    this._adding = null;
+    this._nextAdd();
+  }
+
+  static _failed(doc, err) {
+    if (err) {
+      console.warn(err);
+    }
+    if (!doc.loaded) {
+      this.removeVideo(doc.id);
+    }
+    this._adding = null;
+    this._nextAdd();
   }
 
   // Kill any download processes and delete any files related to a deleted record.
