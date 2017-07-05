@@ -181,7 +181,7 @@ class Downloader {
       console.warn(err);
     }
     if (!doc.loaded) {
-      this.removeVideo(doc.id);
+      this.removeVideo(doc);
     }
     this._adding = null;
     this._nextAdd();
