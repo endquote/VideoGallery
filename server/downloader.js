@@ -29,8 +29,8 @@ class Downloader {
     this.thumbnailWidth = 600;
 
     fs.ensureDirSync(this.target);
-    Database.on('videoAdded', doc => this.addVideo(doc));
-    Database.on('videoRemoved', doc => this.removeVideo(doc));
+    Database.on('videoAdded', doc => this.addVideo(doc.video));
+    Database.on('videoRemoved', doc => this.removeVideo(doc.video));
   }
 
   static addVideo(doc) {
@@ -181,7 +181,7 @@ class Downloader {
       console.warn(err);
     }
     if (!doc.loaded) {
-      this.removeVideo(doc.id);
+      this.removeVideo(doc);
     }
     this._adding = null;
     this._nextAdd();
@@ -189,6 +189,9 @@ class Downloader {
 
   // Kill any download processes and delete any files related to a deleted record.
   static removeVideo(doc) {
+    if (!doc) {
+      return;
+    }
     console.info(`Deleting video ${doc.url}`);
     if (this._childProcesses[doc.id]) {
       this._childProcesses[doc.id].forEach(p => p.kill());

@@ -3,5 +3,6 @@
   "downloads": "~/rgbtv/downloads",
   "database": "mongodb://localhost/",
   "username": "username",
-  "password": "password"
+  "password": "password",
+  "defaultChannel": "default"
 }

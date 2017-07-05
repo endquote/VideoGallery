@@ -9,4 +9,4 @@ Database.init(config.get('database'));
 WebServer.init(config.get('port'), config.get('downloads'), config.get('username'), config.get('password'));
 SocketServer.init();
 Downloader.init(config.get('downloads'));
-Database.cleanup();
+Database.startup();

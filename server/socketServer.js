@@ -12,9 +12,9 @@ class SocketServer {
       console.log('UI socket connected');
 
       // Send events to the client when anything on the database changes.
-      Database.on('videoAdded', doc => socket.emit('videoAdded', doc));
-      Database.on('videoRemoved', doc => socket.emit('videoRemoved', doc));
-      Database.on('videoUpdated', doc => socket.emit('videoUpdated', doc));
+      Database.on('videoAdded', doc => socket.emit('videoAdded', doc.video));
+      Database.on('videoRemoved', doc => socket.emit('videoRemoved', doc.video));
+      Database.on('videoUpdated', doc => socket.emit('videoUpdated', doc.video));
 
       socket.emit('videoSelected', this.selectedVideo);
 
