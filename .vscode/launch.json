@@ -4,12 +4,8 @@
     "type": "node",
     "request": "launch",
     "name": "server - mac",
-    "runtimeExecutable": "nodemon",
     "program": "${workspaceRoot}/server/main.js",
     "cwd": "${workspaceRoot}/server",
-    "restart": true,
-    "console": "integratedTerminal",
-    "internalConsoleOptions": "neverOpen",
     "env": {
       "NODE_CONFIG_DIR": "${env:HOME}/rgbtv"
     }
@@ -17,12 +13,8 @@
     "type": "node",
     "request": "launch",
     "name": "server - win",
-    "runtimeExecutable": "nodemon",
     "program": "${workspaceRoot}/server/main.js",
     "cwd": "${workspaceRoot}/server",
-    "restart": true,
-    "console": "integratedTerminal",
-    "internalConsoleOptions": "neverOpen",
     "env": {
       "NODE_CONFIG_DIR": "C:\\rgbtv"
     }
