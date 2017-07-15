@@ -119,7 +119,7 @@ class Database {
           return;
         }
         this.emitter.emit('videoRemoved', {
-          channel: channelName,
+          channelName,
           // TODO: I'd rather actually return the video...
           video: { id: videoId, _id: videoId },
         });
