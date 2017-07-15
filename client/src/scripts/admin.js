@@ -63,6 +63,13 @@ class AdminPage {
               return this.video.loaded ? `/content/thumbnail/${this.video._id}` : '/images/spinner.gif';
             },
           },
+          watch: {
+            selectedVideo(val) {
+              if (val === this.video) {
+                this.$el.scrollIntoView();
+              }
+            },
+          },
         },
       },
     });
@@ -95,7 +102,8 @@ class AdminPage {
     // Update the selected video.
     this.socket.on('videoSelected', (video) => {
       if (video) {
-        this.app.selectedVideo = videos.find(v => v._id === video._id);
+        const newVideo = videos.find(v => v._id === video._id);
+        this.app.selectedVideo = newVideo;
       }
     });
 
