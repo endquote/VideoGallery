@@ -66,6 +66,9 @@ class Downloader {
     ps.stdout.on('data', data => (ps.stdoutBuffer += data.toString()));
     ps.stderr.on('data', data => (ps.stderrBuffer += data.toString()));
     ps.on('exit', (code) => {
+      if (code === null) {
+        return;
+      }
       if (code === 0) {
         this._onVideoInfo(doc, JSON.parse(ps.stdoutBuffer));
       } else {
@@ -136,10 +139,13 @@ class Downloader {
     ps.stdout.on('data', data => console.info(data.toString()));
     ps.stderr.on('data', data => console.warn(data.toString()));
     ps.on('exit', (code) => {
+      if (code === null) {
+        return;
+      }
       if (code === 0) {
         this._onVideoLoaded(doc);
       } else {
-        this._failed(doc, ps.stderrBuffer);
+        this._failed(doc);
       }
     });
   }
@@ -156,10 +162,13 @@ class Downloader {
     ps.stdout.on('data', data => console.info(data.toString()));
     ps.stderr.on('data', data => console.warn(data.toString()));
     ps.on('exit', (code) => {
+      if (code === null) {
+        return;
+      }
       if (code === 0) {
         this._onResized(doc);
       } else {
-        this._failed(doc, ps.stderrBuffer);
+        this._failed(doc);
       }
     });
   }
