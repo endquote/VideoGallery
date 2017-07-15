@@ -14,7 +14,6 @@ const pump = require('pump');
 const stylus = require('gulp-stylus');
 const fs = require('fs');
 const composer = require('gulp-uglify/composer');
-const config = require('config');
 
 const minify = composer(uglifyjs, console);
 
@@ -84,7 +83,7 @@ gulp.task('images', () => {
 
 gulp.task('browser-sync', () => {
   browserSync.init({
-    proxy: `localhost:${config.get('port')}`,
+    proxy: 'localhost:8080',
     open: false,
   });
 });
