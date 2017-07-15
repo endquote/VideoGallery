@@ -26,9 +26,11 @@ class WebServer {
     // Set up authorization, but let localhost through.
     app.use(conditional(
       (req) => {
+        const notIcon = req.path.indexOf('/images/icons') !== 0;
         const authConfiged = username !== '' || password !== '';
         const isRemote = ['127.0.0.1', '::ffff:127.0.0.1', '::1'].indexOf(req.connection.remoteAddress) === -1;
-        return authConfiged && isRemote;
+        const doAuth = authConfiged && isRemote && notIcon;
+        return doAuth;
       },
       basicAuth({
         authorizer: (u, p) => u === username && p === password,

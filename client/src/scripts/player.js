@@ -21,7 +21,14 @@ class PlayerPage {
       });
   }
 
+  static _parseVideo(video) {
+    video.added = new Date(video.added);
+    video.created = new Date(video.created);
+  }
+
   static _buildApp(videos) {
+    videos.forEach(v => this._parseVideo(v));
+
     PlayerPage.app = new Vue({
       el: '#app',
 
@@ -106,6 +113,10 @@ class PlayerPage {
           computed: {
             qrcode() {
               return this.video._id ? new QRious({ size: 300, value: this.video.url }).toDataURL() : '';
+            },
+            createdDate() {
+              const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+              return `${months[this.video.created.getMonth()]} ${this.video.created.getDate()}, ${this.video.created.getFullYear()}`;
             },
           },
           filters: {
@@ -193,6 +204,7 @@ class PlayerPage {
 
     // Get new videos
     this.videoSocket.on('videoAdded', (video) => {
+      this._parseVideo(video);
       videos.push(video);
     });
 
@@ -213,6 +225,7 @@ class PlayerPage {
       if (index === -1) {
         return;
       }
+      this._parseVideo(video);
       Vue.set(videos, index, video);
 
       // If a video was loaded and nothing is selected, select the new one
