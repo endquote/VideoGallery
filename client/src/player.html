@@ -46,7 +46,7 @@
                 <h2 id="video-info-author">by {{ video.author }}</h2>
                 <h1 id="video-info-title">{{ video.title }}</h1>
               </div>
-              <div id="video-info-description" v-html="$options.filters.linebreak(video.description)"></div>
+              <div id="video-info-description">{{ createdDate }} - <span v-html="$options.filters.linebreak(video.description)"></span></div>
             </div>
           </div>
         </div>

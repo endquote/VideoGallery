@@ -16,8 +16,15 @@ class AdminPage {
       });
   }
 
+  static _parseVideo(video) {
+    video.added = new Date(video.added);
+    video.created = new Date(video.created);
+  }
+
   // Init the root Vue component
   static _buildApp(videos) {
+    videos.forEach(v => this._parseVideo(v));
+
     this.app = new Vue({
       el: '#app',
 
@@ -86,6 +93,7 @@ class AdminPage {
 
     // Add new videos to the beginning of the list.
     this.socket.on('videoAdded', (video) => {
+      this._parseVideo(video);
       videos.unshift(video);
       document.getElementsByTagName('input')[0].value = '';
     });
@@ -110,6 +118,7 @@ class AdminPage {
     // Update the entire video record.
     this.socket.on('videoUpdated', (video) => {
       const index = videos.findIndex(v => v._id === video._id);
+      this._parseVideo(video);
       Vue.set(videos, index, video);
     });
   }
