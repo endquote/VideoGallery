@@ -10,6 +10,8 @@ class PlayerPage {
     this.knobRate = 1; // Time in seconds to move when the knob turns
     this.doubleTapDelay = 300; // Time in ms to consider a double tap
 
+    this._channel = 'default';
+
     // Get the list of videos
     Vue.resource('/videos')
       .get()
@@ -35,6 +37,7 @@ class PlayerPage {
       data: {
         selectedVideo: {},
         videos,
+        channel: this._channel,
         progress: 0,
         showInfo: false,
         playSound: false,
@@ -78,7 +81,7 @@ class PlayerPage {
 
         // Component containing the actual <video> tag.
         'video-player': {
-          props: ['video', 'playSound'],
+          props: ['video', 'playSound', 'channel'],
           methods: {
 
             // Set the volume on start.

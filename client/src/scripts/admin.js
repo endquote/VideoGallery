@@ -6,6 +6,8 @@ Vue.use(VueResource);
 
 class AdminPage {
   static init() {
+    this._channel = 'default';
+
     Vue.resource('/videos')
       .get()
       .catch(() => window.alert('Couldn\'t load data. Is the database server running?'))
@@ -31,6 +33,7 @@ class AdminPage {
       data: {
         videos,
         selectedVideo: {},
+        channel: this._channel,
       },
 
       components: {
@@ -51,7 +54,7 @@ class AdminPage {
 
         // Each item in the video list
         'video-item': {
-          props: ['video', 'selectedVideo'],
+          props: ['video', 'selectedVideo', 'channel'],
           methods: {
             selectVideo() {
               if (!this.video.loaded) {
@@ -67,7 +70,7 @@ class AdminPage {
           },
           computed: {
             thumbnail() {
-              return this.video.loaded ? `/content/thumbnail/${this.video._id}` : '/images/spinner.gif';
+              return this.video.loaded ? `/content/${this.channel}/thumbnail/${this.video._id}` : '/images/spinner.gif';
             },
           },
           watch: {

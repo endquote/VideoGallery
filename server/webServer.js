@@ -55,8 +55,7 @@ class WebServer {
 
     // Routes for video content.
     app.use('/content', (req, res) => {
-      const type = req.originalUrl.split('/')[2].toLowerCase();
-      const id = req.originalUrl.split('/')[3];
+      const [channelName, type, id] = req.originalUrl.toLowerCase().split('/').slice(2);
       if (!id || id === 'undefined') {
         res.sendStatus(404);
         return;
@@ -65,13 +64,13 @@ class WebServer {
       if (type === 'thumbnail') {
         // Thumbnails are the ID + jpg
         try {
-          res.sendFile(path.join(this.target, id, `${id}-resized.jpg`));
+          res.sendFile(path.join(this.target, channelName, id, `${id}-resized.jpg`));
         } catch (e) {
           res.sendStatus(404);
         }
       } else if (type === 'video') {
         // Videos have unknown file extensions
-        fs.readdirAsync(path.join(this.target, id), (err, files) => {
+        fs.readdirAsync(path.join(this.target, channelName, id), (err, files) => {
           if (err) {
             res.sendStatus(404);
             return;
@@ -84,7 +83,7 @@ class WebServer {
             res.sendStatus(404);
           } else {
             try {
-              res.sendFile(path.join(this.target, id, file));
+              res.sendFile(path.join(this.target, channelName, id, file));
             } catch (e) {
               res.sendStatus(404);
             }
