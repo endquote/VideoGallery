@@ -46,7 +46,7 @@ gulp.task('scripts:vendor', () => {
 });
 
 
-gulp.task('scripts:app', () => {
+gulp.task('scripts:app:release', () => {
   return pump([
     browserify({
       entries: ['./src/scripts/main.js'],
@@ -63,12 +63,34 @@ gulp.task('scripts:app', () => {
   ]);
 });
 
-gulp.task('styles', () => {
+gulp.task('scripts:app:dev', () => {
+  return pump([
+    browserify({
+      entries: ['./src/scripts/main.js'],
+      debug: true,
+    })
+    .external(vendors)
+    .bundle(),
+    source('main.js'),
+    buffer(),
+    gulp.dest('./dist/scripts/'),
+  ]);
+});
+
+gulp.task('styles:release', () => {
   return pump([
     gulp.src('./src/styles/**/*'),
     sourcemaps.init(),
     stylus({ compress: true }),
     sourcemaps.write('.'),
+    gulp.dest('./dist/styles/'),
+  ]);
+});
+
+gulp.task('styles:dev', () => {
+  return pump([
+    gulp.src('./src/styles/**/*'),
+    stylus({ compress: false }),
     gulp.dest('./dist/styles/'),
   ]);
 });
@@ -88,11 +110,13 @@ gulp.task('browser-sync', () => {
   });
 });
 
-gulp.task('default', sequence('clean', ['html', 'scripts:app', 'scripts:vendor', 'styles', 'images']));
+gulp.task('default', ['build:release']);
+gulp.task('build:release', sequence('clean', ['html', 'scripts:app:release', 'scripts:vendor', 'styles:release', 'images']));
+gulp.task('build:dev', sequence('clean', ['html', 'scripts:app:dev', 'scripts:vendor', 'styles:dev', 'images']));
 
-gulp.task('dev', ['default', 'browser-sync'], () => {
+gulp.task('dev', ['build:dev', 'browser-sync'], () => {
   gulp.watch('./src/**/*.html', ['html', browserSync.reload]);
-  gulp.watch('./src/scripts/**/*', ['scripts:app', browserSync.reload]);
+  gulp.watch('./src/scripts/**/*', ['scripts:app:dev', browserSync.reload]);
   gulp.watch('./src/styles/**/*', ['styles', browserSync.reload]);
   gulp.watch('./src/images/**/*', ['images', browserSync.reload]);
 });
