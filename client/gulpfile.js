@@ -117,6 +117,6 @@ gulp.task('build:dev', sequence('clean', ['html', 'scripts:app:dev', 'scripts:ve
 gulp.task('dev', ['build:dev', 'browser-sync'], () => {
   gulp.watch('./src/**/*.html', ['html', browserSync.reload]);
   gulp.watch('./src/scripts/**/*', ['scripts:app:dev', browserSync.reload]);
-  gulp.watch('./src/styles/**/*', ['styles', browserSync.reload]);
+  gulp.watch('./src/styles/**/*', ['styles:dev', browserSync.reload]);
   gulp.watch('./src/images/**/*', ['images', browserSync.reload]);
 });
