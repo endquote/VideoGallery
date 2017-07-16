@@ -5,11 +5,11 @@
   <title>rgbtv</title>
 
   <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700" rel="stylesheet">
-  <link rel="stylesheet" type="text/css" href="styles/player.css" />
+  <link rel="stylesheet" type="text/css" href="/styles/player.css" />
 
   <script src="/socket.io/socket.io.js"></script>
-  <script src="scripts/vendor.js"></script>
-  <script src="scripts/main.js"></script>
+  <script src="/scripts/vendor.js"></script>
+  <script src="/scripts/main.js"></script>
 
   <link rel="apple-touch-icon" sizes="180x180" href="/images/icons/apple-touch-icon.png">
   <meta name="apple-mobile-web-app-title" content="rgbtv">
@@ -30,9 +30,9 @@
 
   <div id="app">
 
-    <video-player inline-template v-bind:video="selectedVideo" v-bind:channel="channel" v-bind:play-sound="playSound" v-on:progress-changed="onProgressChanged">
+    <video-player inline-template v-bind:video="selectedVideo" v-bind:channel-name="channelName" v-bind:play-sound="playSound" v-on:progress-changed="onProgressChanged">
       <div id="video-player">
-        <video autoplay v-bind:src="(video && video._id ? '/content/' + channel + '/video/' + video._id : '')" v-on:loadstart="onLoadStart" v-on:timeupdate="onTimeUpdate" v-on:durationchange="onTimeUpdate" v-on:ended="onEnded"></video>
+        <video autoplay v-bind:src="(video && video._id ? '/' + channelName + '/content/video/' + video._id : '')" v-on:loadstart="onLoadStart" v-on:timeupdate="onTimeUpdate" v-on:durationchange="onTimeUpdate" v-on:ended="onEnded"></video>
       </div>
     </video-player>
 
@@ -46,7 +46,7 @@
                 <h2 id="video-info-author">by {{ video.author }}</h2>
                 <h1 id="video-info-title">{{ video.title }}</h1>
               </div>
-              <div id="video-info-description">{{ createdDate }} - <span v-html="$options.filters.linebreak(video.description)"></span></div>
+              <div id="video-info-description">{{ createdDate }}<span v-html="$options.filters.linebreak(video.description)"></span></div>
             </div>
           </div>
         </div>

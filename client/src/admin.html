@@ -5,11 +5,11 @@
   <title>rgbtv</title>
 
   <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700" rel="stylesheet">
-  <link rel="stylesheet" type="text/css" href="styles/admin.css" />
+  <link rel="stylesheet" type="text/css" href="/styles/admin.css" />
 
   <script src="/socket.io/socket.io.js"></script>
-  <script src="scripts/vendor.js"></script>
-  <script src="scripts/main.js"></script>
+  <script src="/scripts/vendor.js"></script>
+  <script src="/scripts/main.js"></script>
 
   <link rel="apple-touch-icon" sizes="180x180" href="/images/icons/apple-touch-icon.png">
   <meta name="apple-mobile-web-app-title" content="rgbtv">
@@ -30,7 +30,7 @@
 
   <div id="app">
 
-    <video-add inline-template>
+    <video-add inline-template v-bind:channel-name="channelName">
       <div>
         <form v-on:submit.prevent="submit">
           <input type="text" class="video-add-url" placeholder="paste URL to add" />

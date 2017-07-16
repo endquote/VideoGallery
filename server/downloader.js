@@ -123,7 +123,7 @@ class Downloader {
     video.url = info.webpage_url;
     video.duration = info.duration;
 
-    Database.saveVideo(video)
+    Database.saveVideo(video, adding.channelName)
       .then(() => this._downloadVideo(adding, bestVideo, compatAudio))
       .catch(() => this._failed(adding));
   }
@@ -185,7 +185,7 @@ class Downloader {
   static _onResized(adding) {
     const video = adding.video;
     video.loaded = true;
-    Database.saveVideo(video);
+    Database.saveVideo(video, adding.channelName);
     if (this._childProcesses[video.id]) {
       this._childProcesses[video.id].forEach(p => p.kill());
       delete this._childProcesses[video.id];

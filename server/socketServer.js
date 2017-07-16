@@ -11,18 +11,19 @@ class SocketServer {
 
     const selectedVideos = {};
 
+    // Send events to the client when anything on the database changes.
+    Database.on('videoAdded', v => io.in(v.channelName).emit('videoAdded', v.video));
+    Database.on('videoRemoved', v => io.in(v.channelName).emit('videoRemoved', v.video));
+    Database.on('videoUpdated', v => io.in(v.channelName).emit('videoUpdated', v.video));
+
     io.on('connection', (socket) => {
       console.log('UI socket connected');
 
+      // Join a channel, tell the client the current video.
       socket.on('joinChannel', (channelName) => {
         socket.join(channelName);
-        socket.in(channelName).emit('videoSelected', selectedVideos[channelName]);
+        socket.emit('videoSelected', selectedVideos[channelName]);
       });
-
-      // Send events to the client when anything on the database changes.
-      Database.on('videoAdded', v => socket.in(v.channelName).emit('videoAdded', v.video));
-      Database.on('videoRemoved', v => socket.in(v.channelName).emit('videoRemoved', v.video));
-      Database.on('videoUpdated', v => socket.in(v.channelName).emit('videoUpdated', v.video));
 
       // When a video is selected, tell other people on this channel about it.
       socket.on('selectVideo', (data) => {

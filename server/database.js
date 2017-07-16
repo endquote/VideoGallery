@@ -11,14 +11,14 @@ class Database {
       .then(() => console.log('Database connected'))
       .catch(() => console.error('Database connection failed'));
 
-    this._defaultChannel = config.get('defaultChannel');
+    this.defaultChannel = config.get('defaultChannel');
 
     this.emitter = new EventEmitter();
     this.emitter.setMaxListeners(0);
     Database.on = this.emitter.on.bind(this.emitter);
 
     this.videoSchema = new mongoose.Schema({
-      url: { required: true, type: String, index: { unique: true, sparse: true } },
+      url: { required: true, type: String, index: true },
       added: { required: true, type: Date },
       created: { required: false, type: Date },
       author: { required: false, type: String },
@@ -50,27 +50,30 @@ class Database {
       });
 
     // Create the default channel if it isn't there.
-    this.channels.findOne({ name: this._defaultChannel }).then((res) => {
+    this.channels.findOne({ name: this.defaultChannel }).then((res) => {
       if (!res) {
-        new this.channels().save(); // eslint-disable-line
+        new this.channels().save(); // eslint-disable-line new-cap
       }
     });
   }
 
 
   // Get all of the videos for a channel.
-  static getVideos(channelName = this._defaultChannel) {
+  static getVideos(channelName = this.defaultChannel) {
     return this.channels
       .findOne({ name: channelName })
       .select('videos')
       .then((res) => {
+        if (!res) {
+          return [];
+        }
         res.videos.sort((a, b) => a.added - b.added);
         return res.videos;
       });
   }
 
   // Add a video to a channel by URL, returning the new record.
-  static addVideo(videoUrl, channelName = this._defaultChannel) {
+  static addVideo(videoUrl, channelName = this.defaultChannel) {
     if (!videoUrl) {
       return Promise.resolve();
     }
@@ -80,30 +83,48 @@ class Database {
         name: channelName,
         'videos.url': videoUrl,
       })
-      .then((channelDoc) => {
-        if (channelDoc) {
+      .then((existingVideo) => {
+        // The video already exists, don't do anything.
+        if (existingVideo) {
           return Promise.resolve();
         }
 
-        return this.channels.findOneAndUpdate({
-          name: channelName,
-        }, {
-          $push: {
-            videos: { url: videoUrl, added: new Date() },
-          },
-        }, {
-          new: true,
-        }).then((doc) => {
-          this.emitter.emit('videoAdded', {
-            channelName,
-            video: doc.videos.find(v => v.url === videoUrl),
+        // Does this channel exist?
+        return this.channels.findOne({ name: channelName })
+          .then((existingChannel) => {
+            if (existingChannel) {
+              return Promise.resolve();
+            }
+
+            // Nope, create it.
+            return this.channels.create({ name: channelName });
+          })
+          .then(() => { // eslint-disable-line arrow-body-style
+            // Add the video.
+            return this.channels.findOneAndUpdate({
+              name: channelName,
+            }, {
+              $push: {
+                videos: {
+                  url: videoUrl,
+                  added: new Date(),
+                },
+              },
+            }, {
+              new: true,
+            });
+          })
+          .then((doc) => {
+            return this.emitter.emit('videoAdded', {
+              channelName,
+              video: doc.videos.find(v => v.url === videoUrl),
+            });
           });
-        });
       });
   }
 
   // Remove a video from a channel by ID, returning the removed record.
-  static removeVideo(videoId, channelName = this._defaultChannel) {
+  static removeVideo(videoId, channelName = this.defaultChannel) {
     return this.channels
       .update({
         name: channelName,
@@ -127,7 +148,7 @@ class Database {
   }
 
   // Update a video.
-  static saveVideo(videoDoc, channelName = this._defaultChannel) {
+  static saveVideo(videoDoc, channelName = this.defaultChannel) {
     // Make a new object which is the video without the id.
     // There's gotta be a better way.
     const update = {};

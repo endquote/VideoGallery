@@ -10,10 +10,10 @@ class PlayerPage {
     this.knobRate = 1; // Time in seconds to move when the knob turns
     this.doubleTapDelay = 300; // Time in ms to consider a double tap
 
-    this._channelName = 'default';
+    this._channelName = document.location.pathname.split('/')[1] || 'default';
 
     // Get the list of videos
-    Vue.resource('/api/videos')
+    Vue.resource(`/${this._channelName}/api/videos`)
       .get()
       .catch(() => window.alert('Couldn\'t load data. Is the database server running?'))
       .then((res) => {
@@ -37,7 +37,7 @@ class PlayerPage {
       data: {
         selectedVideo: {},
         videos,
-        channel: this._channelName,
+        channelName: this._channelName,
         progress: 0,
         showInfo: false,
         playSound: false,
@@ -62,7 +62,7 @@ class PlayerPage {
 
         // Cycle through every combination of info/audio.
         onPlayModeChanged() {
-          if (!this.selectedVideo) {
+          if (!this.selectedVideo || !this.videos.length) {
             return;
           }
           if (!this.showInfo && !this.playSound) {
@@ -81,7 +81,7 @@ class PlayerPage {
 
         // Component containing the actual <video> tag.
         'video-player': {
-          props: ['video', 'playSound', 'channel'],
+          props: ['video', 'playSound', 'channelName'],
           methods: {
 
             // Set the volume on start.
@@ -118,8 +118,11 @@ class PlayerPage {
               return this.video._id ? new QRious({ size: 300, value: this.video.url }).toDataURL() : '';
             },
             createdDate() {
+              if (!this.video || !this.video.created) {
+                return '';
+              }
               const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-              return `${months[this.video.created.getMonth()]} ${this.video.created.getDate()}, ${this.video.created.getFullYear()}`;
+              return `${months[this.video.created.getMonth()]} ${this.video.created.getDate()}, ${this.video.created.getFullYear()} - `;
             },
           },
           filters: {
@@ -261,7 +264,7 @@ class PlayerPage {
   // Select another random video
   static nextVideo() {
     if (!PlayerPage.app.videos.length) {
-      this.videoSocket.emit('selectVideo', null);
+      this.videoSocket.emit('selectVideo', this._channelName, null);
       return;
     }
 

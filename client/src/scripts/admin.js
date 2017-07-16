@@ -6,9 +6,12 @@ Vue.use(VueResource);
 
 class AdminPage {
   static init() {
-    this._channelName = 'default';
+    this._channelName = document.location.pathname.toLowerCase().split('/')[1];
+    if (this._channelName === 'admin') {
+      this._channelName = 'default';
+    }
 
-    Vue.resource('/api/videos')
+    Vue.resource(`/${this._channelName}/api/videos`)
       .get()
       .catch(() => window.alert('Couldn\'t load data. Is the database server running?'))
       .then((res) => {
@@ -40,12 +43,13 @@ class AdminPage {
 
         // Video entry form
         'video-add': {
+          props: ['channelName'],
           methods: {
             submit() {
               const input = this.$el.getElementsByClassName('video-add-url')[0].value;
               input.split(',').forEach((url) => {
-                this.$http
-                  .post('/api/video', { url })
+                Vue.http
+                  .post(`/${this.channelName}/api/video`, { url })
                   .catch(() => false); // Video already added. Alert?
               });
             },
@@ -60,17 +64,17 @@ class AdminPage {
               if (!this.video.loaded) {
                 return;
               }
-              AdminPage.socket.emit('selectVideo', { channelName: this.channelName, videoId: this.video._id });
+              AdminPage.socket.emit('selectVideo', { videoId: this.video._id, channelName: this.channelName });
             },
             removeVideo() {
               if (window.confirm(`Are you sure you want to delete "${this.video.title || this.video.url}"`)) {
-                this.$http.delete('/api/video', { body: { _id: this.video._id } });
+                Vue.http.delete(`/${this.channelName}/api/video/${this.video._id}`);
               }
             },
           },
           computed: {
             thumbnail() {
-              return this.video.loaded ? `/content/${this.channelName}/thumbnail/${this.video._id}` : '/images/spinner.gif';
+              return this.video.loaded ? `/${this.channelName}/content/thumbnail/${this.video._id}` : '/images/spinner.gif';
             },
           },
           watch: {

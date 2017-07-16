@@ -44,82 +44,121 @@ class WebServer {
       console.log(`HTTP server listening on ${port}`);
     });
 
-    // Routes for static content.
-    app.get('/', (req, res) => {
-      res.sendFile(path.join(__dirname, '../client/dist/player.html'));
-    });
-    app.get('/admin', (req, res) => {
-      res.sendFile(path.join(__dirname, '../client/dist/admin.html'));
-    });
-    app.use(express.static(path.join(__dirname, '../client/dist')));
+    // Routing for GET requests.
+    app.get('*', (req, res) => {
+      const [channelName, page, method, videoId] = this.parsePath(req.path);
 
-    // Routes for video content.
-    app.use('/content', (req, res) => {
-      const [channelName, type, id] = req.originalUrl.toLowerCase().split('/').slice(2);
-      if (!id || id === 'undefined') {
-        res.sendStatus(404);
-        return;
+      // Send various static asssts.
+      if (channelName === 'images' || channelName === 'scripts' || channelName === 'styles') {
+        return res.sendFile(path.join(__dirname, '../client/dist/', req.path));
       }
 
-      if (type === 'thumbnail') {
-        // Thumbnails are the ID + jpg
-        try {
-          res.sendFile(path.join(this.target, channelName, id, `${id}-resized.jpg`));
-        } catch (e) {
-          res.sendStatus(404);
-        }
-      } else if (type === 'video') {
-        // Videos have unknown file extensions
-        fs.readdirAsync(path.join(this.target, channelName, id), (err, files) => {
-          if (err) {
-            res.sendStatus(404);
-            return;
-          }
-          const file = files.find((f) => {
-            const parsed = path.parse(f);
-            return parsed.ext !== '.jpg' && parsed.name === id;
+      // Send the player page.
+      if (page === 'player') {
+        return res.sendFile(path.join(__dirname, '../client/dist/player.html'));
+      }
+
+      // Send the admin page.
+      if (page === 'admin') {
+        return res.sendFile(path.join(__dirname, '../client/dist/admin.html'));
+      }
+
+      // Return GET API calls.
+      if (page === 'api') {
+        if (method === 'videos') {
+          // Get all videos.
+          return Database.getVideos(channelName).then(result => res.json(result));
+        } else if (method === 'reprocess') {
+          // Re-download everything.
+          return Database.getVideos().then((result) => {
+            result.forEach(doc => Downloader.addVideo(doc));
+            return res.sendStatus(200);
           });
-          if (!file) {
-            res.sendStatus(404);
-          } else {
-            try {
-              res.sendFile(path.join(this.target, channelName, id, file));
-            } catch (e) {
-              res.sendStatus(404);
-            }
-          }
-        });
-      } else {
-        res.sendStatus(404);
+        }
       }
+
+      // Send video content files.
+      if (page === 'content') {
+        if (videoId) {
+          if (method === 'thumbnail') {
+            // Thumbnails are the ID + jpg
+            try {
+              return res.sendFile(path.join(this.target, channelName, videoId, `${videoId}-resized.jpg`));
+            } catch (e) {
+              return res.sendStatus(404);
+            }
+          } else if (method === 'video') {
+            // Videos have unknown file extensions
+            return fs.readdirAsync(path.join(this.target, channelName, videoId))
+              .then((files) => {
+                const file = files.find((f) => {
+                  const parsed = path.parse(f);
+                  return parsed.ext !== '.jpg' && parsed.name === videoId;
+                });
+                return res.sendFile(path.join(this.target, channelName, videoId, file));
+              })
+              .catch(() => res.sendStatus(404));
+          }
+        }
+      }
+
+      return res.sendStatus(404);
     });
 
-    // Get all videos.
-    app.get('/api/videos', (req, res) => {
-      Database.getVideos().then(result => res.json(result));
+    // Routing for POST requests.
+    app.post('*', (req, res) => {
+      const [channelName, page, method, videoId] = this.parsePath(req.path); // eslint-disable-line no-unused-vars, max-len
+      if (page === 'api') {
+        if (method === 'video') {
+          // Post to add a video.
+          return Database.addVideo(req.body.url, channelName)
+            .then(() => res.sendStatus(200))
+            .catch(() => res.sendStatus(500));
+        }
+      }
+
+      return res.sendStatus(404);
     });
 
-    // Post to add a video.
-    app.post('/api/video', (req, res) => {
-      Database.addVideo(req.body.url)
-        .then(() => res.sendStatus(200))
-        .catch(() => res.sendStatus(500));
-    });
+    // Routing for DELETE requests.
+    app.delete('*', (req, res) => {
+      const [channelName, page, method, videoId] = this.parsePath(req.path); // eslint-disable-line no-unused-vars, max-len
+      if (page === 'api') {
+        if (method === 'video') {
+          // Delete to delete a video.
+          return Database.removeVideo(videoId, channelName)
+            .then(() => res.sendStatus(200))
+            .catch(() => res.sendStatus(500));
+        }
+      }
 
-    // Delete to delete a video.
-    app.delete('/api/video', (req, res) => {
-      Database.removeVideo(req.body._id)
-        .then(() => res.sendStatus(200))
-        .catch(() => res.sendStatus(500));
+      return res.sendStatus(404);
     });
+  }
 
-    // Re-download everything.
-    app.get('/reprocess', (req, res) => {
-      Database.getVideos().then((result) => {
-        result.forEach(doc => Downloader.addVideo(doc));
-        return res.sendStatus(200);
-      });
-    });
+  static parsePath(reqPath) {
+    /*
+    / - default player
+    /admin - default admin
+    /channel - channel player
+    /channel/admin - channel admin
+    /api - default api
+    /channel/api - channel api
+    /images, /scripts, /styles - static assets
+    /channel/content - video content files
+    */
+    let [channelName, page, method, videoId] = reqPath.toLowerCase().split('/').slice(1); // eslint-disable-line prefer-const
+
+    if (!channelName || channelName === 'admin') {
+      page = channelName;
+      channelName = Database.defaultChannel;
+    }
+
+    if (!page) {
+      page = 'player';
+    }
+
+    return [channelName, page, method, videoId];
   }
 }
 
