@@ -6,7 +6,7 @@ Vue.use(VueResource);
 
 class AdminPage {
   static init() {
-    this._channel = 'default';
+    this._channelName = 'default';
 
     Vue.resource('/videos')
       .get()
@@ -33,7 +33,7 @@ class AdminPage {
       data: {
         videos,
         selectedVideo: {},
-        channel: this._channel,
+        channelName: this._channelName,
       },
 
       components: {
@@ -54,13 +54,13 @@ class AdminPage {
 
         // Each item in the video list
         'video-item': {
-          props: ['video', 'selectedVideo', 'channel'],
+          props: ['video', 'selectedVideo', 'channelName'],
           methods: {
             selectVideo() {
               if (!this.video.loaded) {
                 return;
               }
-              AdminPage.socket.emit('selectVideo', { _id: this.video._id });
+              AdminPage.socket.emit('selectVideo', { channelName: this.channelName, videoId: this.video._id });
             },
             removeVideo() {
               if (window.confirm(`Are you sure you want to delete "${this.video.title || this.video.url}"`)) {
@@ -70,7 +70,7 @@ class AdminPage {
           },
           computed: {
             thumbnail() {
-              return this.video.loaded ? `/content/${this.channel}/thumbnail/${this.video._id}` : '/images/spinner.gif';
+              return this.video.loaded ? `/content/${this.channelName}/thumbnail/${this.video._id}` : '/images/spinner.gif';
             },
           },
           watch: {
@@ -88,11 +88,10 @@ class AdminPage {
   // Handle updates to the list from the server.
   static _getUpdates(videos) {
     this.socket = io.connect();
+    this.socket.on('connect', () => this.socket.emit('joinChannel', this._channelName));
 
     // Reload on reconnect, like when new changes are deployed.
-    this.socket.on('reconnect', () => {
-      window.location.reload(true);
-    });
+    this.socket.on('reconnect', () => window.location.reload(true));
 
     // Add new videos to the beginning of the list.
     this.socket.on('videoAdded', (video) => {
@@ -111,9 +110,9 @@ class AdminPage {
     });
 
     // Update the selected video.
-    this.socket.on('videoSelected', (video) => {
-      if (video) {
-        const newVideo = videos.find(v => v._id === video._id);
+    this.socket.on('videoSelected', (videoId) => {
+      if (videoId) {
+        const newVideo = videos.find(v => v._id === videoId);
         this.app.selectedVideo = newVideo;
       }
     });

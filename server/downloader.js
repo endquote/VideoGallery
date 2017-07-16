@@ -211,7 +211,7 @@ class Downloader {
     if (!video) {
       return;
     }
-    console.info(`Deleting video ${video.url} from ${channelName}`);
+    console.info(`Deleting video ${video.id} from ${channelName}`);
     if (this._childProcesses[video.id]) {
       this._childProcesses[video.id].forEach(p => p.kill());
       delete this._childProcesses[video.id];

@@ -10,7 +10,7 @@ class PlayerPage {
     this.knobRate = 1; // Time in seconds to move when the knob turns
     this.doubleTapDelay = 300; // Time in ms to consider a double tap
 
-    this._channel = 'default';
+    this._channelName = 'default';
 
     // Get the list of videos
     Vue.resource('/videos')
@@ -37,7 +37,7 @@ class PlayerPage {
       data: {
         selectedVideo: {},
         videos,
-        channel: this._channel,
+        channel: this._channelName,
         progress: 0,
         showInfo: false,
         playSound: false,
@@ -175,6 +175,7 @@ class PlayerPage {
     const player = document.getElementsByTagName('video')[0];
 
     this.videoSocket = io.connect();
+    this.videoSocket.on('connect', () => this.videoSocket.emit('joinChannel', this._channelName));
 
     // Some tuner has to pick the first video.
     this.videoSocket.on('connect', () => {
@@ -187,22 +188,22 @@ class PlayerPage {
     });
 
     // Update the selected video
-    this.videoSocket.on('videoSelected', (video) => {
-      if (!video) {
+    this.videoSocket.on('videoSelected', (videoId) => {
+      if (!videoId) {
         PlayerPage.app.selectedVideo = null;
         return;
       }
 
       clearTimeout(this.selectFirstVideo);
 
-      if (PlayerPage.app.selectedVideo && PlayerPage.app.selectedVideo._id && PlayerPage.app.selectedVideo._id === video._id) {
+      if (PlayerPage.app.selectedVideo && PlayerPage.app.selectedVideo.id && PlayerPage.app.selectedVideo.id === videoId) {
         // If it's the same video (like if there's only one video in the list), just replay
         document.getElementsByTagName('video')[0].currentTime = 0;
         document.getElementsByTagName('video')[0].play();
         return;
       }
 
-      PlayerPage.app.selectedVideo = videos.find(v => v._id === video._id);
+      PlayerPage.app.selectedVideo = videos.find(v => v._id === videoId);
     });
 
     // Get new videos
@@ -233,7 +234,7 @@ class PlayerPage {
 
       // If a video was loaded and nothing is selected, select the new one
       if (video.selected || (video.loaded && !PlayerPage.app.selectedVideo._id)) {
-        this.videoSocket.emit('selectVideo', { _id: video._id });
+        this.videoSocket.emit('selectVideo', { channelName: this._channelNameName, videoId: video._id });
       }
     });
 
@@ -275,7 +276,7 @@ class PlayerPage {
     }
 
     const random = unplayed[Math.floor(Math.random() * unplayed.length)];
-    this.videoSocket.emit('selectVideo', { _id: random._id });
+    this.videoSocket.emit('selectVideo', { channelName: this._channelName, videoId: random._id });
   }
 }
 
