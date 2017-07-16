@@ -57,6 +57,10 @@ class Database {
     });
   }
 
+  // Get the list of channels.
+  static getChannels() {
+    return this.channels.find().select('name').sort({ name: 1 });
+  }
 
   // Get all of the videos for a channel.
   static getVideos(channelName = this.defaultChannel) {

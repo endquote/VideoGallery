@@ -48,7 +48,7 @@ class WebServer {
     app.get('*', (req, res) => {
       const [channelName, page, method, videoId] = this.parsePath(req.path);
 
-      // Send various static asssts.
+      // Send various static assets.
       if (channelName === 'images' || channelName === 'scripts' || channelName === 'styles') {
         return res.sendFile(path.join(__dirname, '../client/dist/', req.path));
       }
@@ -74,6 +74,9 @@ class WebServer {
             result.forEach(doc => Downloader.addVideo(doc));
             return res.sendStatus(200);
           });
+        } else if (method === 'channels') {
+          // Get all channels.
+          return Database.getChannels(channelName).then(result => res.json(result));
         }
       }
 
@@ -149,7 +152,8 @@ class WebServer {
     */
     let [channelName, page, method, videoId] = reqPath.toLowerCase().split('/').slice(1); // eslint-disable-line prefer-const
 
-    if (!channelName || channelName === 'admin') {
+    if (!channelName || channelName === 'admin' || channelName === 'api') {
+      method = page;
       page = channelName;
       channelName = Database.defaultChannel;
     }
