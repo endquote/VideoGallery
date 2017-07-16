@@ -30,6 +30,12 @@
 
   <div id="app">
 
+    <channel-list inline-template v-bind:channels="channels" v-bind:channel-name="channelName">
+      <select v-on:change="channelChanged">
+        <option v-for="channel in channels" :selected="channel.name === channelName ? 'selected' : null">{{ channel.name }}</option>
+      </select>
+    </channel-list>
+
     <video-add inline-template v-bind:channel-name="channelName">
       <div>
         <form v-on:submit.prevent="submit">

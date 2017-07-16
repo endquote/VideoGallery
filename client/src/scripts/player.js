@@ -241,6 +241,11 @@ class PlayerPage {
       }
     });
 
+    // Change the channel.
+    this.videoSocket.on('changeChannel', (channel) => {
+      window.location = channel === 'default' ? '/' : `${channel}/`;
+    });
+
     this.controllerSocket = io.connect('http://localhost:8181');
 
     // Handle events from the hardware controller.

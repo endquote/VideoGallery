@@ -30,6 +30,10 @@ class SocketServer {
         selectedVideos[data.channelName] = data.videoId;
         io.sockets.in(data.channelName).emit('videoSelected', data.videoId);
       });
+
+      socket.on('changeChannel', (from, to) => {
+        io.sockets.in(from).emit('changeChannel', to);
+      });
     });
   }
 

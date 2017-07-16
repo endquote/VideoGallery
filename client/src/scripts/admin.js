@@ -11,13 +11,20 @@ class AdminPage {
       this._channelName = 'default';
     }
 
+    let videos = null;
+    let channels = null;
+
     Vue.resource(`/${this._channelName}/api/videos`)
       .get()
       .catch(() => window.alert('Couldn\'t load data. Is the database server running?'))
       .then((res) => {
-        const videos = res.body;
-        this._buildApp(videos);
-        this._getUpdates(videos);
+        videos = res.body;
+        return Vue.resource(`/${this._channelName}/api/channels`).get();
+      })
+      .then((res) => {
+        channels = res.body;
+        this._getUpdates(channels, videos);
+        this._buildApp(channels, videos);
       });
   }
 
@@ -27,19 +34,30 @@ class AdminPage {
   }
 
   // Init the root Vue component
-  static _buildApp(videos) {
+  static _buildApp(channels, videos) {
     videos.forEach(v => this._parseVideo(v));
 
     this.app = new Vue({
       el: '#app',
 
       data: {
+        channels,
         videos,
         selectedVideo: {},
         channelName: this._channelName,
       },
 
       components: {
+
+        // Channel selector
+        'channel-list': {
+          props: ['channels', 'channelName'],
+          methods: {
+            channelChanged(e) {
+              AdminPage.socket.emit('changeChannel', this.channelName, e.target.options[e.target.selectedIndex].value);
+            },
+          },
+        },
 
         // Video entry form
         'video-add': {
@@ -90,7 +108,7 @@ class AdminPage {
   }
 
   // Handle updates to the list from the server.
-  static _getUpdates(videos) {
+  static _getUpdates(channels, videos) {
     this.socket = io.connect();
     this.socket.on('connect', () => this.socket.emit('joinChannel', this._channelName));
 
@@ -126,6 +144,11 @@ class AdminPage {
       const index = videos.findIndex(v => v._id === video._id);
       this._parseVideo(video);
       Vue.set(videos, index, video);
+    });
+
+    // Change the channel.
+    this.socket.on('changeChannel', (channel) => {
+      window.location = channel === 'default' ? '/admin' : `${channel}/admin`;
     });
   }
 }
