@@ -8,7 +8,7 @@ class AdminPage {
   static init() {
     this._channelName = 'default';
 
-    Vue.resource('/videos')
+    Vue.resource('/api/videos')
       .get()
       .catch(() => window.alert('Couldn\'t load data. Is the database server running?'))
       .then((res) => {
@@ -45,7 +45,7 @@ class AdminPage {
               const input = this.$el.getElementsByClassName('video-add-url')[0].value;
               input.split(',').forEach((url) => {
                 this.$http
-                  .post('/video', { url })
+                  .post('/api/video', { url })
                   .catch(() => false); // Video already added. Alert?
               });
             },
@@ -64,7 +64,7 @@ class AdminPage {
             },
             removeVideo() {
               if (window.confirm(`Are you sure you want to delete "${this.video.title || this.video.url}"`)) {
-                this.$http.delete('/video', { body: { _id: this.video._id } });
+                this.$http.delete('/api/video', { body: { _id: this.video._id } });
               }
             },
           },

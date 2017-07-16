@@ -13,7 +13,7 @@ class PlayerPage {
     this._channelName = 'default';
 
     // Get the list of videos
-    Vue.resource('/videos')
+    Vue.resource('/api/videos')
       .get()
       .catch(() => window.alert('Couldn\'t load data. Is the database server running?'))
       .then((res) => {

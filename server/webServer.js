@@ -95,19 +95,19 @@ class WebServer {
     });
 
     // Get all videos.
-    app.get('/videos', (req, res) => {
+    app.get('/api/videos', (req, res) => {
       Database.getVideos().then(result => res.json(result));
     });
 
     // Post to add a video.
-    app.post('/video', (req, res) => {
+    app.post('/api/video', (req, res) => {
       Database.addVideo(req.body.url)
         .then(() => res.sendStatus(200))
         .catch(() => res.sendStatus(500));
     });
 
     // Delete to delete a video.
-    app.delete('/video', (req, res) => {
+    app.delete('/api/video', (req, res) => {
       Database.removeVideo(req.body._id)
         .then(() => res.sendStatus(200))
         .catch(() => res.sendStatus(500));
