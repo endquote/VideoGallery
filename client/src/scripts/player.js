@@ -246,7 +246,7 @@ class PlayerPage {
 
     // Change the channel.
     this.videoSocket.on('changeChannel', (channel) => {
-      window.location = channel === 'default' ? '/' : `${channel}/`;
+      window.location = channel === 'default' ? '/' : `/${channel}/`;
     });
 
     this.controllerSocket = io.connect('http://localhost:8181', { reconnectionAttempts: 5 });
