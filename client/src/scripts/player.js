@@ -20,6 +20,7 @@ class PlayerPage {
         const videos = res.body;
         this._buildApp(videos);
         this._getUpdates(videos);
+        document.body.style.visibility = 'visible';
       });
   }
 

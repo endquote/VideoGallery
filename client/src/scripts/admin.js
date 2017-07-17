@@ -25,6 +25,7 @@ class AdminPage {
         channels = res.body;
         this._getUpdates(channels, videos);
         this._buildApp(channels, videos);
+        document.body.style.visibility = 'visible';
       });
   }
 
