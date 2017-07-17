@@ -54,7 +54,14 @@ class AdminPage {
           props: ['channels', 'channelName'],
           methods: {
             channelChanged(e) {
-              AdminPage.socket.emit('changeChannel', this.channelName, e.target.options[e.target.selectedIndex].value);
+              let newChannel = e.target.options[e.target.selectedIndex].value;
+              if (newChannel === 'new') {
+                newChannel = window.prompt('What\'s the name of the new channel?');
+                Vue.http.post(`/${this.channelName}/api/channel`, { channelName: newChannel })
+                  .then(() => AdminPage.socket.emit('changeChannel', this.channelName, newChannel));
+              } else {
+                AdminPage.socket.emit('changeChannel', this.channelName, newChannel);
+              }
             },
           },
         },
@@ -148,7 +155,7 @@ class AdminPage {
 
     // Change the channel.
     this.socket.on('changeChannel', (channel) => {
-      window.location = channel === 'default' ? '/admin' : `${channel}/admin`;
+      window.location = channel === 'default' ? '/admin' : `/${channel}/admin`;
     });
   }
 }

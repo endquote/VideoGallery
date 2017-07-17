@@ -118,6 +118,13 @@ class WebServer {
             .then(() => res.sendStatus(200))
             .catch(() => res.sendStatus(500));
         }
+
+        if (method === 'channel') {
+          // Post to add a channel.
+          return Database.addChannel(req.body.channelName)
+            .then(() => res.sendStatus(200))
+            .catch(() => res.sendStatus(500));
+        }
       }
 
       return res.sendStatus(404);

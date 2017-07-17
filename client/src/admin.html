@@ -32,7 +32,8 @@
 
     <channel-list inline-template v-bind:channels="channels" v-bind:channel-name="channelName">
       <select v-on:change="channelChanged">
-        <option v-for="channel in channels" :selected="channel.name === channelName ? 'selected' : null">{{ channel.name }}</option>
+        <option :value="channel.name" v-for="channel in channels" :selected="channel.name === channelName ? 'selected' : null">{{ channel.name }}</option>
+        <option value="new">new channel...</option>
       </select>
     </channel-list>
 

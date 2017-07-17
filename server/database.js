@@ -29,7 +29,14 @@ class Database {
     });
 
     this.channelSchema = new mongoose.Schema({
-      name: { required: true, type: String, index: { unique: true }, default: 'default' },
+      name: {
+        type: String,
+        index: { unique: true },
+        default: 'default',
+        required() {
+          return ['new', 'admin', 'images', 'scripts', 'styles'].indexOf(this.name) === -1;
+        },
+      },
       videos: [this.videoSchema],
     });
 
@@ -60,6 +67,11 @@ class Database {
   // Get the list of channels.
   static getChannels() {
     return this.channels.find().select('name').sort({ name: 1 });
+  }
+
+  // Make a channel.
+  static addChannel(channelName) {
+    return this.channels.create({ name: channelName });
   }
 
   // Get all of the videos for a channel.
