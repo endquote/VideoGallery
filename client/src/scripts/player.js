@@ -35,7 +35,7 @@ class PlayerPage {
       el: '#app',
 
       data: {
-        selectedVideo: {},
+        selectedVideo: null,
         videos,
         channelName: this._channelName,
         progress: 0,
@@ -48,7 +48,10 @@ class PlayerPage {
       watch: {
         selectedVideo(newValue) {
           if (!newValue) {
-            this.selectedVideo = {};
+            this.selectedVideo = null;
+            this.playSound = false;
+            this.showInfo = false;
+            this.progress = 0;
             return;
           }
           newValue.played = true;
@@ -199,14 +202,14 @@ class PlayerPage {
 
       clearTimeout(this.selectFirstVideo);
 
-      if (PlayerPage.app.selectedVideo && PlayerPage.app.selectedVideo.id && PlayerPage.app.selectedVideo.id === videoId) {
+      const next = videos.find(v => v._id === videoId);
+      if (PlayerPage.app.selectedVideo === next) {
         // If it's the same video (like if there's only one video in the list), just replay
-        document.getElementsByTagName('video')[0].currentTime = 0;
-        document.getElementsByTagName('video')[0].play();
-        return;
+        player.currentTime = 0;
+        player.play();
+      } else {
+        PlayerPage.app.selectedVideo = next;
       }
-
-      PlayerPage.app.selectedVideo = videos.find(v => v._id === videoId);
     });
 
     // Get new videos
@@ -236,8 +239,8 @@ class PlayerPage {
       Vue.set(videos, index, video);
 
       // If a video was loaded and nothing is selected, select the new one
-      if (video.selected || (video.loaded && !PlayerPage.app.selectedVideo._id)) {
-        this.videoSocket.emit('selectVideo', { channelName: this._channelNameName, videoId: video._id });
+      if (video.loaded && !PlayerPage.app.selectedVideo) {
+        this.videoSocket.emit('selectVideo', { channelName: this._channelName, videoId: video._id });
       }
     });
 
@@ -246,7 +249,7 @@ class PlayerPage {
       window.location = channel === 'default' ? '/' : `${channel}/`;
     });
 
-    this.controllerSocket = io.connect('http://localhost:8181');
+    this.controllerSocket = io.connect('http://localhost:8181', { reconnectionAttempts: 5 });
 
     // Handle events from the hardware controller.
     this.controllerSocket.on('controller', (data) => {
@@ -269,7 +272,7 @@ class PlayerPage {
   // Select another random video
   static nextVideo() {
     if (!PlayerPage.app.videos.length) {
-      this.videoSocket.emit('selectVideo', this._channelName, null);
+      this.videoSocket.emit('selectVideo', { channelName: this._channelName, videoId: null });
       return;
     }
 
