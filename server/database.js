@@ -53,17 +53,15 @@ class Database {
       .then((channels) => {
         channels.forEach((channel) => {
           channel.videos.forEach((video) => {
-            this.removeVideo(video.id, channel.name);
+            // TODO: There should be a way to select only the unloaded videos... 
+            return video.loaded ? Promise.resolve() : this.removeVideo(video.id, channel.name);
           });
         });
       });
 
     // Create the default channel if it isn't there.
-    this.channels.findOne({ name: this.defaultChannel }).then((res) => {
-      if (!res) {
-        new this.channels().save(); // eslint-disable-line new-cap
-      }
-    });
+    this.channels.findOne({ name: this.defaultChannel })
+      .then(res => (res ? Promise.resolve() : this.channels.create()));
   }
 
   // Get the list of channels.
@@ -117,7 +115,7 @@ class Database {
             // Nope, create it.
             return this.channels.create({ name: channelName });
           })
-          .then(() => { // eslint-disable-line arrow-body-style
+          .then(() => {
             // Add the video.
             return this.channels.findOneAndUpdate({
               name: channelName,
