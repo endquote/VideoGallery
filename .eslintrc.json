@@ -11,7 +11,8 @@
     "no-underscore-dangle": "off",
     "no-param-reassign": "off",
     "no-console": "off",
-    "linebreak-style": "off"
+    "linebreak-style": "off",
+    "arrow-body-style": "off"
   },
   "globals": {}
 }
