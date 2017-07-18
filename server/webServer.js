@@ -46,103 +46,112 @@ class WebServer {
 
     // Routing for GET requests.
     app.get('*', (req, res) => {
-      const [channelName, page, method, videoId] = this.parsePath(req.path);
-
       // Send various static assets.
-      if (channelName === 'images' || channelName === 'scripts' || channelName === 'styles') {
+      const root = req.path.split('/')[1];
+      if (root === 'images' || root === 'scripts' || root === 'styles') {
         return res.sendFile(path.join(__dirname, '../client/dist/', req.path));
       }
 
-      // Send the player page.
-      if (page === 'player') {
-        return res.sendFile(path.join(__dirname, '../client/dist/player.html'));
-      }
-
-      // Send the admin page.
-      if (page === 'admin') {
-        return res.sendFile(path.join(__dirname, '../client/dist/admin.html'));
-      }
-
-      // Return GET API calls.
-      if (page === 'api') {
-        if (method === 'videos') {
-          // Get all videos.
-          return Database.getVideos(channelName).then(result => res.json(result));
-        } else if (method === 'reprocess') {
-          // Re-download everything.
-          return Database.getVideos().then((result) => {
-            result.forEach(doc => Downloader.addVideo(doc));
-            return res.sendStatus(200);
-          });
-        } else if (method === 'channels') {
-          // Get all channels.
-          return Database.getChannels(channelName).then(result => res.json(result));
-        }
-      }
-
-      // Send video content files.
-      if (page === 'content') {
-        if (videoId) {
-          if (method === 'thumbnail') {
-            // Thumbnails are the ID + jpg
-            try {
-              return res.sendFile(path.join(this.target, channelName, videoId, `${videoId}-resized.jpg`));
-            } catch (e) {
-              return res.sendStatus(404);
-            }
-          } else if (method === 'video') {
-            // Videos have unknown file extensions
-            return fs.readdirAsync(path.join(this.target, channelName, videoId))
-              .then((files) => {
-                const file = files.find((f) => {
-                  const parsed = path.parse(f);
-                  return parsed.ext !== '.jpg' && parsed.name === videoId;
-                });
-                return res.sendFile(path.join(this.target, channelName, videoId, file));
-              })
-              .catch(() => res.sendStatus(404));
+      return this.parsePath(req.path)
+        .then(({ channelName, page, method, videoId }) => {
+          // Send the player page.
+          if (page === 'player') {
+            return res.sendFile(path.join(__dirname, '../client/dist/player.html'));
           }
-        }
-      }
 
-      return res.sendStatus(404);
+          // Send the admin page.
+          if (page === 'admin') {
+            return res.sendFile(path.join(__dirname, '../client/dist/admin.html'));
+          }
+
+          // Return GET API calls.
+          if (page === 'api') {
+            if (method === 'videos') {
+              // Get all videos.
+              return Database.getVideos(channelName).then(result => res.json(result));
+            } else if (method === 'reprocess') {
+              // Re-download everything.
+              return Database.getVideos().then((result) => {
+                result.forEach(doc => Downloader.addVideo(doc));
+                return res.sendStatus(200);
+              });
+            } else if (method === 'channels') {
+              // Get all channels.
+              return Database.getChannels(channelName).then(result => res.json(result));
+            }
+          }
+
+          // Send video content files.
+          if (page === 'content') {
+            if (videoId) {
+              if (method === 'thumbnail') {
+                // Thumbnails are the ID + jpg
+                try {
+                  return res.sendFile(path.join(this.target, channelName, videoId, `${videoId}-resized.jpg`));
+                } catch (e) {
+                  return res.sendStatus(404);
+                }
+              } else if (method === 'video') {
+                // Videos have unknown file extensions
+                return fs.readdirAsync(path.join(this.target, channelName, videoId))
+                  .then((files) => {
+                    const file = files.find((f) => {
+                      const parsed = path.parse(f);
+                      return parsed.ext !== '.jpg' && parsed.name === videoId;
+                    });
+                    return res.sendFile(path.join(this.target, channelName, videoId, file));
+                  })
+                  .catch(() => res.sendStatus(404));
+              }
+            }
+          }
+
+          return res.sendStatus(404);
+        })
+        .catch(() => res.sendStatus(404));
     });
 
     // Routing for POST requests.
     app.post('*', (req, res) => {
-      const [channelName, page, method, videoId] = this.parsePath(req.path); // eslint-disable-line no-unused-vars, max-len
-      if (page === 'api') {
-        if (method === 'video') {
-          // Post to add a video.
-          return Database.addVideo(req.body.url, channelName)
-            .then(() => res.sendStatus(200))
-            .catch(() => res.sendStatus(500));
-        }
+      return this.parsePath(req.path)
+        .then(({ channelName, page, method, videoId }) => { // eslint-disable-line no-unused-vars
+          if (page === 'api') {
+            if (method === 'video') {
+              // Post to add a video.
+              return Database.addVideo(req.body.url, channelName)
+                .then(() => res.sendStatus(200))
+                .catch(() => res.sendStatus(500));
+            }
 
-        if (method === 'channel') {
-          // Post to add a channel.
-          return Database.addChannel(req.body.channelName)
-            .then(() => res.sendStatus(200))
-            .catch(() => res.sendStatus(500));
-        }
-      }
+            if (method === 'channel') {
+              // Post to add a channel.
+              return Database.addChannel(req.body.channelName)
+                .then(() => res.sendStatus(200))
+                .catch(() => res.sendStatus(500));
+            }
+          }
 
-      return res.sendStatus(404);
+          return res.sendStatus(404);
+        })
+        .catch(() => res.sendStatus(404));
     });
 
     // Routing for DELETE requests.
     app.delete('*', (req, res) => {
-      const [channelName, page, method, videoId] = this.parsePath(req.path); // eslint-disable-line no-unused-vars, max-len
-      if (page === 'api') {
-        if (method === 'video') {
-          // Delete to delete a video.
-          return Database.removeVideo(videoId, channelName)
-            .then(() => res.sendStatus(200))
-            .catch(() => res.sendStatus(500));
-        }
-      }
+      return this.parsePath(req.path)
+        .then(({ channelName, page, method, videoId }) => {
+          if (page === 'api') {
+            if (method === 'video') {
+              // Delete to delete a video.
+              return Database.removeVideo(videoId, channelName)
+                .then(() => res.sendStatus(200))
+                .catch(() => res.sendStatus(500));
+            }
+          }
 
-      return res.sendStatus(404);
+          return res.sendStatus(404);
+        })
+        .catch(() => res.sendStatus(404));
     });
   }
 
@@ -169,7 +178,13 @@ class WebServer {
       page = 'player';
     }
 
-    return [channelName, page, method, videoId];
+    return Database.getChannels()
+      .then((channels) => {
+        if (!channels.find(c => c.name === channelName)) {
+          return Promise.reject('Invalid channel');
+        }
+        return { channelName, page, method, videoId };
+      });
   }
 }
 

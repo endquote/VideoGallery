@@ -59,7 +59,11 @@ class AdminPage {
               if (newChannel === 'new') {
                 newChannel = window.prompt('What\'s the name of the new channel?');
                 Vue.http.post(`/${this.channelName}/api/channel`, { channelName: newChannel })
-                  .then(() => AdminPage.socket.emit('changeChannel', this.channelName, newChannel));
+                  .then(() => AdminPage.socket.emit('changeChannel', this.channelName, newChannel))
+                  .catch(() => {
+                    alert('That\'s a lousy name for a channel.');
+                    window.location.reload();
+                  });
               } else {
                 AdminPage.socket.emit('changeChannel', this.channelName, newChannel);
               }

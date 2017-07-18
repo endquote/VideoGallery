@@ -5,7 +5,6 @@ const config = require('config');
 
 class Database {
   static init(url = 'mongodb://localhost/') {
-    url += 'rgbtv';
     mongoose.Promise = global.Promise;
     mongoose.connect(url, { useMongoClient: true })
       .then(() => console.log('Database connected'))
@@ -33,8 +32,11 @@ class Database {
         type: String,
         index: { unique: true },
         default: 'default',
-        required() {
-          return ['new', 'admin', 'images', 'scripts', 'styles'].indexOf(this.name) === -1;
+        required: true,
+        validate: {
+          validator(v) {
+            return ['new', 'admin', 'images', 'scripts', 'styles'].indexOf(v.toLowerCase()) === -1;
+          },
         },
       },
       videos: [this.videoSchema],
