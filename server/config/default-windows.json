@@ -1,7 +1,7 @@
 {
   "port": 8080,
   "downloads": "C:\\rgbtv\\downloads",
-  "database": "mongodb://localhost/",
+  "database": "mongodb://localhost/rgbtv",
   "username": "username",
   "password": "password",
   "defaultChannel": "default"
