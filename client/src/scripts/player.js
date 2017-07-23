@@ -7,67 +7,129 @@ Vue.use(VueResource);
 
 class PlayerPage {
   static init() {
-    return;
     this.knobRate = 1; // Time in seconds to move when the knob turns
     this.doubleTapDelay = 300; // Time in ms to consider a double tap
 
-    this._channelName = document.location.pathname.split('/')[1] || 'default';
-
-    // Get the list of videos
-    Vue.resource(`/${this._channelName}/api/videos`)
-      .get()
-      .catch(() => window.alert('Couldn\'t load data. Is the database server running?'))
-      .then((res) => {
-        const videos = res.body;
-        this._buildApp(videos);
-        this._getUpdates(videos);
-        document.body.style.visibility = 'visible';
-      });
+    PlayerPage.app = PlayerPage.buildApp();
+    PlayerPage.parseLocation();
+    document.body.style.visibility = 'visible';
+    window.addEventListener('popstate', PlayerPage.parseLocation);
   }
 
-  static _parseVideo(video) {
+  static parseLocation() {
+    const parts = document.location.pathname.toLowerCase().split('/').slice(1);
+    PlayerPage.app.tuner = parts.shift() || null;
+    PlayerPage.app.channel = parts.shift() || null;
+    PlayerPage.app.video = parts.shift() || null;
+  }
+
+  static parseVideo(video) {
     video.added = new Date(video.added);
     video.created = new Date(video.created);
   }
 
-  static _buildApp(videos) {
-    videos.forEach(v => this._parseVideo(v));
-
-    PlayerPage.app = new Vue({
+  static buildApp() {
+    return new Vue({
       el: '#app',
 
-      data: {
-        selectedVideo: null,
-        videos,
-        channelName: this._channelName,
-        progress: 0,
-        showInfo: false,
-        playSound: false,
-        controllerConnected: false,
-        controllerBattery: 0,
+      data() {
+        return {
+          tuner: undefined,
+          video: undefined,
+          videos: [],
+          channel: undefined,
+          progress: 0,
+          showInfo: false,
+          playSound: false,
+          controllerConnected: false,
+          controllerBattery: 0,
+        };
       },
 
       watch: {
-        selectedVideo(newValue) {
+        channel() {
+          console.info(`Getting videos for ${this.channel}`);
+          Vue.resource(`/api/videos/${this.channel || ''}`)
+            .get()
+            .catch(() => window.alert('Couldn\'t load data.'))
+            .then((res) => {
+              const videos = res.body;
+              videos.forEach(v => PlayerPage.parseVideo(v));
+              this.videos = videos;
+              this.video = this.videos.find(v => v._id === this.video);
+              PlayerPage.getUpdates();
+            });
+        },
+
+        video(newValue) {
           if (!newValue) {
-            this.selectedVideo = null;
+            this.video = null;
             this.playSound = false;
             this.showInfo = false;
             this.progress = 0;
-            return;
+          } else if (typeof newValue === 'object') {
+            newValue.played = true;
           }
-          newValue.played = true;
+
+          const tuner = this.tuner ? this.tuner : '';
+          const channel = this.channel ? this.channel : '';
+          let video = this.video;
+          if (!video) {
+            video = '';
+          } else if (typeof this.video === 'object') {
+            video = video._id;
+          }
+
+          const state = `${document.location.protocol}//${document.location.host}/${tuner}/${channel}/${video}`;
+          history.pushState(null, '', state);
         },
       },
 
       methods: {
+        // Select another random video
+        nextVideo() {
+          if (!this.videos.length) {
+            if (this.video) {
+              const msg = {
+                tuner: this.tuner,
+                channel: this.channel,
+                video: null,
+              };
+              console.info('sending', 'tunerChanged', msg);
+              PlayerPage.socket.emit('tunerChanged', msg);
+            }
+            return;
+          }
+
+          let unplayed = this.videos.filter(v => !v.played && v.loaded);
+
+          if (unplayed.length === 0) {
+            // All videos played
+            this.videos.forEach(v => (v.played = false));
+            if (this.videos.length > 1) {
+              unplayed = this.videos.filter(v => !v.played && v.loaded && v._id !== this.video._id);
+            } else {
+              unplayed = this.videos.filter(v => !v.played && v.loaded);
+            }
+          }
+
+          const random = unplayed[Math.floor(Math.random() * unplayed.length)];
+          const msg = {
+            tuner: this.tuner,
+            channel: this.channel,
+            video: random ? random._id : null,
+          };
+          console.info('sending', 'tunerChanged', msg);
+          PlayerPage.socket.emit('tunerChanged', msg);
+        },
+
         onProgressChanged(progress) {
           this.progress = progress;
         },
 
         // Cycle through every combination of info/audio.
         onPlayModeChanged() {
-          if (!this.selectedVideo || !this.videos.length) {
+          if (!this.video || !this.videos.length) {
             return;
           }
           if (!this.showInfo && !this.playSound) {
@@ -80,13 +142,21 @@ class PlayerPage {
             this.playSound = false;
           }
         },
+
+        onVideoEnded() {
+          this.nextVideo();
+        },
+
+        onNextRequested() {
+          this.nextVideo();
+        },
       },
 
       components: {
 
         // Component containing the actual <video> tag.
         'video-player': {
-          props: ['video', 'playSound', 'channelName'],
+          props: ['video', 'playSound', 'channel'],
           methods: {
 
             // Set the volume on start.
@@ -103,7 +173,7 @@ class PlayerPage {
 
             // Go to the next video when the current one ends.
             onEnded() {
-              PlayerPage.nextVideo();
+              this.$emit('video-ended');
             },
           },
 
@@ -164,7 +234,7 @@ class PlayerPage {
                 // Double tap, go to next video
                 clearTimeout(this.$tapTimeout);
                 this.$tapTimeout = null;
-                PlayerPage.nextVideo();
+                this.$emit('next-requested');
               } else {
                 this.$tapTimeout = setTimeout(() => {
                   // Single tap, toggle info
@@ -179,82 +249,93 @@ class PlayerPage {
     });
   }
 
-  static _getUpdates(videos) {
-    const player = document.getElementsByTagName('video')[0];
+  static getUpdates() {
+    if (PlayerPage.subscribed) {
+      return;
+    }
 
-    this.videoSocket = io.connect();
-    this.videoSocket.on('connect', () => this.videoSocket.emit('joinChannel', this._channelName));
+    PlayerPage.subscribed = true;
 
-    // Some tuner has to pick the first video.
-    this.videoSocket.on('connect', () => {
-      this.selectFirstVideo = setTimeout(this.nextVideo.bind(this), 1000);
-    });
+    const app = PlayerPage.app;
+
+    this.socket = io.connect();
 
     // Reload on reconnect, like when new changes are deployed.
-    this.videoSocket.on('reconnect', () => {
-      window.location.reload(true);
+    this.socket.on('reconnect', () => window.location.reload(true));
+
+    this.socket.on('connect', () => {
+      const msg = {
+        tuner: app.tuner,
+        channel: app.channel,
+        video: app.video ? app.video._id : null,
+      };
+      console.info('sending', 'tunerOn', msg);
+      this.socket.emit('tunerOn', msg);
     });
 
     // Update the selected video
-    this.videoSocket.on('videoSelected', (videoId) => {
-      if (!videoId) {
-        PlayerPage.app.selectedVideo = null;
+    this.socket.on('tunerChanged', ({ channel, video }) => {
+      console.info('receiving', 'tunerChanged', channel, video);
+      if (channel !== app.channel) {
+        app.video = video;
+        app.channel = channel;
         return;
       }
-
-      clearTimeout(this.selectFirstVideo);
-
-      const next = videos.find(v => v._id === videoId);
-      if (PlayerPage.app.selectedVideo === next) {
-        // If it's the same video (like if there's only one video in the list), just replay
-        player.currentTime = 0;
-        player.play();
-      } else {
-        PlayerPage.app.selectedVideo = next;
+      app.video = app.videos.find(v => v._id === video) || null;
+      if (!app.video) {
+        app.nextVideo();
       }
     });
 
-    // Get new videos
-    this.videoSocket.on('videoAdded', (video) => {
-      this._parseVideo(video);
-      videos.push(video);
-    });
-
-    // Remove videos
-    this.videoSocket.on('videoRemoved', (video) => {
-      const index = videos.findIndex(v => v._id === video._id);
-      if (index !== -1) {
-        videos.splice(index, 1);
+    // Add new videos to the beginning of the list.
+    function addVideo(video) {
+      PlayerPage.parseVideo(video);
+      if (!app.channel || video.channels.find(c => c.name === app.channel)) {
+        app.videos.unshift(video);
       }
-      if (PlayerPage.app.selectedVideo._id === video._id) {
-        PlayerPage.nextVideo();
-      }
-    });
+    }
 
-    // Update existing videos
-    this.videoSocket.on('videoUpdated', (video) => {
-      const index = videos.findIndex(v => v._id === video._id);
+    this.socket.on('videoAdded', ({ video }) => addVideo(video));
+
+    // Remove videos from the list.
+    function removeVideo(videoId) {
+      const index = app.videos.findIndex(v => v._id === videoId);
       if (index === -1) {
         return;
       }
-      this._parseVideo(video);
-      Vue.set(videos, index, video);
+      app.videos.splice(index, 1);
+      if (app.video._id === videoId) {
+        app.nextVideo();
+      }
+    }
+
+    this.socket.on('videoRemoved', ({ videoId, channel }) => removeVideo(videoId, channel));
+
+    // Update the entire video record.
+    this.socket.on('videoUpdated', ({ video }) => {
+      PlayerPage.parseVideo(video);
+      const index = app.videos.findIndex(v => v._id === video._id);
+      const inChannel = !app.channel || video.channels.find(c => c.name === app.channel);
+      if (index !== -1 && inChannel) {
+        // Video properties changed
+        Vue.set(app.videos, index, video);
+      } else if (index === -1 && inChannel) {
+        // Video was added to this channel
+        addVideo(video);
+      } else if (index !== -1 && !inChannel) {
+        // Video was removed from this channel
+        removeVideo(video._id);
+      }
 
       // If a video was loaded and nothing is selected, select the new one
-      if (video.loaded && !PlayerPage.app.selectedVideo) {
-        this.videoSocket.emit('selectVideo', { channelName: this._channelName, videoId: video._id });
+      if (video.loaded && !app.video) {
+        app.nextVideo();
       }
     });
 
-    // Change the channel.
-    this.videoSocket.on('changeChannel', (channel) => {
-      window.location = channel === 'default' ? '/' : `/${channel}/`;
-    });
-
-    this.controllerSocket = io.connect('http://localhost:8181', { reconnectionAttempts: 5 });
-
     // Handle events from the hardware controller.
-    this.controllerSocket.on('controller', (data) => {
+    const player = document.getElementsByTagName('video')[0];
+    this.socket.on('controller', (data) => {
       if (data.knob === 'seekForward') {
         player.currentTime += this.knobRate;
       } else if (data.knob === 'seekBack') {
@@ -262,34 +343,13 @@ class PlayerPage {
       } else if (data.knob === 'nextMode') {
         document.getElementById('click-target').dispatchEvent(new Event('pointerup'));
       } else if (data.status === 'connected') {
-        PlayerPage.app.controllerConnected = true;
+        app.controllerConnected = true;
       } else if (data.status === 'disconnected') {
-        PlayerPage.app.controllerConnected = false;
+        app.controllerConnected = false;
       } else if (data.battery) {
-        PlayerPage.app.controllerBattery = data.battery;
+        app.controllerBattery = data.battery;
       }
     });
-  }
-
-  // Select another random video
-  static nextVideo() {
-    if (!PlayerPage.app.videos.length) {
-      this.videoSocket.emit('selectVideo', { channelName: this._channelName, videoId: null });
-      return;
-    }
-
-    let unplayed = PlayerPage.app.videos.filter(v => !v.played && v.loaded);
-
-    if (unplayed.length === 0) {
-      // All videos played
-      PlayerPage.app.videos.forEach((v) => {
-        v.played = false;
-      });
-      unplayed = PlayerPage.app.videos.filter(v => !v.played && v.loaded);
-    }
-
-    const random = unplayed[Math.floor(Math.random() * unplayed.length)];
-    this.videoSocket.emit('selectVideo', { channelName: this._channelName, videoId: random._id });
   }
 }
 

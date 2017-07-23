@@ -30,13 +30,13 @@
 
   <div id="app">
 
-    <video-player inline-template v-bind:video="selectedVideo" v-bind:channel-name="channelName" v-bind:play-sound="playSound" v-on:progress-changed="onProgressChanged">
+    <video-player inline-template v-bind:video="video" v-bind:channel="channel" v-bind:play-sound="playSound" v-on:progress-changed="onProgressChanged" v-on:video-ended="onVideoEnded">
       <div id="video-player">
-        <video autoplay v-bind:src="(video && video._id ? '/' + channelName + '/content/video/' + video._id : '')" v-on:loadstart="onLoadStart" v-on:timeupdate="onTimeUpdate" v-on:durationchange="onTimeUpdate" v-on:ended="onEnded"></video>
+        <video autoplay v-bind:src="(video && video._id ? '/content/' + video._id + '/video/' : '')" v-on:loadstart="onLoadStart" v-on:timeupdate="onTimeUpdate" v-on:durationchange="onTimeUpdate" v-on:ended="onEnded"></video>
       </div>
     </video-player>
 
-    <video-info inline-template v-bind:video="selectedVideo" v-bind:show-info="showInfo">
+    <video-info inline-template v-bind:video="video" v-bind:show-info="showInfo">
       <transition name="video-info-toggle">
         <div id="video-info" class="video-info" v-if="showInfo">
           <img id="video-qr-code" v-bind:src="qrcode" />
@@ -61,7 +61,7 @@
       <div id="controller-status" v-bind:class="{ shown: connected, lowbatt: battery <= .1 }"></div>
     </controller-status>
 
-    <click-target inline-template v-on:play-mode-changed="onPlayModeChanged">
+    <click-target inline-template v-on:play-mode-changed="onPlayModeChanged" v-on:next-requested="onNextRequested">
       <div id="click-target" v-on:pointerup="onPointerUp" v-on:keyup="onKeyPress" tabindex="0"></div>
     </click-target>
 

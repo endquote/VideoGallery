@@ -7,7 +7,6 @@ Vue.use(VueResource);
 class AdminPage {
   static init() {
     AdminPage.app = AdminPage.buildApp();
-    this.getUpdates();
     AdminPage.parseLocation();
     document.body.style.visibility = 'visible';
     window.addEventListener('popstate', AdminPage.parseLocation);
@@ -42,7 +41,7 @@ class AdminPage {
 
         // When the channel changes, get new data.
         channel() {
-          history.pushState(null, '', `/admin/${this.channel || ''}`);
+          history.pushState(null, '', `${document.location.protocol}//${document.location.host}/admin/${this.channel || ''}`);
           Vue.resource(`/api/videos/${this.channel || ''}`)
             .get()
             .catch(() => window.alert('Couldn\'t load data.'))
@@ -60,6 +59,7 @@ class AdminPage {
               }
               this.channels = channels.current;
               this.invalidChannels = channels.invalid;
+              AdminPage.getUpdates();
             });
         },
       },
@@ -135,6 +135,12 @@ class AdminPage {
 
   // Handle updates to the list from the server.
   static getUpdates() {
+    if (AdminPage.subscribed) {
+      return;
+    }
+
+    AdminPage.subscribed = true;
+
     const app = AdminPage.app;
     this.socket = io.connect();
 

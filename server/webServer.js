@@ -74,12 +74,6 @@ class WebServer {
             return res.sendStatus(200);
           });
         }
-      } else if (root === 'play') {
-        return res.sendFile(path.join(__dirname, '../client/dist/player.html'));
-      } else if (root === 'remote') {
-        return res.sendFile(path.join(__dirname, '../client/dist/remote.html'));
-      } else if (root === 'admin') {
-        return res.sendFile(path.join(__dirname, '../client/dist/admin.html'));
       } else if (root === 'content') {
         // Return media files.
         const videoId = parts.shift();
@@ -105,6 +99,10 @@ class WebServer {
               .catch(() => res.sendStatus(404));
           }
         }
+      } else if (root === 'admin') {
+        return res.sendFile(path.join(__dirname, '../client/dist/admin.html'));
+      } else {
+        return res.sendFile(path.join(__dirname, '../client/dist/player.html'));
       }
 
       return res.sendStatus(404);
