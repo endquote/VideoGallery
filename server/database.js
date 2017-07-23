@@ -1,7 +1,6 @@
 const EventEmitter = require('events').EventEmitter;
 
 const mongoose = require('mongoose');
-const config = require('config');
 
 class Database {
   static init(url = 'mongodb://localhost/') {
@@ -10,11 +9,25 @@ class Database {
       .then(() => console.log('Database connected'))
       .catch(() => console.error('Database connection failed'));
 
-    this.defaultChannel = config.get('defaultChannel');
-
     this.emitter = new EventEmitter();
     this.emitter.setMaxListeners(0);
     Database.on = this.emitter.on.bind(this.emitter);
+
+    const invalidChannels = ['new', 'all', 'admin', 'images', 'scripts', 'styles', '_'];
+    this.invalidChannels = invalidChannels;
+
+    this.channelSchema = new mongoose.Schema({
+      name: {
+        type: String,
+        default: 'default',
+        required: true,
+        validate: {
+          validator(v) {
+            return invalidChannels.indexOf(v.toLowerCase()) === -1;
+          },
+        },
+      },
+    });
 
     this.videoSchema = new mongoose.Schema({
       url: { required: true, type: String, index: true },
@@ -25,168 +38,120 @@ class Database {
       description: { required: false, type: String },
       loaded: { required: true, type: Boolean, default: false },
       duration: { require: true, type: Number, default: 0 },
+      channels: [this.channelSchema],
     });
 
-    this.channelSchema = new mongoose.Schema({
-      name: {
-        type: String,
-        index: { unique: true },
-        default: 'default',
-        required: true,
-        validate: {
-          validator(v) {
-            return ['new', 'admin', 'images', 'scripts', 'styles'].indexOf(v.toLowerCase()) === -1;
-          },
-        },
-      },
-      videos: [this.videoSchema],
-    });
+    this.Video = mongoose.model('video', this.videoSchema);
 
-    this.channels = mongoose.model('channel', this.channelSchema);
+    return Promise.resolve();
   }
 
-  // Called when the server starts.
-  static startup() {
-    // Delete any videos which previously failed to load.
-    this.channels
-      .find({ 'videos.loaded': false })
-      .then((channels) => {
-        channels.forEach((channel) => {
-          channel.videos.forEach((video) => {
-            // TODO: There should be a way to select only the unloaded videos... 
-            return video.loaded ? Promise.resolve() : this.removeVideo(video.id, channel.name);
-          });
-        });
+  // Remove any unloaded videos.
+  static cleanup() {
+    return this.Video.find({ loaded: false })
+      .then((res) => {
+        const removes = [];
+        res.forEach(v => removes.push(this.removeVideo(v.id)));
+        return Promise.all(res);
       });
-
-    // Create the default channel if it isn't there.
-    this.channels.findOne({ name: this.defaultChannel })
-      .then(res => (res ? Promise.resolve() : this.channels.create()));
   }
 
   // Get the list of channels.
   static getChannels() {
-    return this.channels.find().select('name').sort({ name: 1 });
-  }
-
-  // Make a channel.
-  static addChannel(channelName) {
-    return this.channels.create({ name: channelName });
+    return this.Video.find().distinct('channels.name').sort();
   }
 
   // Get all of the videos for a channel.
-  static getVideos(channelName = this.defaultChannel) {
-    return this.channels
-      .findOne({ name: channelName })
-      .select('videos')
-      .then((res) => {
-        if (!res) {
-          return [];
-        }
-        res.videos.sort((a, b) => a.added - b.added);
-        return res.videos;
-      });
+  static getVideos(channel = null) {
+    if (channel === '') {
+      channel = null;
+    }
+
+    if (channel) {
+      return this.Video.find({ 'channels.name': channel });
+    }
+
+    return this.Video.find().sort({ added: -1 });
   }
 
   // Add a video to a channel by URL, returning the new record.
-  static addVideo(videoUrl, channelName = this.defaultChannel) {
-    if (!videoUrl) {
-      return Promise.resolve();
+  static addVideo(url, channel = null) {
+    if (!url) {
+      return Promise.reject('Missing video URL');
     }
 
-    return this.channels
-      .findOne({
-        name: channelName,
-        'videos.url': videoUrl,
-      })
+    if (channel === '') {
+      channel = null;
+    }
+
+    if (channel) {
+      channel = channel.toLowerCase();
+    }
+
+    return this.Video
+      .findOne({ url })
       .then((existingVideo) => {
-        // The video already exists, don't do anything.
-        if (existingVideo) {
-          return Promise.resolve();
+        if (!existingVideo) {
+          // This is a new video.
+          return this.Video.create({ url, added: new Date(), channels: channel !== null ? [{ name: channel }] : [] })
+            .then(doc => this.emitter.emit('videoAdded', { video: doc, channelName: channel }));
         }
 
-        // Does this channel exist?
-        return this.channels.findOne({ name: channelName })
-          .then((existingChannel) => {
-            if (existingChannel) {
-              return Promise.resolve();
-            }
+        if (channel && !existingVideo.channels.find(c => c.name === channel)) {
+          // Add a new channel to an existing video.
+          existingVideo.channels.push({ name: channel });
+          return this.saveVideo(existingVideo);
+        }
 
-            // Nope, create it.
-            return this.channels.create({ name: channelName });
-          })
-          .then(() => {
-            // Add the video.
-            return this.channels.findOneAndUpdate({
-              name: channelName,
-            }, {
-              $push: {
-                videos: {
-                  url: videoUrl,
-                  added: new Date(),
-                },
-              },
-            }, {
-              new: true,
-            });
-          })
-          .then((doc) => {
-            return this.emitter.emit('videoAdded', {
-              channelName,
-              video: doc.videos.find(v => v.url === videoUrl),
-            });
-          });
+        // Add an existing channel to an existing video.
+        return Promise.reject('Video was already in that channel');
       });
   }
 
   // Remove a video from a channel by ID, returning the removed record.
-  static removeVideo(videoId, channelName = this.defaultChannel) {
-    return this.channels
-      .update({
-        name: channelName,
-      }, {
-        $pull: {
-          videos: {
-            _id: videoId,
-          },
-        },
-      })
-      .then((res) => {
-        if (!res.nModified) {
-          return;
+  static removeVideo(id, channel) {
+    if (!id) {
+      return Promise.reject('Missing video ID');
+    }
+
+    if (channel === '') {
+      channel = null;
+    }
+
+    if (channel) {
+      channel = channel.toLowerCase();
+    }
+
+    return this.Video
+      .findOne({ _id: id })
+      .then((existingVideo) => {
+        if (!existingVideo) {
+          // This video doesn't exist.
+          return Promise.reject('Video not found');
         }
-        this.emitter.emit('videoRemoved', {
-          channelName,
-          // TODO: I'd rather actually return the video...
-          video: { id: videoId, _id: videoId },
-        });
+
+        if (!channel) {
+          // Remove video entirely.
+          return this.Video.remove({ _id: id })
+            .then(() => this.emitter.emit('videoRemoved', { videoId: id, channelName: channel }));
+        }
+
+        const channelIndex = existingVideo.channels.findIndex(c => c.name === channel);
+        if (channelIndex === -1) {
+          // This video wasn't in that channel.
+          return Promise.reject('That video is not in that channel');
+        }
+
+        // Remove a video frmo a channel.
+        existingVideo.channels.splice(channelIndex, 1);
+        return this.saveVideo(existingVideo);
       });
   }
 
   // Update a video.
-  static saveVideo(videoDoc, channelName = this.defaultChannel) {
-    // Make a new object which is the video without the id.
-    // There's gotta be a better way.
-    const update = {};
-    Object.keys(this.videoSchema.paths)
-      .filter(k => k !== '_id')
-      .forEach(k => (update[`videos.$.${k}`] = videoDoc[k]));
-
-    return this.channels
-      .findOneAndUpdate({
-        name: channelName,
-        'videos._id': videoDoc._id,
-      }, {
-        $set: update,
-      }, {
-        new: true,
-      })
-      .then((channelDoc) => {
-        this.emitter.emit('videoUpdated', {
-          channelName,
-          video: channelDoc.videos.find(v => v.id === videoDoc.id),
-        });
-      });
+  static saveVideo(videoDoc) {
+    return videoDoc.save()
+      .then(doc => this.emitter.emit('videoUpdated', { video: doc }));
   }
 }
 

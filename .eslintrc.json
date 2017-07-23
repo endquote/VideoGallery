@@ -12,7 +12,8 @@
     "no-param-reassign": "off",
     "no-console": "off",
     "linebreak-style": "off",
-    "arrow-body-style": "off"
+    "arrow-body-style": "off",
+    "max-len": "off"
   },
   "globals": {}
 }

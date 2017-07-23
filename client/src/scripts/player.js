@@ -7,6 +7,7 @@ Vue.use(VueResource);
 
 class PlayerPage {
   static init() {
+    return;
     this.knobRate = 1; // Time in seconds to move when the knob turns
     this.doubleTapDelay = 300; // Time in ms to consider a double tap
 

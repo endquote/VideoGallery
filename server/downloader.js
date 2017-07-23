@@ -1,5 +1,5 @@
 const path = require('path');
-const fs = require('fs-extra-promise');
+const fs = require('fs-extra');
 const childProcess = require('child_process');
 
 const config = require('config');
@@ -16,10 +16,9 @@ class Downloader {
     this.target = target || '../downloads';
     this.target = path.resolve(target);
 
-    this._childProcesses = {};
-
     // The video currently being loaded
     this._adding = null;
+    this._processes = [];
 
     // A queue of additional videos to load
     this._addQueue = [];
@@ -32,13 +31,17 @@ class Downloader {
 
     this._defaultChannel = config.get('defaultChannel');
 
-    fs.ensureDirSync(this.target);
-    Database.on('videoAdded', doc => this.addVideo(doc.video, doc.channelName));
-    Database.on('videoRemoved', doc => this.removeVideo(doc.video, doc.channelName));
+    Database.on('videoAdded', e => this.addVideo(e.video));
+    Database.on('videoRemoved', e => this.removeVideo(e.videoId));
+
+    return fs.ensureDir(this.target);
   }
 
-  static addVideo(doc, channelName = this._defaultChannel) {
-    this._addQueue.push({ video: doc, channelName });
+  static addVideo(videoDoc) {
+    if (videoDoc.loaded) {
+      return;
+    }
+    this._addQueue.push(videoDoc);
     this._nextAdd();
   }
 
@@ -52,20 +55,20 @@ class Downloader {
       return;
     }
     this._adding = this._addQueue.shift();
-    this._childProcesses[this._adding.video.id] = [];
+    this._processes.forEach(p => p.kill());
+    this._processes = [];
     this._getVideoInfo(this._adding);
   }
 
   // Spawn a youtube-dl process to get metadata about the video.
-  static _getVideoInfo(adding) {
-    const video = adding.video;
+  static _getVideoInfo(video) {
     console.info(`Getting info for ${video.url}`);
     const cmd = this.infoCmd.split(' ')[0];
     const args = this.infoCmd.split(' ').slice(1);
     args.push(video.url);
     const opts = { shell: false };
     const ps = childProcess.spawn(cmd, args, opts);
-    this._childProcesses[video.id].push(ps);
+    this._processes.push(ps);
     ps.stdoutBuffer = '';
     ps.stderrBuffer = '';
     ps.stdout.on('data', data => (ps.stdoutBuffer += data.toString()));
@@ -75,16 +78,15 @@ class Downloader {
         return;
       }
       if (code === 0) {
-        this._onVideoInfo(adding, JSON.parse(ps.stdoutBuffer));
+        this._onVideoInfo(video, JSON.parse(ps.stdoutBuffer));
       } else {
-        this._failed(adding, ps.stderrBuffer);
+        this._failed(video, ps.stderrBuffer);
       }
     });
   }
 
   // Save the video info to the database.
-  static _onVideoInfo(adding, info) {
-    const video = adding.video;
+  static _onVideoInfo(video, info) {
     console.info(`Saving info for ${video.url}`);
     if (!info) {
       this._failed(video);
@@ -123,14 +125,13 @@ class Downloader {
     video.url = info.webpage_url;
     video.duration = info.duration;
 
-    Database.saveVideo(video, adding.channelName)
-      .then(() => this._downloadVideo(adding, bestVideo, compatAudio))
-      .catch(() => this._failed(adding));
+    Database.saveVideo(video)
+      .then(() => this._downloadVideo(video, bestVideo, compatAudio))
+      .catch(() => this._failed(video));
   }
 
   // Spawn a youtube-dl process to download the video.
-  static _downloadVideo(adding, videoFmt, audioFmt) {
-    const video = adding.video;
+  static _downloadVideo(video, videoFmt, audioFmt) {
     console.info(`Downloading video ${video.url}`);
     const cmd = this.downloadCmd.split(' ')[0];
     const args = this.downloadCmd.split(' ').slice(1);
@@ -138,11 +139,11 @@ class Downloader {
       args.unshift(`${videoFmt.format_id}+${audioFmt.format_id}`);
       args.unshift('-f');
     }
-    args.push(`${this.target}/${adding.channelName}/${video.id}/${video.id}`);
+    args.push(`${this.target}/${video.id}/${video.id}`);
     args.push(video.url);
     const opts = { shell: false };
     const ps = childProcess.spawn(cmd, args, opts);
-    this._childProcesses[video.id].push(ps);
+    this._processes.push(ps);
     ps.stdout.on('data', data => console.info(data.toString()));
     ps.stderr.on('data', data => console.warn(data.toString()));
     ps.on('exit', (code) => {
@@ -150,23 +151,22 @@ class Downloader {
         return;
       }
       if (code === 0) {
-        this._onVideoLoaded(adding);
+        this._onVideoLoaded(video);
       } else {
-        this._failed(adding);
+        this._failed(video);
       }
     });
   }
 
   // Resize the thumbnail image.
-  static _onVideoLoaded(adding) {
-    const video = adding.video;
+  static _onVideoLoaded(video) {
     const cmd = 'convert';
-    const inFile = path.join(this.target, adding.channelName, video.id, `${video.id}.jpg`);
-    const outFile = path.join(this.target, adding.channelName, video.id, `${video.id}-resized.jpg`);
+    const inFile = path.join(this.target, video.id, `${video.id}.jpg`);
+    const outFile = path.join(this.target, video.id, `${video.id}-resized.jpg`);
     const args = [inFile, '-resize', this.thumbnailWidth, outFile];
     const opts = { shell: false };
     const ps = childProcess.spawn(cmd, args, opts);
-    this._childProcesses[video.id].push(ps);
+    this._processes.push(ps);
     ps.stdout.on('data', data => console.info(data.toString()));
     ps.stderr.on('data', data => console.warn(data.toString()));
     ps.on('exit', (code) => {
@@ -174,50 +174,45 @@ class Downloader {
         return;
       }
       if (code === 0) {
-        this._onResized(adding);
+        this._onResized(video);
       } else {
-        this._failed(adding);
+        this._failed(video);
       }
     });
   }
 
   // Save that the video has been loaded.
-  static _onResized(adding) {
-    const video = adding.video;
+  static _onResized(video) {
     video.loaded = true;
-    Database.saveVideo(video, adding.channelName);
-    if (this._childProcesses[video.id]) {
-      this._childProcesses[video.id].forEach(p => p.kill());
-      delete this._childProcesses[video.id];
-    }
+    Database.saveVideo(video);
     this._adding = null;
     this._nextAdd();
   }
 
-  static _failed(adding, err) {
-    const video = adding.video;
+  // If a download fails, kill any related processes and remove the video.
+  static _failed(video, err) {
     if (err) {
       console.warn(err);
     }
-    if (!video.loaded) {
-      this.removeVideo(video, adding.channelName);
-    }
+    this._processes.forEach(p => p.kill());
+    this._processes = [];
+    this.removeVideo(video);
     this._adding = null;
     this._nextAdd();
   }
 
-  // Kill any download processes and delete any files related to a deleted record.
-  static removeVideo(video, channelName) {
-    if (!video) {
-      return;
+  // Delete any files related to a video.
+  static removeVideo(id) {
+    if (!id) {
+      return Promise.reject('Missing id');
     }
-    console.info(`Deleting video ${video.id} from ${channelName}`);
-    if (this._childProcesses[video.id]) {
-      this._childProcesses[video.id].forEach(p => p.kill());
-      delete this._childProcesses[video.id];
-    }
-    fs.removeSync(path.join(this.target, channelName, video.id), err => console.warn(err));
-    Database.removeVideo(video.id, channelName);
+    console.info(`Deleting video ${id}`);
+    return fs.remove(path.join(this.target, id))
+      .catch(err => console.warn(err))
+
+      // Delete from the database too, though it's probably already gone.
+      .then(() => Database.removeVideo(id))
+      .catch(() => true);
   }
 }
 
