@@ -7,8 +7,15 @@ Vue.use(VueResource);
 class AdminPage {
   static init() {
     AdminPage.app = AdminPage.buildApp();
+    AdminPage.app.channel = null;
     document.body.style.visibility = 'visible';
     window.addEventListener('popstate', AdminPage.parseLocation);
+  }
+
+  static parseLocation() {
+    const parts = document.location.pathname.toLowerCase().split('/').slice(1);
+    this._root = parts.shift() || 'admin';
+    AdminPage.app.channel = parts.shift() || null;
   }
 
   static parseVideo(video) {
@@ -26,35 +33,35 @@ class AdminPage {
           channels: [],
           invalidChannels: [],
           videos: [],
-          channel: null,
+          channel: undefined,
           tuner: undefined,
           tuners: [],
         };
       },
 
-      mounted() {
-        Vue.resource(`/api/videos/${this.channel || ''}`)
-          .get()
-          .catch(() => window.alert('Couldn\'t load data.'))
-          .then((res) => {
-            const videos = res.body;
-            videos.forEach(v => AdminPage.parseVideo(v));
-            this.videos = videos;
-            return Vue.resource('/api/channels').get();
-          })
-          .then((res) => {
-            const channels = res.body;
-            if (this.channel && channels.current.indexOf(this.channel) === -1) {
-              channels.current.push(this.channel);
-              channels.current.sort();
-            }
-            this.channels = channels.current;
-            this.invalidChannels = channels.invalid;
-            AdminPage.getUpdates();
-          });
-      },
-
       watch: {
+        // When the channel changes, get new data.
+        channel() {
+          Vue.resource(`/api/videos/${this.channel || ''}`)
+            .get()
+            .catch(() => window.alert('Couldn\'t load data.'))
+            .then((res) => {
+              const videos = res.body;
+              videos.forEach(v => AdminPage.parseVideo(v));
+              this.videos = videos;
+              return Vue.resource('/api/channels').get();
+            })
+            .then((res) => {
+              const channels = res.body;
+              if (this.channel && channels.current.indexOf(this.channel) === -1) {
+                channels.current.push(this.channel);
+                channels.current.sort();
+              }
+              this.channels = channels.current;
+              this.invalidChannels = channels.invalid;
+              AdminPage.getUpdates();
+            });
+        },
 
         tuners(newValue) {
           if (this.tuner) {
