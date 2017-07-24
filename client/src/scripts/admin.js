@@ -7,15 +7,8 @@ Vue.use(VueResource);
 class AdminPage {
   static init() {
     AdminPage.app = AdminPage.buildApp();
-    AdminPage.parseLocation();
     document.body.style.visibility = 'visible';
     window.addEventListener('popstate', AdminPage.parseLocation);
-  }
-
-  static parseLocation() {
-    const parts = document.location.pathname.toLowerCase().split('/').slice(1);
-    this._root = parts.shift() || 'admin';
-    AdminPage.app.channel = parts.shift() || null;
   }
 
   static parseVideo(video) {
@@ -33,34 +26,40 @@ class AdminPage {
           channels: [],
           invalidChannels: [],
           videos: [],
-          channel: undefined,
+          channel: null,
+          tuner: undefined,
+          tuners: [],
         };
+      },
+
+      mounted() {
+        Vue.resource(`/api/videos/${this.channel || ''}`)
+          .get()
+          .catch(() => window.alert('Couldn\'t load data.'))
+          .then((res) => {
+            const videos = res.body;
+            videos.forEach(v => AdminPage.parseVideo(v));
+            this.videos = videos;
+            return Vue.resource('/api/channels').get();
+          })
+          .then((res) => {
+            const channels = res.body;
+            if (this.channel && channels.current.indexOf(this.channel) === -1) {
+              channels.current.push(this.channel);
+              channels.current.sort();
+            }
+            this.channels = channels.current;
+            this.invalidChannels = channels.invalid;
+            AdminPage.getUpdates();
+          });
       },
 
       watch: {
 
-        // When the channel changes, get new data.
-        channel() {
-          history.pushState(null, '', `${document.location.protocol}//${document.location.host}/admin/${this.channel || ''}`);
-          Vue.resource(`/api/videos/${this.channel || ''}`)
-            .get()
-            .catch(() => window.alert('Couldn\'t load data.'))
-            .then((res) => {
-              const videos = res.body;
-              videos.forEach(v => AdminPage.parseVideo(v));
-              this.videos = videos;
-              return Vue.resource('/api/channels').get();
-            })
-            .then((res) => {
-              const channels = res.body;
-              if (this.channel && channels.current.indexOf(this.channel) === -1) {
-                channels.current.push(this.channel);
-                channels.current.sort();
-              }
-              this.channels = channels.current;
-              this.invalidChannels = channels.invalid;
-              AdminPage.getUpdates();
-            });
+        tuners(newValue) {
+          if (this.tuner) {
+            this.tuner = newValue.find(t => t.name === this.tuner.name);
+          }
         },
       },
 
@@ -68,6 +67,24 @@ class AdminPage {
         // When the channel-list emits a change event, change the channel.
         onChannelChanged(newChannel) {
           this.channel = newChannel;
+          if (this.tuner) {
+            const msg = {
+              tuner: this.tuner.name,
+              channel: this.channel,
+              video: null,
+            };
+            console.info('sending', 'tunerChanged', msg);
+            AdminPage.socket.emit('tunerChanged', msg);
+          }
+        },
+
+        onTunerChanged(tuner) {
+          this.tuner = tuner;
+          if (tuner === null) {
+            this.channel = null;
+          } else {
+            this.channel = tuner.channel;
+          }
         },
       },
 
@@ -129,6 +146,22 @@ class AdminPage {
             },
           },
         },
+
+        'tuner-list': {
+          props: ['tuners', 'tuner'],
+          methods: {
+            onTunerChanged(e) {
+              let tuner = null;
+              if (e.target.selectedIndex === 0) {
+                tuner = null;
+              } else {
+                tuner = e.target.options[e.target.selectedIndex].value;
+                tuner = this.tuners.find(t => t.name === tuner);
+              }
+              return this.$emit('tuner-changed', tuner);
+            },
+          },
+        },
       },
     });
   }
@@ -184,6 +217,12 @@ class AdminPage {
         // Video was removed from this channel
         removeVideo(video._id);
       }
+    });
+
+    this.socket.on('connect', () => this.socket.emit('tunerAdmin'));
+
+    this.socket.on('tunerChanged', (tuners) => {
+      AdminPage.app.tuners = tuners;
     });
   }
 }

@@ -57,7 +57,12 @@ class PlayerPage {
               videos.forEach(v => PlayerPage.parseVideo(v));
               this.videos = videos;
               this.video = this.videos.find(v => v._id === this.video);
-              PlayerPage.getUpdates();
+
+              if (!PlayerPage.subscribed) {
+                PlayerPage.getUpdates();
+              } else if (!this.video) {
+                this.nextVideo();
+              }
             });
         },
 
@@ -250,10 +255,6 @@ class PlayerPage {
   }
 
   static getUpdates() {
-    if (PlayerPage.subscribed) {
-      return;
-    }
-
     PlayerPage.subscribed = true;
 
     const app = PlayerPage.app;
