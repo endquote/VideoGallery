@@ -93,6 +93,19 @@ class AdminPage {
             this.channel = tuner.channel;
           }
         },
+
+        onVideoSelected(video) {
+          if (!this.tuner) {
+            return;
+          }
+          const msg = {
+            tuner: this.tuner.name,
+            channel: this.channel,
+            video: video._id,
+          };
+          console.info('sending', 'tunerChanged', msg);
+          AdminPage.socket.emit('tunerChanged', msg);
+        },
       },
 
       components: {
@@ -145,6 +158,12 @@ class AdminPage {
               if (window.confirm(`Are you sure you want to delete "${this.video.title || this.video.url}"`)) {
                 Vue.http.patch('/api/video', { id: this.video._id, channel: this.channel });
               }
+            },
+            selectVideo() {
+              if (!this.video.loaded) {
+                return;
+              }
+              this.$emit('video-selected', this.video);
             },
           },
           computed: {
