@@ -103,6 +103,10 @@ class AdminPage {
           console.info('sending', 'tunerChanged', msg);
           AdminPage.socket.emit('tunerChanged', msg);
         },
+
+        onTunerNext(tuner) {
+          AdminPage.socket.emit('tunerNext', tuner.name);
+        },
       },
 
       components: {
@@ -132,6 +136,7 @@ class AdminPage {
           },
         },
 
+        // List of tuners
         'tuner-list': {
           props: ['tuners', 'tuner'],
           methods: {
@@ -148,8 +153,15 @@ class AdminPage {
           },
         },
 
+        // Playback controls for current tuner
         'tuner-control': {
           props: ['tuner'],
+
+          methods: {
+            nextVideo() {
+              return this.$emit('tuner-next', this.tuner);
+            },
+          },
         },
 
         // Video entry form

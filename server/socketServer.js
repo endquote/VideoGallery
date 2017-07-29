@@ -24,39 +24,59 @@ class SocketServer {
       // Called by a tuner when it first connects, to set/get state on the tuner.
       socket.on('tunerOn', ({ tuner, channel, video }) => {
         tuner = tuner || SocketServer.defaultTunerName;
-        const state = SocketServer.getTunerState(tuner);
+        const state = SocketServer.getTunerState(tuner, socket);
         // A new instance of a tuner can specify a video, but can't say no video.
         state.video = video || state.video;
         // A new instance of a tuner can specify a new channel.
         state.channel = channel;
         socket.join(tuner);
-        console.info('tunerOn', tuner, JSON.stringify(state));
-        io.sockets.in(tuner).emit('tunerChanged', state);
-        io.sockets.in('admin').emit('tunerChanged', SocketServer.getTunerList());
+        this.sendTunerState(io, tuner);
       });
 
       // Whenever a tuner changes channels/videos, tell the other instances.
       socket.on('tunerChanged', ({ tuner, channel, video }) => {
         tuner = tuner || SocketServer.defaultTunerName;
-        const state = SocketServer.getTunerState(tuner);
+        const state = SocketServer.getTunerState(tuner, socket);
         state.video = video;
         state.channel = channel;
-        console.info('tunerChanged', tuner, JSON.stringify(state));
-        io.sockets.in(tuner).emit('tunerChanged', state);
-        io.sockets.in('admin').emit('tunerChanged', SocketServer.getTunerList());
+        this.sendTunerState(io, tuner);
       });
 
       socket.on('tunerAdmin', () => {
         socket.join('admin');
         socket.emit('tunerChanged', SocketServer.getTunerList());
       });
+
+      socket.on('tunerNext', (tuner) => {
+        this.tunerStates[tuner].sockets[0].emit('nextVideo');
+      });
+
+      socket.on('disconnect', () => {
+        Object.keys(this.tunerStates).forEach((t) => {
+          const i = this.tunerStates[t].sockets.indexOf(socket);
+          if (i !== -1) {
+            this.tunerStates[t].sockets.splice(i, 1);
+          }
+        });
+      });
     });
   }
 
-  static getTunerState(tuner) {
-    tuner = tuner || '';
-    this.tunerStates[tuner] = this.tunerStates[tuner] || { tuner, channel: null, video: null };
-    return this.tunerStates[tuner];
+  static getTunerState(tuner, socket) {
+    tuner = tuner || this.defaultTunerName;
+    const state = this.tunerStates[tuner] || { tuner, channel: null, video: null, sockets: [] };
+    if (socket && state.sockets.indexOf(socket) === -1) {
+      state.sockets.push(socket);
+    }
+    this.tunerStates[tuner] = state;
+    return state;
+  }
+
+  static sendTunerState(io, tuner) {
+    let state = this.getTunerState(tuner);
+    state = { tuner, channel: state.channel, video: state.video };
+    io.sockets.in(tuner).emit('tunerChanged', state);
+    io.sockets.in('admin').emit('tunerChanged', SocketServer.getTunerList());
   }
 
   static getTunerList() {

@@ -351,6 +351,8 @@ class PlayerPage {
       }
     });
 
+    this.socket.on('nextVideo', () => app.nextVideo());
+
     // Handle events from the hardware controller.
     const player = document.getElementsByTagName('video')[0];
     this.socket.on('controller', (data) => {
