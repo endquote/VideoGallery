@@ -23,8 +23,8 @@ class Downloader {
     this._addQueue = [];
 
     // https://github.com/rg3/youtube-dl/blob/master/README.md
-    this.infoCmd = 'youtube-dl --dump-json --playlist-items 1';
-    this.downloadCmd = 'youtube-dl --write-thumbnail --no-progress --playlist-items 1 -o';
+    this.infoCmd = 'youtube-dl -v --dump-json --playlist-items 1';
+    this.downloadCmd = 'youtube-dl -v --write-thumbnail --no-progress --playlist-items 1 -o';
 
     this.thumbnailWidth = 600;
 
@@ -128,7 +128,7 @@ class Downloader {
       args.unshift(`${videoFmt.format_id}+${audioFmt.format_id}`);
       args.unshift('-f');
     }
-    args.push(`${this.target}/${doc.id}/${doc.id}`);
+    args.push(`${this.target}/${doc.id}/${doc.id}.${videoFmt.ext}`);
     args.push(doc.url);
     const opts = { shell: false };
     const ps = childProcess.spawn(cmd, args, opts);
