@@ -155,6 +155,10 @@ class PlayerPage {
         onNextRequested() {
           this.nextVideo();
         },
+
+        onVideoError() {
+          this.nextVideo();
+        },
       },
 
       components: {
@@ -191,7 +195,7 @@ class PlayerPage {
                 return;
               }
               console.error(err);
-              PlayerPage.nextVideo();
+              this.$emit('videoError', err);
             },
           },
 
