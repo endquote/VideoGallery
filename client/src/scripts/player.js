@@ -97,6 +97,19 @@ class PlayerPage {
             onEnded() {
               PlayerPage.nextVideo();
             },
+
+            onError(err) {
+              err = err.target.error;
+              if (!err) {
+                return;
+              }
+              const empty = 'MEDIA_ELEMENT_ERROR: Empty src attribute';
+              if (err.message === empty) {
+                return;
+              }
+              console.error(err);
+              PlayerPage.nextVideo();
+            },
           },
 
           watch: {
