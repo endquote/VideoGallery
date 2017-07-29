@@ -32,7 +32,7 @@
 
     <video-player inline-template v-bind:video="video" v-bind:channel="channel" v-bind:play-sound="playSound" v-on:progress-changed="onProgressChanged" v-on:video-ended="onVideoEnded">
       <div id="video-player">
-        <video autoplay v-bind:src="(video && video._id ? '/content/' + video._id + '/video/' : '')" v-on:loadstart="onLoadStart" v-on:timeupdate="onTimeUpdate" v-on:durationchange="onTimeUpdate" v-on:ended="onEnded"></video>
+        <video autoplay v-bind:src="(video && video._id ? '/content/' + video._id + '/video/' : '')" v-on:loadstart="onLoadStart" v-on:timeupdate="onTimeUpdate" v-on:durationchange="onTimeUpdate" v-on:ended="onEnded" v-on:error="onError"></video>
       </div>
     </video-player>
 
