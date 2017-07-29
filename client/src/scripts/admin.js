@@ -63,6 +63,7 @@ class AdminPage {
           newValue.forEach(t => (t.video = this.videos.find(v => v._id === t.video)));
           if (this.tuner) {
             this.tuner = newValue.find(t => t.name === this.tuner.name);
+            this.channel = this.tuner.channel;
           }
         },
       },
