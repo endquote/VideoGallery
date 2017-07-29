@@ -30,32 +30,46 @@
 
   <div id="app">
 
-    <tuner-list id="tuner-list" inline-template v-bind:tuners="tuners" v-bind:tuner="tuner" v-on:tuner-changed="onTunerChanged">
-      <select v-on:change="onTunerChanged">
+    <tuner-list inline-template v-bind:tuners="tuners" v-bind:tuner="tuner" v-on:tuner-changed="onTunerChanged">
+      <select id="tuner-list" v-on:change="onTunerChanged">
         <option value="" :selected="tuner === undefined ? 'selected' : null">admin</option>
         <option :value="i.name" v-for="i in tuners" :selected="i === tuner ? 'selected' : null">{{ i.name || 'default' }}</option>
       </select>
     </tuner-list>
 
-    <channel-list id="channel-list" inline-template v-bind:channels="channels" v-bind:invalid-channels="invalidChannels" v-bind:channel="channel" v-on:channel-changed="onChannelChanged">
-      <select v-on:change="channelChanged">
+    <channel-list inline-template v-bind:channels="channels" v-bind:invalid-channels="invalidChannels" v-bind:channel="channel" v-on:channel-changed="onChannelChanged">
+      <select id="channel-list" v-on:change="channelChanged">
         <option value="" :selected="channel === null ? 'selected' : null">all</option>
         <option :value="i" v-for="i in channels" :selected="i === channel ? 'selected' : null">{{ i }}</option>
         <option value="new">new channel...</option>
       </select>
     </channel-list>
 
+    <tuner-control inline-template v-if="tuner" v-bind:tuner="tuner">
+      <div id="tuner-control">
+        <div id="tuner-control-title" v-if="tuner.video"><a v-bind:href="'#' + tuner.video._id">{{ tuner.video.title }}</a></div>
+        <div id="tuner-control-buttons">
+          <button>⏭</button>
+          <button>⏪</button>
+          <button>⏩</button>
+          <button>ℹ️</button>
+          <button>🔈</button>
+        </div>
+      </div>
+    </tuner-control>
+
     <video-add inline-template v-bind:channel="channel">
       <div>
         <form v-on:submit.prevent="submit">
-          <input type="text" class="video-add-url" placeholder="paste URL to add" />
+          <input type="text" id="video-add-url" placeholder="paste URL to add" />
         </form>
       </div>
     </video-add>
 
     <ul id="video-list">
-      <video-item inline-template v-for="item in videos" :key="item._id" v-bind:video="item" v-bind:channel="channel" v-bind:class="{ selected: tuner && tuner.video === item._id }" v-on:video-selected="onVideoSelected">
+      <video-item inline-template v-for="item in videos" :key="item._id" v-bind:video="item" v-bind:channel="channel" v-bind:class="{ selected: tuner && tuner.video._id === item._id }" v-on:video-selected="onVideoSelected">
         <li class="video-item" v-on:click="selectVideo">
+          <a v-bind:name="video._id"></a>
           <h1><a class="link-source" v-bind:href="video.url" target="_blank">{{ video.title ? video.title : 'Loading...' }}</a></h1>
           <div class="video-thumbnail" v-bind:style="{ backgroundImage: 'url('+thumbnail+')' }">
             <div class="video-delete" v-on:click="removeVideo">✖</div>

@@ -9,13 +9,6 @@ class AdminPage {
     AdminPage.app = AdminPage.buildApp();
     AdminPage.app.channel = null;
     document.body.style.visibility = 'visible';
-    window.addEventListener('popstate', AdminPage.parseLocation);
-  }
-
-  static parseLocation() {
-    const parts = document.location.pathname.toLowerCase().split('/').slice(1);
-    this._root = parts.shift() || 'admin';
-    AdminPage.app.channel = parts.shift() || null;
   }
 
   static parseVideo(video) {
@@ -64,6 +57,10 @@ class AdminPage {
         },
 
         tuners(newValue) {
+          if (!newValue) {
+            return;
+          }
+          newValue.forEach(t => (t.video = this.videos.find(v => v._id === t.video)));
           if (this.tuner) {
             this.tuner = newValue.find(t => t.name === this.tuner.name);
           }
@@ -135,6 +132,26 @@ class AdminPage {
           },
         },
 
+        'tuner-list': {
+          props: ['tuners', 'tuner'],
+          methods: {
+            onTunerChanged(e) {
+              let tuner = null;
+              if (e.target.selectedIndex === 0) {
+                tuner = null;
+              } else {
+                tuner = e.target.options[e.target.selectedIndex].value;
+                tuner = this.tuners.find(t => t.name === tuner);
+              }
+              return this.$emit('tuner-changed', tuner);
+            },
+          },
+        },
+
+        'tuner-control': {
+          props: ['tuner'],
+        },
+
         // Video entry form
         'video-add': {
           props: ['channel'],
@@ -169,22 +186,6 @@ class AdminPage {
           computed: {
             thumbnail() {
               return this.video.loaded ? `/content/${this.video._id}/thumbnail/` : '/images/spinner.gif';
-            },
-          },
-        },
-
-        'tuner-list': {
-          props: ['tuners', 'tuner'],
-          methods: {
-            onTunerChanged(e) {
-              let tuner = null;
-              if (e.target.selectedIndex === 0) {
-                tuner = null;
-              } else {
-                tuner = e.target.options[e.target.selectedIndex].value;
-                tuner = this.tuners.find(t => t.name === tuner);
-              }
-              return this.$emit('tuner-changed', tuner);
             },
           },
         },
