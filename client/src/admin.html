@@ -33,7 +33,7 @@
     <tuner-list inline-template v-bind:tuners="tuners" v-bind:tuner="tuner" v-on:tuner-changed="onTunerChanged">
       <select id="tuner-list" v-on:change="onTunerChanged">
         <option value="" :selected="tuner === undefined ? 'selected' : null">admin</option>
-        <option :value="i.name" v-for="i in tuners" :selected="i === tuner ? 'selected' : null">{{ i.name || 'default' }}</option>
+        <option :value="i.name" v-for="i in tuners" :selected="i === tuner ? 'selected' : null">{{ i.name }}</option>
       </select>
     </tuner-list>
 
@@ -52,8 +52,8 @@
           <button v-on:click="nextVideo">⏭</button>
           <button v-on:click="seekBack">⏪</button>
           <button v-on:click="seekForward">⏩</button>
-          <button>ℹ️</button>
-          <button>🔈</button>
+          <button v-on:click="toggleInfo" v-bind:class="{ off: !tuner.info }">ℹ️</button>
+          <button v-on:click="toggleAudio" v-bind:class="{ off: !tuner.audio }">🔈</button>
         </div>
       </div>
     </tuner-control>

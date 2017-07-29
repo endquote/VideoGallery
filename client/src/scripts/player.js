@@ -93,13 +93,15 @@ class PlayerPage {
       methods: {
         // Select another random video
         nextVideo() {
+          const msg = {
+            tuner: this.tuner,
+            channel: this.channel,
+            video: null,
+            audio: this.playSound,
+            info: this.showInfo,
+          };
           if (!this.videos.length) {
             if (this.video) {
-              const msg = {
-                tuner: this.tuner,
-                channel: this.channel,
-                video: null,
-              };
               console.info('sending', 'tunerChanged', msg);
               PlayerPage.socket.emit('tunerChanged', msg);
             }
@@ -119,11 +121,7 @@ class PlayerPage {
           }
 
           const random = unplayed[Math.floor(Math.random() * unplayed.length)];
-          const msg = {
-            tuner: this.tuner,
-            channel: this.channel,
-            video: random ? random._id : null,
-          };
+          msg.video = random ? random._id : null;
           console.info('sending', 'tunerChanged', msg);
           PlayerPage.socket.emit('tunerChanged', msg);
         },
@@ -137,15 +135,26 @@ class PlayerPage {
           if (!this.video || !this.videos.length) {
             return;
           }
-          if (!this.showInfo && !this.playSound) {
-            this.showInfo = true;
-          } else if (this.showInfo && !this.playSound) {
-            this.playSound = true;
-          } else if (this.showInfo && this.playSound) {
-            this.showInfo = false;
-          } else if (!this.showInfo && this.playSound) {
-            this.playSound = false;
+          let showInfo = this.showInfo;
+          let playSound = this.playSound;
+          if (!showInfo && !playSound) {
+            showInfo = true;
+          } else if (showInfo && !playSound) {
+            playSound = true;
+          } else if (showInfo && playSound) {
+            showInfo = false;
+          } else if (!showInfo && playSound) {
+            playSound = false;
           }
+          const msg = {
+            tuner: this.tuner,
+            channel: this.channel,
+            video: this.video._id,
+            audio: playSound,
+            info: showInfo,
+          };
+          console.info('sending', 'tunerChanged', msg);
+          PlayerPage.socket.emit('tunerChanged', msg);
         },
 
         onVideoEnded() {
@@ -292,8 +301,8 @@ class PlayerPage {
     });
 
     // Update the selected video
-    this.socket.on('tunerChanged', ({ channel, video }) => {
-      console.info('receiving', 'tunerChanged', channel, video);
+    this.socket.on('tunerChanged', ({ channel, video, info, audio }) => {
+      console.info('receiving', 'tunerChanged', channel, video, info, audio);
       if (channel !== app.channel) {
         app.video = video;
         app.channel = channel;
@@ -303,6 +312,8 @@ class PlayerPage {
       if (!app.video) {
         app.nextVideo();
       }
+      app.showInfo = info;
+      app.playSound = audio;
     });
 
     // Add new videos to the beginning of the list.

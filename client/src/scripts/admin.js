@@ -163,7 +163,13 @@ class AdminPage {
             },
             seekBack() {
               AdminPage.socket.emit('seekBack', this.tuner.name);
-            }
+            },
+            toggleInfo() {
+              AdminPage.socket.emit('info', this.tuner.name);
+            },
+            toggleAudio() {
+              AdminPage.socket.emit('audio', this.tuner.name);
+            },
           },
         },
 
@@ -264,7 +270,10 @@ class AdminPage {
     this.socket.on('connect', () => this.socket.emit('tunerAdmin'));
 
     this.socket.on('tunerChanged', (tuners) => {
-      AdminPage.app.tuners = tuners;
+      const t = [];
+      Object.keys(tuners).forEach(k => t.push(tuners[k]));
+      t.unshift({ name: 'default' });
+      AdminPage.app.tuners = t;
     });
   }
 }
