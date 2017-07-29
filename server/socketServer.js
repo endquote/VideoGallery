@@ -59,6 +59,9 @@ class SocketServer {
           }
         });
       });
+
+      socket.on('seekForward', tuner => io.sockets.in(tuner).emit('seekForward'));
+      socket.on('seekBack', tuner => io.sockets.in(tuner).emit('seekBack'));
     });
   }
 

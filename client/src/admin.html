@@ -45,13 +45,13 @@
       </select>
     </channel-list>
 
-    <tuner-control inline-template v-if="tuner" v-bind:tuner="tuner" v-on:tuner-next="onTunerNext">
+    <tuner-control inline-template v-if="tuner" v-bind:tuner="tuner">
       <div id="tuner-control">
         <div id="tuner-control-title" v-if="tuner.video"><a v-bind:href="'#' + tuner.video._id">{{ tuner.video.title }}</a></div>
         <div id="tuner-control-buttons">
           <button v-on:click="nextVideo">⏭</button>
-          <button>⏪</button>
-          <button>⏩</button>
+          <button v-on:click="seekBack">⏪</button>
+          <button v-on:click="seekForward">⏩</button>
           <button>ℹ️</button>
           <button>🔈</button>
         </div>

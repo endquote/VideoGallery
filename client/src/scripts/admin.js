@@ -104,10 +104,6 @@ class AdminPage {
           console.info('sending', 'tunerChanged', msg);
           AdminPage.socket.emit('tunerChanged', msg);
         },
-
-        onTunerNext(tuner) {
-          AdminPage.socket.emit('tunerNext', tuner.name);
-        },
       },
 
       components: {
@@ -160,8 +156,14 @@ class AdminPage {
 
           methods: {
             nextVideo() {
-              return this.$emit('tuner-next', this.tuner);
+              AdminPage.socket.emit('tunerNext', this.tuner.name);
             },
+            seekForward() {
+              AdminPage.socket.emit('seekForward', this.tuner.name);
+            },
+            seekBack() {
+              AdminPage.socket.emit('seekBack', this.tuner.name);
+            }
           },
         },
 
