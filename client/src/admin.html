@@ -32,17 +32,17 @@
 
   <tuner-list inline-template :tuners="tuners" :tuner="tuner" v-if="tuners.length" v-on:tuner-changed="onTunerChanged">
     <select id="tuner-list" v-on:change="onTunerChanged">
-        <option value="" :selected="tuner === undefined ? 'selected' : null">admin</option>
-        <option :value="i.name" v-for="i in tuners" :selected="i === tuner ? 'selected' : null">{{ i.name }}</option>
-      </select>
+      <option value="" :selected="tuner === undefined ? 'selected' : null">admin</option>
+      <option :value="i.name" v-for="i in tuners" :selected="i === tuner ? 'selected' : null">{{ i.name }}</option>
+    </select>
   </tuner-list>
 
   <channel-list inline-template :channels="channels" :invalid-channels="invalidChannels" :channel="channel" v-on:channel-changed="onChannelChanged">
     <select id="channel-list" v-on:change="channelChanged">
-        <option value="" :selected="channel === null ? 'selected' : null">all</option>
-        <option :value="i" v-for="i in channels" :selected="i === channel ? 'selected' : null">{{ i }}</option>
-        <option value="new">new channel...</option>
-      </select>
+      <option value="" :selected="channel === null ? 'selected' : null">all</option>
+      <option :value="i" v-for="i in channels" :selected="i === channel ? 'selected' : null">{{ i }}</option>
+      <option value="new">new channel...</option>
+    </select>
   </channel-list>
 
   <tuner-control inline-template v-if="tuner" :tuner="tuner">
