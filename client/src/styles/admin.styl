@@ -3,6 +3,7 @@
 #video-list
   list-style none
   margin 0
+  margin-top 1em
   padding 0
 
 h1
@@ -33,23 +34,32 @@ h1
   text-align center
   background-color white
   padding .8rem
+  cursor default
 
 .video-item.selected 
   outline 2px solid black
-
-button
-  height 50px
-  width 50px
-  background-color white
-  border none
-  font-size 1.8em
 
 a.link-source
   text-overflow ellipsis
   color black
 
-input
+#channel-list, #tuner-list, #video-add-url
   font-family font-body
-  font-size 2em
+  font-size 2.5em
   width 100%
   
+#tuner-control-title
+  font-size 2em
+  white-space nowrap
+  overflow hidden
+  text-overflow ellipsis
+
+#tuner-control-buttons button
+  font-size 2em
+  display inline
+  float left
+  width 20%
+  line-height 1.5em
+
+.off
+  text-decoration line-through

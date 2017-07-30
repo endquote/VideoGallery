@@ -51,9 +51,7 @@ gulp.task('scripts:app:release', () => {
     browserify({
       entries: ['./src/scripts/main.js'],
       debug: true,
-    })
-    .external(vendors)
-    .bundle(),
+    }).external(vendors).bundle(),
     source('main.js'),
     buffer(),
     sourcemaps.init({ loadMaps: true }),
@@ -68,9 +66,7 @@ gulp.task('scripts:app:dev', () => {
     browserify({
       entries: ['./src/scripts/main.js'],
       debug: true,
-    })
-    .external(vendors)
-    .bundle(),
+    }).external(vendors).bundle(),
     source('main.js'),
     buffer(),
     gulp.dest('./dist/scripts/'),
@@ -107,6 +103,7 @@ gulp.task('browser-sync', () => {
   browserSync.init({
     proxy: 'localhost:8080',
     open: false,
+    ghostMode: false,
   });
 });
 

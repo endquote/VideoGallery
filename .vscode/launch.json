@@ -18,5 +18,14 @@
     "env": {
       "NODE_CONFIG_DIR": "C:\\rgbtv"
     }
+  }, {
+    "type": "node",
+    "request": "launch",
+    "name": "powermate - mac",
+    "program": "${workspaceRoot}/controllers/powermate/powermate.js",
+    "cwd": "${workspaceRoot}/controllers/powermate",
+    "env": {
+      "NODE_CONFIG_DIR": "${env:HOME}/rgbtv"
+    }
   }]
 }

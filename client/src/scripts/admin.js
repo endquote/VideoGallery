@@ -6,44 +6,180 @@ Vue.use(VueResource);
 
 class AdminPage {
   static init() {
-    Vue.resource('/videos')
-      .get()
-      .catch(() => window.alert('Couldn\'t load data. Is the database server running?'))
-      .then((res) => {
-        const videos = res.body;
-        this._buildApp(videos);
-        this._getUpdates(videos);
-      });
+    AdminPage.app = AdminPage.buildApp();
+    AdminPage.app.channel = null;
+    document.body.style.visibility = 'visible';
   }
 
-  static _parseVideo(video) {
+  static parseVideo(video) {
     video.added = new Date(video.added);
     video.created = new Date(video.created);
   }
 
   // Init the root Vue component
-  static _buildApp(videos) {
-    videos.forEach(v => this._parseVideo(v));
-
-    this.app = new Vue({
+  static buildApp() {
+    return new Vue({
       el: '#app',
 
-      data: {
-        videos,
-        selectedVideo: {},
+      data() {
+        return {
+          channels: [],
+          invalidChannels: [],
+          videos: [],
+          channel: undefined,
+          tuner: undefined,
+          tuners: [],
+        };
+      },
+
+      watch: {
+        // When the channel changes, get new data.
+        channel() {
+          Vue.resource(`/api/videos/${this.channel || ''}`)
+            .get()
+            .catch(() => window.alert('Couldn\'t load data.'))
+            .then((res) => {
+              const videos = res.body;
+              videos.forEach(v => AdminPage.parseVideo(v));
+              this.videos = videos;
+              return Vue.resource('/api/channels').get();
+            })
+            .then((res) => {
+              const channels = res.body;
+              channels.current.sort();
+              this.channels = channels.current;
+              this.invalidChannels = channels.invalid;
+              AdminPage.getUpdates();
+            });
+        },
+
+        tuners(newValue) {
+          if (!newValue) {
+            return;
+          }
+          newValue.forEach(t => (t.video = this.videos.find(v => v._id === t.video)));
+          if (this.tuner) {
+            this.tuner = newValue.find(t => t.name === this.tuner.name);
+            this.channel = this.tuner.channel;
+          }
+        },
+      },
+
+      methods: {
+        // When the channel-list emits a change event, change the channel.
+        onChannelChanged(newChannel) {
+          this.channel = newChannel;
+          if (this.tuner) {
+            const msg = {
+              tuner: this.tuner.name,
+              channel: this.channel,
+              video: null,
+            };
+            console.info('sending', 'tunerChanged', msg);
+            AdminPage.socket.emit('tunerChanged', msg);
+          }
+        },
+
+        onTunerChanged(tuner) {
+          this.tuner = tuner;
+          if (tuner === null) {
+            this.channel = null;
+          } else {
+            this.channel = tuner.channel;
+          }
+        },
+
+        onVideoSelected(video) {
+          if (!this.tuner) {
+            return;
+          }
+          const msg = {
+            tuner: this.tuner.name,
+            channel: this.channel,
+            video: video._id,
+          };
+          console.info('sending', 'tunerChanged', msg);
+          AdminPage.socket.emit('tunerChanged', msg);
+        },
       },
 
       components: {
 
+        // Channel selector
+        'channel-list': {
+          props: ['channels', 'invalidChannels', 'channel'],
+          methods: {
+            channelChanged(e) {
+              let newChannel = e.target.options[e.target.selectedIndex].value || null;
+              if (newChannel === 'new') {
+                newChannel = window.prompt('What\'s the name of the new channel?') || '';
+                newChannel = newChannel.toLowerCase();
+                if (this.invalidChannels.indexOf(newChannel) !== -1) {
+                  for (let i = 0; i < e.target.options.length; i += 1) {
+                    if (e.target.options[i].value === this.channel) {
+                      e.target.selectedIndex = i;
+                      break;
+                    }
+                  }
+                  return alert('That\'s a lousy name for a channel.');
+                }
+              }
+
+              return this.$emit('channel-changed', newChannel);
+            },
+          },
+        },
+
+        // List of tuners
+        'tuner-list': {
+          props: ['tuners', 'tuner'],
+          methods: {
+            onTunerChanged(e) {
+              let tuner = null;
+              if (e.target.selectedIndex === 0) {
+                tuner = null;
+              } else {
+                tuner = e.target.options[e.target.selectedIndex].value;
+                tuner = this.tuners.find(t => t.name === tuner);
+              }
+              return this.$emit('tuner-changed', tuner);
+            },
+          },
+        },
+
+        // Playback controls for current tuner
+        'tuner-control': {
+          props: ['tuner'],
+
+          methods: {
+            nextVideo() {
+              AdminPage.socket.emit('tunerNext', this.tuner.name);
+            },
+            seekForward() {
+              AdminPage.socket.emit('seekForward', this.tuner.name);
+            },
+            seekBack() {
+              AdminPage.socket.emit('seekBack', this.tuner.name);
+            },
+            toggleInfo() {
+              AdminPage.socket.emit('info', this.tuner.name);
+            },
+            toggleAudio() {
+              AdminPage.socket.emit('audio', this.tuner.name);
+            },
+          },
+        },
+
         // Video entry form
         'video-add': {
+          props: ['channel'],
           methods: {
             submit() {
-              const input = this.$el.getElementsByClassName('video-add-url')[0].value;
+              const input = document.getElementById('video-add-url').value;
               input.split(',').forEach((url) => {
-                this.$http
-                  .post('/video', { url })
-                  .catch(() => false); // Video already added. Alert?
+                Vue.http
+                  .post('/api/video', { url, channel: this.channel })
+                  .catch(err => console.warn(err));
               });
             },
           },
@@ -51,30 +187,23 @@ class AdminPage {
 
         // Each item in the video list
         'video-item': {
-          props: ['video', 'selectedVideo'],
+          props: ['video', 'channel'],
           methods: {
+            removeVideo() {
+              if (window.confirm(`Are you sure you want to delete "${this.video.title || this.video.url}"`)) {
+                Vue.http.patch('/api/video', { id: this.video._id, channel: this.channel });
+              }
+            },
             selectVideo() {
               if (!this.video.loaded) {
                 return;
               }
-              AdminPage.socket.emit('selectVideo', { _id: this.video._id });
-            },
-            removeVideo() {
-              if (window.confirm(`Are you sure you want to delete "${this.video.title || this.video.url}"`)) {
-                this.$http.delete('/video', { body: { _id: this.video._id } });
-              }
+              this.$emit('video-selected', this.video);
             },
           },
           computed: {
             thumbnail() {
-              return this.video.loaded ? `/content/thumbnail/${this.video._id}` : '/images/spinner.gif';
-            },
-          },
-          watch: {
-            selectedVideo(val) {
-              if (val === this.video) {
-                this.$el.scrollIntoView();
-              }
+              return this.video.loaded ? `/content/${this.video._id}/thumbnail/` : '/images/spinner.gif';
             },
           },
         },
@@ -83,43 +212,64 @@ class AdminPage {
   }
 
   // Handle updates to the list from the server.
-  static _getUpdates(videos) {
+  static getUpdates() {
+    if (AdminPage.subscribed) {
+      return;
+    }
+
+    AdminPage.subscribed = true;
+
+    const app = AdminPage.app;
     this.socket = io.connect();
 
     // Reload on reconnect, like when new changes are deployed.
-    this.socket.on('reconnect', () => {
-      window.location.reload(true);
-    });
+    this.socket.on('reconnect', () => window.location.reload(true));
 
     // Add new videos to the beginning of the list.
-    this.socket.on('videoAdded', (video) => {
-      this._parseVideo(video);
-      videos.unshift(video);
-      document.getElementsByTagName('input')[0].value = '';
-    });
+    function addVideo(video) {
+      AdminPage.parseVideo(video);
+      if (!app.channel || video.channels.find(c => c.name === app.channel)) {
+        app.videos.unshift(video);
+        document.getElementsByTagName('input')[0].value = '';
+      }
+    }
+
+    this.socket.on('videoAdded', ({ video }) => addVideo(video));
 
     // Remove videos from the list.
-    this.socket.on('videoRemoved', (video) => {
-      const index = videos.findIndex(v => v._id === video._id);
+    function removeVideo(videoId) {
+      const index = app.videos.findIndex(v => v._id === videoId);
       if (index === -1) {
         return;
       }
-      videos.splice(index, 1);
-    });
+      app.videos.splice(index, 1);
+    }
 
-    // Update the selected video.
-    this.socket.on('videoSelected', (video) => {
-      if (video) {
-        const newVideo = videos.find(v => v._id === video._id);
-        this.app.selectedVideo = newVideo;
+    this.socket.on('videoRemoved', ({ videoId, channel }) => removeVideo(videoId, channel));
+
+    // Update the entire video record.
+    this.socket.on('videoUpdated', ({ video }) => {
+      AdminPage.parseVideo(video);
+      const index = app.videos.findIndex(v => v._id === video._id);
+      const inChannel = !app.channel || video.channels.find(c => c.name === app.channel);
+      if (index !== -1 && inChannel) {
+        // Video properties changed
+        Vue.set(app.videos, index, video);
+      } else if (index === -1 && inChannel) {
+        // Video was added to this channel
+        addVideo(video);
+      } else if (index !== -1 && !inChannel) {
+        // Video was removed from this channel
+        removeVideo(video._id);
       }
     });
 
-    // Update the entire video record.
-    this.socket.on('videoUpdated', (video) => {
-      const index = videos.findIndex(v => v._id === video._id);
-      this._parseVideo(video);
-      Vue.set(videos, index, video);
+    this.socket.on('connect', () => this.socket.emit('tunerAdmin'));
+
+    this.socket.on('tunerChanged', (tuners) => {
+      const t = [];
+      Object.keys(tuners).sort((a, b) => a - b).forEach(k => t.push(tuners[k]));
+      AdminPage.app.tuners = t;
     });
   }
 }

@@ -1,17 +1,17 @@
 {
   "name": "rgbtv-controllers",
   "version": "1.0.0",
-  "main": "main.js",
+  "powermate": "powermate.js",
   "author": "Josh Santangelo <josh@endquote.com>",
-  "description": "Hardware controllers for the Video Gallery application.",
+  "description": "Powermate hardware controller for rgbtv.",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git://github.com/endquote/rgbtv.git"
   },
   "scripts": {
-    "start": "node main.js",
-    "dev": "node ./node_modules/nodemon/bin/nodemon.js --debug=5858 main.js"
+    "start": "node powermate.js",
+    "dev": "node ./node_modules/nodemon/bin/nodemon.js powermate.js"
   },
   "devDependencies": {
     "nodemon": "^1.11.0"
@@ -19,6 +19,6 @@
   "dependencies": {
     "config": "^1.26.1",
     "noble": "^1.8.1",
-    "socket.io": "^2.0.3"
+    "socket.io-client": "2.0.3"
   }
 }
