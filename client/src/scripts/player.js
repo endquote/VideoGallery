@@ -368,22 +368,12 @@ class PlayerPage {
 
     this.socket.on('seekForward', () => (player.currentTime += this.knobRate));
     this.socket.on('seekBack', () => (player.currentTime -= this.knobRate));
+    this.socket.on('nextMode', () => document.getElementById('click-target').dispatchEvent(new Event('pointerup')));
 
     // Handle events from the hardware controller.
-    this.socket.on('controller', (data) => {
-      if (data.knob === 'seekForward') {
-        player.currentTime += this.knobRate;
-      } else if (data.knob === 'seekBack') {
-        player.currentTime -= this.knobRate;
-      } else if (data.knob === 'nextMode') {
-        document.getElementById('click-target').dispatchEvent(new Event('pointerup'));
-      } else if (data.status === 'connected') {
-        app.controllerConnected = true;
-      } else if (data.status === 'disconnected') {
-        app.controllerConnected = false;
-      } else if (data.battery) {
-        app.controllerBattery = data.battery;
-      }
+    this.socket.on('controller', ({ connected, battery }) => {
+      app.controllerConnected = connected;
+      app.controllerBattery = battery;
     });
   }
 }

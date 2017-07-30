@@ -29,8 +29,6 @@ class Downloader {
 
     this.thumbnailWidth = 600;
 
-    this._defaultChannel = config.get('defaultChannel');
-
     Database.on('videoAdded', e => this.addVideo(e.video));
     Database.on('videoRemoved', e => this.removeVideo(e.videoId));
 

@@ -19,20 +19,9 @@ class SocketServer {
 
     // Tell tuners about changes to channels and videos.
     io.on('connection', (socket) => {
-      console.log('UI socket connected');
-
-      // Keep track of the sockets in each tuner.
-      socket.on('disconnect', () => {
-        Object.keys(this.tunerStates).forEach((t) => {
-          const i = this.tunerStates[t].sockets.indexOf(socket);
-          if (i !== -1) {
-            this.tunerStates[t].sockets.splice(i, 1);
-          }
-        });
-      });
-
       // Called by a tuner when it first connects, to set/get state on the tuner.
       socket.on('tunerOn', ({ tuner, channel, video }) => {
+        console.log('Player socket connected');
         tuner = tuner || SocketServer.defaultTunerName;
         const state = SocketServer.getTunerState(tuner, socket);
         // A new instance of a tuner can specify a video, but can't say no video.
@@ -41,6 +30,35 @@ class SocketServer {
         state.channel = channel;
         socket.join(tuner);
         this.sendTunerState(tuner);
+      });
+
+      // Called by the admin page when it first connects.
+      socket.on('tunerAdmin', () => {
+        console.log('Admin socket connected');
+        socket.join('admin');
+        socket.emit('tunerChanged', SocketServer.getTunerStates());
+      });
+
+      // When a controller connects itself, save it.
+      socket.on('controllerOn', (tuner) => {
+        console.log('Controller socket connected');
+        socket.join(tuner);
+        const state = this.getTunerState(tuner);
+        state.controller = socket;
+      });
+
+      // Keep track of the sockets in each tuner.
+      socket.on('disconnect', () => {
+        Object.keys(this.tunerStates).forEach((t) => {
+          const state = this.tunerStates[t];
+          const i = state.sockets.indexOf(socket);
+          if (i !== -1) {
+            state.sockets.splice(i, 1);
+          }
+          if (state.controller === socket) {
+            state.controller = null;
+          }
+        });
       });
 
       // Whenever a tuner changes channels/videos, tell the other instances.
@@ -55,15 +73,12 @@ class SocketServer {
       });
 
       // When the admin page connects, tell it about the tuners.
-      socket.on('tunerAdmin', () => {
-        socket.join('admin');
-        socket.emit('tunerChanged', SocketServer.getTunerStates());
-      });
-
       // Send playback controls to tuners.
       socket.on('tunerNext', tuner => this.getTunerState(tuner).sockets[0].emit('nextVideo'));
       socket.on('seekForward', tuner => io.sockets.in(tuner).emit('seekForward'));
       socket.on('seekBack', tuner => io.sockets.in(tuner).emit('seekBack'));
+      socket.on('nextMode', tuner => io.sockets.in(tuner).emit('nextMode'));
+      socket.on('controller', (tuner, state) => io.sockets.in(tuner).emit('controller', state));
       socket.on('info', (tuner) => {
         const state = this.getTunerState(tuner);
         state.info = !state.info;
@@ -86,6 +101,7 @@ class SocketServer {
       video: null,
       info: false,
       audio: false,
+      controller: null,
       sockets: [],
     };
     if (socket && state.sockets.indexOf(socket) === -1) {
@@ -109,7 +125,7 @@ class SocketServer {
       const original = this.getTunerState(tuner);
       const copy = {};
       Object.keys(original).forEach((k) => {
-        if (k !== 'sockets') {
+        if (k !== 'sockets' && k !== 'controller') {
           copy[k] = original[k];
         }
       });

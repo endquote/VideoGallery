@@ -1,8 +1,9 @@
 {
+  "host": "localhost",
   "port": 8080,
+  "controlTuner": "default",
   "downloads": "~/rgbtv/downloads",
   "database": "mongodb://localhost/rgbtv",
   "username": "username",
-  "password": "password",
-  "defaultChannel": "default"
+  "password": "password"
 }
