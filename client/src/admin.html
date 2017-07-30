@@ -30,7 +30,7 @@
 
   <div id="app">
 
-    <tuner-list inline-template v-bind:tuners="tuners" v-bind:tuner="tuner" v-on:tuner-changed="onTunerChanged">
+    <tuner-list inline-template v-bind:tuners="tuners" v-bind:tuner="tuner" v-if="tuners.length" v-on:tuner-changed="onTunerChanged">
       <select id="tuner-list" v-on:change="onTunerChanged">
         <option value="" :selected="tuner === undefined ? 'selected' : null">admin</option>
         <option :value="i.name" v-for="i in tuners" :selected="i === tuner ? 'selected' : null">{{ i.name }}</option>

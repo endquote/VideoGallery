@@ -272,7 +272,6 @@ class AdminPage {
     this.socket.on('tunerChanged', (tuners) => {
       const t = [];
       Object.keys(tuners).forEach(k => t.push(tuners[k]));
-      t.unshift({ name: 'default' });
       AdminPage.app.tuners = t;
     });
   }
