@@ -46,10 +46,7 @@ class AdminPage {
             })
             .then((res) => {
               const channels = res.body;
-              if (this.channel && channels.current.indexOf(this.channel) === -1) {
-                channels.current.push(this.channel);
-                channels.current.sort();
-              }
+              channels.current.sort();
               this.channels = channels.current;
               this.invalidChannels = channels.invalid;
               AdminPage.getUpdates();
@@ -271,7 +268,7 @@ class AdminPage {
 
     this.socket.on('tunerChanged', (tuners) => {
       const t = [];
-      Object.keys(tuners).forEach(k => t.push(tuners[k]));
+      Object.keys(tuners).sort((a, b) => a - b).forEach(k => t.push(tuners[k]));
       AdminPage.app.tuners = t;
     });
   }
