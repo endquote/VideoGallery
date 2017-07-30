@@ -178,7 +178,7 @@ class AdminPage {
           props: ['channel'],
           methods: {
             submit() {
-              const input = this.$el.getElementsByClassName('video-add-url')[0].value;
+              const input = document.getElementById('video-add-url').value;
               input.split(',').forEach((url) => {
                 Vue.http
                   .post('/api/video', { url, channel: this.channel })
