@@ -11,9 +11,10 @@
   },
   "devDependencies": {
     "eslint": "^4.1.1",
-    "eslint-config-airbnb-base": "^11.0.1",
-    "eslint-plugin-import": "^2.2.0",
-    "js-beautify": "^1.6.8"
+    "eslint-config-prettier": "2.3.0",
+    "eslint-plugin-prettier": "2.1.2",
+    "prettier": "1.5.3",
+    "stylint": "1.5.9"
   },
   "scripts": {
     "postinstall": "npm --prefix ./server install ./server && npm --prefix ./client install ./client",

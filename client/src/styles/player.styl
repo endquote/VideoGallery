@@ -1,131 +1,131 @@
 @import "main.styl"
 
-onepxwide = 0.05208333333vw
-onepxhigh = 0.09259259259vh
-info-margin-w = 30 * onepxwide
-info-margin-h = 30 * onepxhigh
-qr-size = 8vw
+$onepxwide = .05208333333vw
+$onepxhigh = .09259259259vh
+$info-margin-w = 30 * $onepxwide
+$info-margin-h = 30 * $onepxhigh
+$qr-size = 8vw
 
 body
-    user-select none
-    overflow hidden
-    cursor none
+  cursor: none
+  overflow: hidden
+  user-select: none
 
 #video-player
-    background-color black
-    position absolute
-    top 0
-    left 0
-    bottom 0
-    right 0
+  background-color: black
+  bottom: 0
+  left: 0
+  position: absolute
+  right: 0
+  top: 0
 
 .video-info
-    background-color rgba(1, 1, 1, .5)
-    color white
-    position absolute
-    left 0
-    right 0
-    bottom 0
-    height 25vh
+  background-color: rgba(1, 1, 1, .5)
+  bottom: 0
+  color: white
+  height: 25vh
+  left: 0
+  position: absolute
+  right: 0
 
 .video-info-toggle-enter-active, .video-info-toggle-leave-active
-    transition all .2s ease-out
+  transition: all .2s ease-out
 
 .video-info-toggle-enter, .video-info-toggle-leave-to
-    bottom -25vh - onepxwide
+  bottom: -25vh - $onepxwide
 
 .video-info-toggle-enter-to, .video-info-toggle-leave
-    bottom 0
+  bottom: 0
 
 #video-qr-code
-    position absolute
-    top info-margin-h
-    right info-margin-w
-    width qr-size
-    padding onepxwide * 10
-    background-color white
+  background-color: white
+  padding: $onepxwide * 10
+  position: absolute
+  right: $info-margin-w
+  top: $info-margin-h
+  width: $qr-size
 
 #video-info-content-container
-    position absolute
-    left info-margin-w
-    top info-margin-h
-    right (info-margin-w * 2) + qr-size + onepxwide * 10
-    bottom info-margin-h
+  bottom: $info-margin-h
+  left: $info-margin-w
+  position: absolute
+  right: ($info-margin-w * 2) + $qr-size + $onepxwide * 10
+  top: $info-margin-h
 
 #video-info-content
-    overflow hidden
-    column-count 3
-    column-gap (info-margin-w / 2)
-    column-fill auto
-    height 100%
+  column-count: 3
+  column-fill: auto
+  column-gap: ($info-margin-w / 2)
+  height: 100%
+  overflow: hidden
 
 #video-info-author-title
-    column-span all
-    margin-bottom (info-margin-h / 2)
+  column-span: all
+  margin-bottom: ($info-margin-h / 2)
 
 #video-info-title
-    font-weight normal
-    text-overflow ellipsis
-    white-space nowrap
-    overflow hidden
-    margin 0
-    font-size 3vh
-    font-family font-head
+  font-family: font-head
+  font-size: 3vh
+  font-weight: normal
+  margin: 0
+  overflow: hidden
+  text-overflow: ellipsis
+  white-space: nowrap
 
 #video-info-author
-    float right
-    margin 0
-    margin-left info-margin-w
-    margin-top .3em
-    max-width 25%
-    text-overflow ellipsis
-    white-space nowrap
-    overflow hidden
-    font-size 2vh
-    font-weight normal
-    font-family font-head
-    
+  float: right
+  font-family: font-head
+  font-size: 2vh
+  font-weight: normal
+  margin: 0
+  margin-left: $info-margin-w
+  margin-top: .3em
+  max-width: 25%
+  overflow: hidden
+  text-overflow: ellipsis
+  white-space: nowrap
+  
 #video-info-description
-    font-weight normal
-    margin 0
-    font-size 1.5vh
+  font-size: 1.5vh
+  font-weight: normal
+  margin: 0
 
 #video-info.shown
-    bottom 0
+  bottom: 0
 
 #video-progress
-    background-color white
-    border-bottom onepxhigh solid black
-    position absolute
-    left 0
-    bottom 0
-    height onepxhigh
+  background-color: white
+  border-bottom: $onepxhigh solid black
+  bottom: 0
+  height: $onepxhigh
+  left: 0
+  position: absolute
 
 #controller-status
-    position absolute
-    left 0
-    bottom 0
-    width onepxwide * 10
-    height onepxhigh
-    border-bottom onepxhigh solid white
-    background-color black
-    visibility hidden
+  background-color: black
+  border-bottom: $onepxhigh solid white
+  bottom: 0
+  height: $onepxhigh
+  left: 0
+  position: absolute
+  visibility: hidden
+  width: $onepxwide * 10
 
 #controller-status.lowbatt
-    border-bottom onepxhigh solid black
-    background-color red
+  background-color: red
+  border-bottom: $onepxhigh solid black
 
 #controller-status.shown
-    visibility visible
+  visibility: visible
 
 #click-target
-    background-color transparent
-    position absolute
-    top 0
-    left 0
-    bottom 0
-    right 0
+  background-color: transparent
+  bottom: 0
+  left: 0
+  position: absolute
+  right: 0
+  top: 0
 
 video
-    width 100%
-    height 100%
+  height: 100%
+  width: 100%

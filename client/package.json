@@ -17,6 +17,7 @@
   "devDependencies": {
     "browser-sync": "^2.18.8",
     "browserify": "^14.1.0",
+    "config": "1.26.1",
     "del": "^3.0.0",
     "gulp": "^3.9.1",
     "gulp-batch": "^1.0.5",
@@ -27,7 +28,6 @@
     "gulp-uglify": "^3.0.0",
     "gulp-watch": "^4.3.11",
     "pump": "^1.0.2",
-    "config": "1.26.1",
     "uglify-es": "^3.0.23",
     "uglify-js": "^3.0.23",
     "vinyl-buffer": "^1.0.0",

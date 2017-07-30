@@ -1,5 +1,6 @@
 {
-  "extends": "airbnb-base",
+  "plugins": ["prettier"],
+  "extends": ["prettier"],
   "parserOptions": {
     "ecmaVersion": 6
   },
@@ -8,12 +9,7 @@
     "es6": true
   },
   "rules": {
-    "no-underscore-dangle": "off",
-    "no-param-reassign": "off",
-    "no-console": "off",
-    "linebreak-style": "off",
-    "arrow-body-style": "off",
-    "max-len": "off"
+    "prettier/prettier": "error"
   },
   "globals": {}
 }

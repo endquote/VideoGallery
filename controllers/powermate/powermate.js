@@ -1,33 +1,35 @@
-const noble = require('noble');
-const config = require('config');
-const socket = require('socket.io-client')(`http://${config.get('host')}:${config.get('port')}`);
+const noble = require("noble");
+const config = require("config");
+const socket = require("socket.io-client")(
+  `http://${config.get("host")}:${config.get("port")}`
+);
 
 // PowerMate connection class.
 // Ported from: https://github.com/circuitbeard/node-red-contrib-powermateble/blob/master/src/powermate-device.js
 class PowerMate {
   static init() {
     // Constants
-    this.SERVICE_UUID = '25598cf7424040a69910080f19f91ebc';
-    this.BATTERY_CHAR_UUID = '50f09cc9fe1d4c79a962b3a7cd3e5584';
-    this.KNOB_CHAR_UUID = '9cf53570ddd947f3ba6309acefc60415';
-    this.LED_CHAR_UUID = '847d189e86ee4bd2966f800832b1259d';
+    this.SERVICE_UUID = "25598cf7424040a69910080f19f91ebc";
+    this.BATTERY_CHAR_UUID = "50f09cc9fe1d4c79a962b3a7cd3e5584";
+    this.KNOB_CHAR_UUID = "9cf53570ddd947f3ba6309acefc60415";
+    this.LED_CHAR_UUID = "847d189e86ee4bd2966f800832b1259d";
 
     this.LED_MIN = 161;
     this.LED_MAX = 191;
 
     this.KNOB_ACTIONS = {
-      101: 'nextMode', // release
-      102: '', // holdrelease
-      103: 'seekBack', // anticlockwise
-      104: 'seekForward', // clockwise
-      105: '', // holdanticlockwise
-      112: '', // holdclockwise
-      114: '', // 'hold1',
-      115: '', // 'hold2',
-      116: '', // 'hold3',
-      117: '', // 'hold4',
-      118: '', // 'hold5',
-      119: '', // 'hold6',
+      101: "nextMode", // release
+      102: "", // holdrelease
+      103: "seekBack", // anticlockwise
+      104: "seekForward", // clockwise
+      105: "", // holdanticlockwise
+      112: "", // holdclockwise
+      114: "", // 'hold1',
+      115: "", // 'hold2',
+      116: "", // 'hold3',
+      117: "", // 'hold4',
+      118: "", // 'hold5',
+      119: "" // 'hold6',
     };
 
     // Reference to the actual device
@@ -36,12 +38,12 @@ class PowerMate {
     this.battery = 1;
 
     // Connect to rgbtv
-    socket.on('connect', () => {
-      console.info('Powermate service connected to rgbtv');
-      socket.emit('controllerOn', config.get('controlTuner'));
+    socket.on("connect", () => {
+      console.info("Powermate service connected to rgbtv");
+      socket.emit("controllerOn", config.get("controlTuner"));
     });
-    socket.on('disconnect', () => {
-      console.info('Powermate service disconneted from rgbtv');
+    socket.on("disconnect", () => {
+      console.info("Powermate service disconneted from rgbtv");
     });
 
     // Defining handlers up front so they can be removed on disconnection.
@@ -52,32 +54,34 @@ class PowerMate {
     this._onBatteryReadHandler = this._onBatteryRead.bind(this);
     this._onKnobReadHandler = this._onKnobRead.bind(this);
 
-    noble.on('discover', this._onDiscoverHandler);
-    noble.on('stateChange', this._onStateChangeHandler);
+    noble.on("discover", this._onDiscoverHandler);
+    noble.on("stateChange", this._onStateChangeHandler);
 
     setInterval(() => this.emitStatus(), 3000);
   }
 
   // When Bluetooth comes on, start scanning.
   static _onStateChange(state) {
-    if (state === 'poweredOn') {
-      console.info('Scanning for PowerMate');
+    if (state === "poweredOn") {
+      console.info("Scanning for PowerMate");
       noble.startScanning([this.SERVICE_UUID], true);
     }
   }
 
   // When the device is discovered, connct to it.
   static _onDiscover(peripheral) {
-    console.info(`Found ${peripheral.advertisement.localName} ${peripheral.address}`);
+    console.info(
+      `Found ${peripheral.advertisement.localName} ${peripheral.address}`
+    );
 
     this._disconnect();
 
     this._peripheral = peripheral;
 
-    this._peripheral.on('connect', this._onConnectHandler);
-    this._peripheral.on('disconnect', this._onDisconnectHandler);
+    this._peripheral.on("connect", this._onConnectHandler);
+    this._peripheral.on("disconnect", this._onDisconnectHandler);
 
-    this._peripheral.connect((err) => {
+    this._peripheral.connect(err => {
       if (err) {
         console.error(err);
       }
@@ -87,20 +91,26 @@ class PowerMate {
   // When the device is connected, subscribe to updates.
   static _onConnect(err) {
     if (err) {
-      console.error('PowerMate connection error');
+      console.error("PowerMate connection error");
       console.error(err);
       return;
     }
 
-    console.info('PowerMate connected');
+    console.info("PowerMate connected");
     this.connected = true;
     this.emitStatus();
 
     // Discover services and characteristics (filter serial data service)
     const serviceIds = [this.SERVICE_UUID];
-    const characteristicIds = [this.BATTERY_CHAR_UUID, this.KNOB_CHAR_UUID, this.LED_CHAR_UUID];
+    const characteristicIds = [
+      this.BATTERY_CHAR_UUID,
+      this.KNOB_CHAR_UUID,
+      this.LED_CHAR_UUID
+    ];
     this._peripheral.discoverSomeServicesAndCharacteristics(
-      serviceIds, characteristicIds, (e, services, characteristics) => {
+      serviceIds,
+      characteristicIds,
+      (e, services, characteristics) => {
         if (e) {
           console.error(e);
         }
@@ -109,43 +119,57 @@ class PowerMate {
         this._service = services[0];
 
         // Store the chars
-        this._batteryChar = characteristics.find(c => c.uuid === this.BATTERY_CHAR_UUID);
-        this._knobChar = characteristics.find(c => c.uuid === this.KNOB_CHAR_UUID);
-        this._ledChar = characteristics.find(c => c.uuid === this.LED_CHAR_UUID);
+        this._batteryChar = characteristics.find(
+          c => c.uuid === this.BATTERY_CHAR_UUID
+        );
+        this._knobChar = characteristics.find(
+          c => c.uuid === this.KNOB_CHAR_UUID
+        );
+        this._ledChar = characteristics.find(
+          c => c.uuid === this.LED_CHAR_UUID
+        );
 
         // Subscribe to battery
-        this._batteryChar.notify(true, () => console.info('Signed up for battery notifications'));
-        this._batteryChar.on('read', this._onBatteryReadHandler);
+        this._batteryChar.notify(true, () =>
+          console.info("Signed up for battery notifications")
+        );
+        this._batteryChar.on("read", this._onBatteryReadHandler);
 
         // Subscribe to knob
-        this._knobChar.notify(true, () => console.info('Signed up for knob notifications'));
-        this._knobChar.on('read', this._onKnobReadHandler);
-      });
+        this._knobChar.notify(true, () =>
+          console.info("Signed up for knob notifications")
+        );
+        this._knobChar.on("read", this._onKnobReadHandler);
+      }
+    );
   }
 
   static _onBatteryRead(data) {
-    const value = parseInt(data.toString('hex'), 16);
+    const value = parseInt(data.toString("hex"), 16);
     console.info(`PowerMate battery: ${value}`);
     this.battery = value / 100;
     this.emitStatus();
   }
 
   static _onKnobRead(data) {
-    const value = parseInt(data.toString('hex'), 16);
+    const value = parseInt(data.toString("hex"), 16);
     const parsedValue = this.KNOB_ACTIONS[value];
     if (!parsedValue) {
       return;
     }
 
     // For some reason 'holdRelease' comes in pairs
-    if (parsedValue === 'holdrelease' && this._peripheral.lastKnobAction === 'holdrelease') {
+    if (
+      parsedValue === "holdrelease" &&
+      this._peripheral.lastKnobAction === "holdrelease"
+    ) {
       this._peripheral.lastKnobAction = null;
       return;
     }
     this._peripheral.lastKnobAction = parsedValue;
 
     console.info(`PowerMate knob: ${parsedValue}`);
-    socket.emit(parsedValue, config.get('controlTuner'));
+    socket.emit(parsedValue, config.get("controlTuner"));
   }
 
   // Set LED brightness, 0-100
@@ -157,11 +181,13 @@ class PowerMate {
     // Map percentage to min/max range
     let mappedLevel = 160;
     if (level >= 0) {
-      mappedLevel = Math.round(this._map(level, 0, 100, this.LED_MIN, this.LED_MAX));
+      mappedLevel = Math.round(
+        this._map(level, 0, 100, this.LED_MIN, this.LED_MAX)
+      );
     }
 
     // Write the value
-    this._ledChar.write(new Buffer([mappedLevel]), true, (err) => {
+    this._ledChar.write(new Buffer([mappedLevel]), true, err => {
       if (err) {
         console.error(err);
       }
@@ -169,12 +195,12 @@ class PowerMate {
   }
 
   static _map(x, inMin, inMax, outMin, outMax) {
-    return (((x - inMin) * (outMax - outMin)) / (inMax - inMin)) + outMin;
+    return (x - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
   }
 
   // Clean up on disconnection.
   static _onDisconnect(err) {
-    console.info('PowerMate disconnected');
+    console.info("PowerMate disconnected");
     this.connected = false;
     this.emitStatus();
     if (err) {
@@ -187,16 +213,16 @@ class PowerMate {
   // Clean up on disconnection.
   static _disconnect() {
     if (this._peripheral) {
-      this._peripheral.removeListener('connect', this._onConnectHandler);
-      this._peripheral.removeListener('disconnect', this._onDisconnectHandler);
+      this._peripheral.removeListener("connect", this._onConnectHandler);
+      this._peripheral.removeListener("disconnect", this._onDisconnectHandler);
     }
 
     if (this._knobChar) {
-      this._knobChar.removeListener('read', this._onKnobReadHandler);
+      this._knobChar.removeListener("read", this._onKnobReadHandler);
     }
 
     if (this._batteryChar) {
-      this._batteryChar.removeListener('read', this._onBatteryReadHandler);
+      this._batteryChar.removeListener("read", this._onBatteryReadHandler);
     }
 
     delete this._peripheral;
@@ -210,15 +236,15 @@ class PowerMate {
   static destroy() {
     this._disconnect();
     noble.stopScanning();
-    noble.removeListener('stateChange', this._onStateChangeHandler);
-    noble.removeListener('discover', this._onDiscoverHandler);
+    noble.removeListener("stateChange", this._onStateChangeHandler);
+    noble.removeListener("discover", this._onDiscoverHandler);
   }
 
   static emitStatus() {
-    socket.emit('controller', config.get('controlTuner'), {
+    socket.emit("controller", config.get("controlTuner"), {
       connected: this.connected,
-      type: 'radial',
-      battery: this.battery,
+      type: "radial",
+      battery: this.battery
     });
   }
 }

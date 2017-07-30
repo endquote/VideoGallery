@@ -1,65 +1,65 @@
 @import "main.styl"
 
 #video-list
-  list-style none
-  margin 0
-  margin-top 1em
-  padding 0
+  list-style: none
+  margin: 0
+  margin-top: 1em
+  padding: 0
 
 h1
-  text-overflow ellipsis
-  overflow hidden
-  line-height 1em
+  line-height: 1em
+  overflow: hidden
+  text-overflow: ellipsis
 
 .video-item
-  white-space nowrap
-  overflow hidden
-  float left
-  width 48vw
-  padding 1vw
-  outline 2px solid transparent
+  float: left
+  outline: 2px solid transparent
+  overflow: hidden
+  padding: 1vw
+  white-space: nowrap
+  width: 48vw
 
-.video-item .video-thumbnail
-  width 100%
-  height 28vw
-  background-size cover
-  background-position center center
-  position relative
-  background-color black
+.video-thumbnail
+  background-color: black
+  background-position: center center
+  background-size: cover
+  height: 28vw
+  position: relative
+  width: 100%
 
 .video-delete
-  right 0
-  bottom 0
-  position absolute
-  text-align center
-  background-color white
-  padding .8rem
-  cursor default
+  background-color: white
+  bottom: 0
+  cursor: default
+  padding: .8rem
+  position: absolute
+  right: 0
+  text-align: center
 
-.video-item.selected 
-  outline 2px solid black
+.video-item.selected
+  outline: 2px solid black
 
 a.link-source
-  text-overflow ellipsis
-  color black
+  color: black
+  text-overflow: ellipsis
 
 #channel-list, #tuner-list, #video-add-url
-  font-family font-body
-  font-size 2.5em
-  width 100%
+  font-family: font-body
+  font-size: 2.5em
+  width: 100%
   
 #tuner-control-title
-  font-size 2em
-  white-space nowrap
-  overflow hidden
-  text-overflow ellipsis
+  font-size: 2em
+  overflow: hidden
+  text-overflow: ellipsis
+  white-space: nowrap
 
 #tuner-control-buttons button
-  font-size 2em
-  display inline
-  float left
-  width 20%
-  line-height 1.5em
+  display: inline
+  float: left
+  font-size: 2em
+  line-height: 1.5em
+  width: 20%
 
 .off
-  text-decoration line-through
+  text-decoration: line-through
