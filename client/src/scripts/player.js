@@ -308,12 +308,12 @@ class PlayerPage {
         app.channel = channel;
         return;
       }
+      app.showInfo = info;
+      app.playSound = audio;
       app.video = app.videos.find(v => v._id === video) || null;
       if (!app.video) {
         app.nextVideo();
       }
-      app.showInfo = info;
-      app.playSound = audio;
     });
 
     // Add new videos to the beginning of the list.
