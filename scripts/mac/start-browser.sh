@@ -5,3 +5,5 @@ export NODE_CONFIG_DIR=~/rgbtv
 export RGBTV_URL=`node server/client-url.js`
 sleep 30
 open -a "Google Chrome" --args --kiosk --app=$RGBTV_URL
+sleep 10
+cliclick -m verbose -r m:200,200
