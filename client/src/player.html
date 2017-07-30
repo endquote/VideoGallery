@@ -2,64 +2,75 @@
 <html>
 
 <head>
-  <title>player</title>
+  <title>rgbtv</title>
 
   <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700" rel="stylesheet">
-  <link rel="stylesheet" type="text/css" href="styles/player.css" />
+  <link rel="stylesheet" type="text/css" href="/styles/player.css" />
 
   <script src="/socket.io/socket.io.js"></script>
-  <script src="scripts/vendor.js"></script>
-  <script src="scripts/main.js"></script>
+  <script src="/scripts/vendor.js"></script>
+  <script src="/scripts/main.js"></script>
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-title" content="rgbtv">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/icons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/icons/favicon-16x16.png">
+  <link rel="manifest" href="/images/icons/manifest.json">
+  <link rel="mask-icon" href="/images/icons/safari-pinned-tab.svg" color="#5bbad5">
+  <link rel="shortcut icon" href="/images/icons/favicon.ico">
+  <meta name="msapplication-config" content="/images/icons/browserconfig.xml">
+  <meta name="theme-color" content="#ffffff">
 
 </head>
 
 <body>
 
-  <div id="app">
+<div id="app">
 
-    <video-player inline-template v-bind:video="selectedVideo" v-bind:play-sound="playSound" v-on:progress-changed="onProgressChanged">
-      <div id="video-player">
-        <video autoplay v-bind:src="(video && video._id ? '/content/video/' + video._id : '')" v-on:loadstart="onLoadStart" v-on:timeupdate="onTimeUpdate" v-on:durationchange="onTimeUpdate" v-on:ended="onEnded" v-on:error="onError"></video>
-      </div>
-    </video-player>
+  <video-player inline-template :video="video" :channel="channel" :play-sound="playSound" v-on:progress-changed="onProgressChanged" v-on:video-ended="onVideoEnded" v-on:video-error="onVideoError">
+    <div id="video-player">
+      <video autoplay :src="(video && video._id ? '/content/' + video._id + '/video/' : '')" v-on:loadstart="onLoadStart" v-on:timeupdate="onTimeUpdate" v-on:durationchange="onTimeUpdate" v-on:ended="onEnded" v-on:error="onError"></video>
+    </div>
+  </video-player>
 
-    <video-info inline-template v-bind:video="selectedVideo" v-bind:show-info="showInfo">
-      <transition name="video-info-toggle">
-        <div id="video-info" class="video-info" v-if="showInfo">
-          <img id="video-qr-code" v-bind:src="qrcode" />
-          <div id="video-info-content-container">
-            <div id="video-info-content">
-              <div id="video-info-author-title">
-                <h2 id="video-info-author">by {{ video.author }}</h2>
-                <h1 id="video-info-title">{{ video.title }}</h1>
-              </div>
-              <div id="video-info-description" v-html="$options.filters.linebreak(video.description)"></div>
+  <video-info inline-template :video="video" :show-info="showInfo">
+    <transition name="video-info-toggle">
+      <div id="video-info" class="video-info" v-if="showInfo">
+        <img id="video-qr-code" :src="qrcode" />
+        <div id="video-info-content-container">
+          <div id="video-info-content">
+            <div id="video-info-author-title">
+              <h2 id="video-info-author">by {{ video.author }}</h2>
+              <h1 id="video-info-title">{{ video.title }}</h1>
             </div>
+            <div id="video-info-description">{{ createdDate }}<span v-html="$options.filters.linebreak(video.description)"></span></div>
           </div>
         </div>
-      </transition>
-    </video-info>
+      </div>
+    </transition>
+  </video-info>
 
-    <video-progress inline-template v-bind:progress="progress">
-      <div id="video-progress" v-bind:style="'width:' + (progress * 100) + 'vw'"></div>
-    </video-progress>
+  <video-progress inline-template :progress="progress">
+    <div id="video-progress" :style="'width:' + (progress * 100) + 'vw'"></div>
+  </video-progress>
 
-    <controller-status inline-template v-bind:connected="controllerConnected" v-bind:battery="controllerBattery">
-      <div id="controller-status" v-bind:class="{ shown: connected, lowbatt: battery <= .1 }"></div>
-    </controller-status>
+  <controller-status inline-template :connected="controllerConnected" :battery="controllerBattery">
+    <div id="controller-status" :class="{ shown: connected, lowbatt: battery <= .1 }"></div>
+  </controller-status>
 
-    <click-target inline-template v-on:play-mode-changed="onPlayModeChanged">
-      <div id="click-target" v-on:pointerup="onPointerUp" v-on:keyup="onKeyPress" tabindex="0"></div>
-    </click-target>
+  <click-target inline-template v-on:play-mode-changed="onPlayModeChanged" v-on:next-requested="onNextRequested">
+    <div id="click-target" v-on:pointerup="onPointerUp" v-on:keyup="onKeyPress" tabindex="0"></div>
+  </click-target>
 
-  </div>
+</div>
 
-  <script>
-    PlayerPage.init();
+<script>
+  PlayerPage.init();
 
-  </script>
+</script>
 </body>
 
 </html>

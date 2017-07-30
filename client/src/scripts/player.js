@@ -10,60 +10,163 @@ class PlayerPage {
     this.knobRate = 1; // Time in seconds to move when the knob turns
     this.doubleTapDelay = 300; // Time in ms to consider a double tap
 
-    // Get the list of videos
-    Vue.resource('/videos')
-      .get()
-      .catch(() => window.alert('Couldn\'t load data. Is the database server running?'))
-      .then((res) => {
-        const videos = res.body;
-        this._buildApp(videos);
-        this._getUpdates(videos);
-      });
+    PlayerPage.app = PlayerPage.buildApp();
+    PlayerPage.parseLocation();
+    document.body.style.visibility = 'visible';
+    window.addEventListener('popstate', PlayerPage.parseLocation);
   }
 
-  static _buildApp(videos) {
-    PlayerPage.app = new Vue({
+  static parseLocation() {
+    const parts = document.location.pathname.toLowerCase().split('/').slice(1);
+    PlayerPage.app.tuner = parts.shift() || null;
+    PlayerPage.app.channel = parts.shift() || null;
+    PlayerPage.app.video = parts.shift() || null;
+  }
+
+  static parseVideo(video) {
+    video.added = new Date(video.added);
+    video.created = new Date(video.created);
+  }
+
+  static buildApp() {
+    return new Vue({
       el: '#app',
 
-      data: {
-        selectedVideo: {},
-        videos,
-        progress: 0,
-        showInfo: false,
-        playSound: false,
-        controllerConnected: false,
-        controllerBattery: 0,
+      data() {
+        return {
+          tuner: undefined,
+          video: undefined,
+          videos: [],
+          channel: undefined,
+          progress: 0,
+          showInfo: false,
+          playSound: false,
+          controllerConnected: false,
+          controllerBattery: 0,
+        };
       },
 
       watch: {
-        selectedVideo(newValue) {
+        channel() {
+          console.info(`Getting videos for ${this.channel}`);
+          Vue.resource(`/api/videos/${this.channel || ''}`)
+            .get()
+            .catch(() => window.alert('Couldn\'t load data.'))
+            .then((res) => {
+              const videos = res.body;
+              videos.forEach(v => PlayerPage.parseVideo(v));
+              this.videos = videos;
+              this.video = this.videos.find(v => v._id === this.video);
+
+              if (!PlayerPage.subscribed) {
+                PlayerPage.getUpdates();
+              } else if (!this.video) {
+                this.nextVideo();
+              }
+            });
+        },
+
+        video(newValue) {
           if (!newValue) {
-            this.selectedVideo = {};
-            return;
+            this.video = null;
+            this.playSound = false;
+            this.showInfo = false;
+            this.progress = 0;
+          } else if (typeof newValue === 'object') {
+            newValue.played = true;
           }
-          newValue.played = true;
+
+          const tuner = this.tuner ? this.tuner : '';
+          const channel = this.channel ? this.channel : '';
+          let video = this.video;
+          if (!video) {
+            video = '';
+          } else if (typeof this.video === 'object') {
+            video = video._id;
+          }
+
+          const state = `${document.location.protocol}//${document.location.host}/${tuner}/${channel}/${video}`;
+          history.pushState(null, '', state);
         },
       },
 
       methods: {
+        // Select another random video
+        nextVideo() {
+          const msg = {
+            tuner: this.tuner,
+            channel: this.channel,
+            video: null,
+            audio: this.playSound,
+            info: this.showInfo,
+          };
+          if (!this.videos.length) {
+            if (this.video) {
+              console.info('sending', 'tunerChanged', msg);
+              PlayerPage.socket.emit('tunerChanged', msg);
+            }
+            return;
+          }
+
+          let unplayed = this.videos.filter(v => !v.played && v.loaded);
+
+          if (unplayed.length === 0) {
+            // All videos played
+            this.videos.forEach(v => (v.played = false));
+            if (this.videos.length > 1) {
+              unplayed = this.videos.filter(v => !v.played && v.loaded && v._id !== this.video._id);
+            } else {
+              unplayed = this.videos.filter(v => !v.played && v.loaded);
+            }
+          }
+
+          const random = unplayed[Math.floor(Math.random() * unplayed.length)];
+          msg.video = random ? random._id : null;
+          console.info('sending', 'tunerChanged', msg);
+          PlayerPage.socket.emit('tunerChanged', msg);
+        },
+
         onProgressChanged(progress) {
           this.progress = progress;
         },
 
         // Cycle through every combination of info/audio.
         onPlayModeChanged() {
-          if (!this.selectedVideo) {
+          if (!this.video || !this.videos.length) {
             return;
           }
-          if (!this.showInfo && !this.playSound) {
-            this.showInfo = true;
-          } else if (this.showInfo && !this.playSound) {
-            this.playSound = true;
-          } else if (this.showInfo && this.playSound) {
-            this.showInfo = false;
-          } else if (!this.showInfo && this.playSound) {
-            this.playSound = false;
+          let showInfo = this.showInfo;
+          let playSound = this.playSound;
+          if (!showInfo && !playSound) {
+            showInfo = true;
+          } else if (showInfo && !playSound) {
+            playSound = true;
+          } else if (showInfo && playSound) {
+            showInfo = false;
+          } else if (!showInfo && playSound) {
+            playSound = false;
           }
+          const msg = {
+            tuner: this.tuner,
+            channel: this.channel,
+            video: this.video._id,
+            audio: playSound,
+            info: showInfo,
+          };
+          console.info('sending', 'tunerChanged', msg);
+          PlayerPage.socket.emit('tunerChanged', msg);
+        },
+
+        onVideoEnded() {
+          this.nextVideo();
+        },
+
+        onNextRequested() {
+          this.nextVideo();
+        },
+
+        onVideoError() {
+          this.nextVideo();
         },
       },
 
@@ -71,7 +174,7 @@ class PlayerPage {
 
         // Component containing the actual <video> tag.
         'video-player': {
-          props: ['video', 'playSound'],
+          props: ['video', 'playSound', 'channel'],
           methods: {
 
             // Set the volume on start.
@@ -88,7 +191,7 @@ class PlayerPage {
 
             // Go to the next video when the current one ends.
             onEnded() {
-              PlayerPage.nextVideo();
+              this.$emit('video-ended');
             },
 
             onError(err) {
@@ -101,7 +204,7 @@ class PlayerPage {
                 return;
               }
               console.error(err);
-              PlayerPage.nextVideo();
+              this.$emit('videoError', err);
             },
           },
 
@@ -119,6 +222,13 @@ class PlayerPage {
           computed: {
             qrcode() {
               return this.video._id ? new QRious({ size: 300, value: this.video.url }).toDataURL() : '';
+            },
+            createdDate() {
+              if (!this.video || !this.video.created) {
+                return '';
+              }
+              const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+              return `${months[this.video.created.getMonth()]} ${this.video.created.getDate()}, ${this.video.created.getFullYear()} - `;
             },
           },
           filters: {
@@ -155,7 +265,7 @@ class PlayerPage {
                 // Double tap, go to next video
                 clearTimeout(this.$tapTimeout);
                 this.$tapTimeout = null;
-                PlayerPage.nextVideo();
+                this.$emit('next-requested');
               } else {
                 this.$tapTimeout = setTimeout(() => {
                   // Single tap, toggle info
@@ -170,109 +280,101 @@ class PlayerPage {
     });
   }
 
-  static _getUpdates(videos) {
-    const player = document.getElementsByTagName('video')[0];
+  static getUpdates() {
+    PlayerPage.subscribed = true;
 
-    this.videoSocket = io.connect();
+    const app = PlayerPage.app;
 
-    // Some tuner has to pick the first video.
-    this.videoSocket.on('connect', () => {
-      this.selectFirstVideo = setTimeout(this.nextVideo.bind(this), 1000);
-    });
+    this.socket = io.connect();
 
     // Reload on reconnect, like when new changes are deployed.
-    this.videoSocket.on('reconnect', () => {
-      window.location.reload(true);
+    this.socket.on('reconnect', () => window.location.reload(true));
+
+    this.socket.on('connect', () => {
+      const msg = {
+        tuner: app.tuner,
+        channel: app.channel,
+        video: app.video ? app.video._id : null,
+      };
+      console.info('sending', 'tunerOn', msg);
+      this.socket.emit('tunerOn', msg);
     });
 
     // Update the selected video
-    this.videoSocket.on('videoSelected', (video) => {
-      if (!video) {
-        PlayerPage.app.selectedVideo = null;
+    this.socket.on('tunerChanged', ({ channel, video, info, audio }) => {
+      console.info('receiving', 'tunerChanged', channel, video, info, audio);
+      if (channel !== app.channel) {
+        app.video = video;
+        app.channel = channel;
         return;
       }
-
-      clearTimeout(this.selectFirstVideo);
-
-      if (PlayerPage.app.selectedVideo && PlayerPage.app.selectedVideo._id && PlayerPage.app.selectedVideo._id === video._id) {
-        // If it's the same video (like if there's only one video in the list), just replay
-        document.getElementsByTagName('video')[0].currentTime = 0;
-        document.getElementsByTagName('video')[0].play();
-        return;
-      }
-
-      PlayerPage.app.selectedVideo = videos.find(v => v._id === video._id);
-    });
-
-    // Get new videos
-    this.videoSocket.on('videoAdded', (video) => {
-      videos.push(video);
-    });
-
-    // Remove videos
-    this.videoSocket.on('videoRemoved', (video) => {
-      const index = videos.findIndex(v => v._id === video._id);
-      if (index !== -1) {
-        videos.splice(index, 1);
-      }
-      if (PlayerPage.app.selectedVideo._id === video._id) {
-        PlayerPage.nextVideo();
+      app.showInfo = info;
+      app.playSound = audio;
+      app.video = app.videos.find(v => v._id === video) || null;
+      if (!app.video) {
+        app.nextVideo();
       }
     });
 
-    // Update existing videos
-    this.videoSocket.on('videoUpdated', (video) => {
-      const index = videos.findIndex(v => v._id === video._id);
+    // Add new videos to the beginning of the list.
+    function addVideo(video) {
+      PlayerPage.parseVideo(video);
+      if (!app.channel || video.channels.find(c => c.name === app.channel)) {
+        app.videos.unshift(video);
+      }
+    }
+
+    this.socket.on('videoAdded', ({ video }) => addVideo(video));
+
+    // Remove videos from the list.
+    function removeVideo(videoId) {
+      const index = app.videos.findIndex(v => v._id === videoId);
       if (index === -1) {
         return;
       }
-      Vue.set(videos, index, video);
+      app.videos.splice(index, 1);
+      if (app.video._id === videoId) {
+        app.nextVideo();
+      }
+    }
+
+    this.socket.on('videoRemoved', ({ videoId, channel }) => removeVideo(videoId, channel));
+
+    // Update the entire video record.
+    this.socket.on('videoUpdated', ({ video }) => {
+      PlayerPage.parseVideo(video);
+      const index = app.videos.findIndex(v => v._id === video._id);
+      const inChannel = !app.channel || video.channels.find(c => c.name === app.channel);
+      if (index !== -1 && inChannel) {
+        // Video properties changed
+        Vue.set(app.videos, index, video);
+      } else if (index === -1 && inChannel) {
+        // Video was added to this channel
+        addVideo(video);
+      } else if (index !== -1 && !inChannel) {
+        // Video was removed from this channel
+        removeVideo(video._id);
+      }
 
       // If a video was loaded and nothing is selected, select the new one
-      if (video.selected || (video.loaded && !PlayerPage.app.selectedVideo._id)) {
-        this.videoSocket.emit('selectVideo', { _id: video._id });
+      if (video.loaded && !app.video) {
+        app.nextVideo();
       }
     });
 
-    this.controllerSocket = io.connect('http://localhost:8181');
+    this.socket.on('nextVideo', () => app.nextVideo());
+
+    const player = document.getElementsByTagName('video')[0];
+
+    this.socket.on('seekForward', () => (player.currentTime += this.knobRate));
+    this.socket.on('seekBack', () => (player.currentTime -= this.knobRate));
+    this.socket.on('nextMode', () => document.getElementById('click-target').dispatchEvent(new Event('pointerup')));
 
     // Handle events from the hardware controller.
-    this.controllerSocket.on('controller', (data) => {
-      if (data.knob === 'seekForward') {
-        player.currentTime += this.knobRate;
-      } else if (data.knob === 'seekBack') {
-        player.currentTime -= this.knobRate;
-      } else if (data.knob === 'nextMode') {
-        document.getElementById('click-target').dispatchEvent(new Event('pointerup'));
-      } else if (data.status === 'connected') {
-        PlayerPage.app.controllerConnected = true;
-      } else if (data.status === 'disconnected') {
-        PlayerPage.app.controllerConnected = false;
-      } else if (data.battery) {
-        PlayerPage.app.controllerBattery = data.battery;
-      }
+    this.socket.on('controller', ({ connected, battery }) => {
+      app.controllerConnected = connected;
+      app.controllerBattery = battery;
     });
-  }
-
-  // Select another random video
-  static nextVideo() {
-    if (!PlayerPage.app.videos.length) {
-      this.videoSocket.emit('selectVideo', null);
-      return;
-    }
-
-    let unplayed = PlayerPage.app.videos.filter(v => !v.played && v.loaded);
-
-    if (unplayed.length === 0) {
-      // All videos played
-      PlayerPage.app.videos.forEach((v) => {
-        v.played = false;
-      });
-      unplayed = PlayerPage.app.videos.filter(v => !v.played && v.loaded);
-    }
-
-    const random = unplayed[Math.floor(Math.random() * unplayed.length)];
-    this.videoSocket.emit('selectVideo', { _id: random._id });
   }
 }
 

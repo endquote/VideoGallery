@@ -4,7 +4,7 @@ const conditional = require('express-conditional-middleware');
 const bodyParser = require('body-parser');
 const http = require('http');
 const path = require('path');
-const fs = require('fs-extra-promise');
+const fs = require('fs-extra');
 
 const Database = require('./database');
 const Downloader = require('./downloader');
@@ -22,13 +22,16 @@ class WebServer {
     // Set up web server.
     const app = express();
     app.use(bodyParser.json());
+    app.use(bodyParser.urlencoded());
 
     // Set up authorization, but let localhost through.
     app.use(conditional(
       (req) => {
+        const notIcon = req.path.indexOf('/images/icons') !== 0;
         const authConfiged = username !== '' || password !== '';
         const isRemote = ['127.0.0.1', '::ffff:127.0.0.1', '::1'].indexOf(req.connection.remoteAddress) === -1;
-        return authConfiged && isRemote;
+        const doAuth = authConfiged && isRemote && notIcon;
+        return doAuth;
       },
       basicAuth({
         authorizer: (u, p) => u === username && p === password,
@@ -42,82 +45,97 @@ class WebServer {
       console.log(`HTTP server listening on ${port}`);
     });
 
-    // Routes for static content.
-    app.get('/', (req, res) => {
-      res.sendFile(path.join(__dirname, '../client/dist/player.html'));
-    });
-    app.get('/admin', (req, res) => {
-      res.sendFile(path.join(__dirname, '../client/dist/admin.html'));
-    });
-    app.use(express.static(path.join(__dirname, '../client/dist')));
+    // Routing for GET requests.
+    app.get('*', (req, res) => {
+      const parts = req.path.toLowerCase().split('/').slice(1);
+      const root = parts.shift();
 
-    // Routes for video content.
-    app.use('/content', (req, res) => {
-      const type = req.originalUrl.split('/')[2].toLowerCase();
-      const id = req.originalUrl.split('/')[3];
-      if (!id || id === 'undefined') {
-        res.sendStatus(404);
-        return;
+      // Send various static assets.
+      if (root === 'images' || root === 'scripts' || root === 'styles') {
+        return res.sendFile(path.join(__dirname, '../client/dist/', req.path));
       }
 
-      if (type === 'thumbnail') {
-        // Thumbnails are the ID + jpg
-        try {
-          res.sendFile(path.join(this.target, id, `${id}-resized.jpg`));
-        } catch (e) {
-          res.sendStatus(404);
-        }
-      } else if (type === 'video') {
-        // Videos have unknown file extensions
-        fs.readdirAsync(path.join(this.target, id), (err, files) => {
-          if (err) {
-            res.sendStatus(404);
-            return;
-          }
-          const file = files.find((f) => {
-            const parsed = path.parse(f);
-            return parsed.ext !== '.jpg' && parsed.name === id;
+      if (root === 'api') {
+        // Send GET API responses.
+        const method = parts.shift();
+        if (method === 'channels') {
+          // Get all channels.
+          return Database.getChannels()
+            .then(result => res.json({ current: result, invalid: Database.invalidChannels }));
+        } else if (method === 'videos') {
+          // Get all videos.
+          const channel = parts.shift();
+          return Database.getVideos(channel)
+            .then(result => res.json(result));
+        } else if (method === 'reprocess') {
+          // Re-download everything.
+          return Database.getVideos().then((result) => {
+            result.forEach(doc => Downloader.addVideo(doc));
+            return res.sendStatus(200);
           });
-          if (!file) {
-            res.sendStatus(404);
-          } else {
+        }
+      } else if (root === 'content') {
+        // Return media files.
+        const videoId = parts.shift();
+        const contentType = parts.shift();
+        if (videoId) {
+          if (contentType === 'thumbnail') {
+            // Thumbnails are the ID + jpg
             try {
-              res.sendFile(path.join(this.target, id, file));
+              return res.sendFile(path.join(this.target, videoId, `${videoId}-resized.jpg`));
             } catch (e) {
-              res.sendStatus(404);
+              return res.sendStatus(404);
             }
+          } else if (contentType === 'video') {
+            // Videos have unknown file extensions
+            return fs.readdir(path.join(this.target, videoId))
+              .then((files) => {
+                const file = files.find((f) => {
+                  const parsed = path.parse(f);
+                  return parsed.ext !== '.jpg' && parsed.name === videoId;
+                });
+                return res.sendFile(path.join(this.target, videoId, file));
+              })
+              .catch(() => res.sendStatus(404));
           }
-        });
+        }
+      } else if (root === 'admin') {
+        return res.sendFile(path.join(__dirname, '../client/dist/admin.html'));
       } else {
-        res.sendStatus(404);
+        return res.sendFile(path.join(__dirname, '../client/dist/player.html'));
       }
+
+      return res.sendStatus(404);
     });
 
-    // Get all videos.
-    app.get('/videos', (req, res) => {
-      Database.getVideos().then(result => res.json(result));
+    // Routing for POST requests.
+    app.post('*', (req, res) => {
+      const [page, method] = req.path.split('/').slice(1);
+      if (page === 'api') {
+        if (method === 'video') {
+          // Add a video or channel.
+          return Database.addVideo(req.body.url, req.body.channel)
+            .then(() => res.sendStatus(200))
+            .catch(err => res.status(500).send(err));
+        }
+      }
+
+      return res.sendStatus(404);
     });
 
-    // Post to add a video.
-    app.post('/video', (req, res) => {
-      Database.addVideo(req.body.url)
-        .then(() => res.sendStatus(200))
-        .catch(() => res.sendStatus(500));
-    });
+    // Routing for PATCH requests.
+    app.patch('*', (req, res) => {
+      const [page, method] = req.path.split('/').slice(1);
+      if (page === 'api') {
+        if (method === 'video') {
+          // Delete a video or channel.
+          return Database.removeVideo(req.body.id, req.body.channel)
+            .then(() => res.sendStatus(200))
+            .catch(err => res.status(500).send(err));
+        }
+      }
 
-    // Delete to delete a video.
-    app.delete('/video', (req, res) => {
-      Database.removeVideo(req.body._id)
-        .then(() => res.sendStatus(200))
-        .catch(() => res.sendStatus(500));
-    });
-
-    // Re-download everything.
-    app.get('/reprocess', (req, res) => {
-      Database.getVideos().then((result) => {
-        result.forEach(doc => Downloader.addVideo(doc));
-        return res.sendStatus(200);
-      });
+      return res.sendStatus(404);
     });
   }
 }
