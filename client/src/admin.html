@@ -67,7 +67,7 @@
     </video-add>
 
     <ul id="video-list">
-      <video-item inline-template v-for="item in videos" :key="item._id" v-bind:video="item" v-bind:channel="channel" v-bind:class="{ selected: tuner && tuner.video._id === item._id }" v-on:video-selected="onVideoSelected">
+      <video-item inline-template v-for="item in videos" :key="item._id" v-bind:video="item" v-bind:channel="channel" v-bind:class="{ selected: tuner && tuner.video && tuner.video._id === item._id }" v-on:video-selected="onVideoSelected">
         <li class="video-item" v-on:click="selectVideo">
           <a v-bind:name="video._id"></a>
           <h1><a class="link-source" v-bind:href="video.url" target="_blank">{{ video.title ? video.title : 'Loading...' }}</a></h1>
