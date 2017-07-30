@@ -1,6 +1,6 @@
 {
   "name": "rgbtv-controllers",
-  "version": "1.0.0",
+  "version": "1.5.2",
   "powermate": "powermate.js",
   "author": "Josh Santangelo <josh@endquote.com>",
   "description": "Powermate hardware controller for rgbtv.",
