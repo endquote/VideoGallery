@@ -103,6 +103,7 @@ gulp.task('browser-sync', () => {
   browserSync.init({
     proxy: 'localhost:8080',
     open: false,
+    ghostMode: false,
   });
 });
 
