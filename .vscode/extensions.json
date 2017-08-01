@@ -1,8 +1,6 @@
 {
   "recommendations": [
-    "HookyQR.beautify",
     "dbaeumer.vscode-eslint",
-    "vtfn.stylint",
     "sysoev.language-stylus"
   ]
 }

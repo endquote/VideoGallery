@@ -5,7 +5,7 @@
 1. Install [Chrome](https://www.google.com/chrome/)
 1. Install [Xcode](https://itunes.apple.com/us/app/xcode/id497799835?mt=12), launch it once to finish install
 1. Install [Homebrew](https://brew.sh)
-1. `brew install node imagemagick mongodb ffmpeg youtube-dl`
+1. `brew install node imagemagick mongodb ffmpeg youtube-dl cliclick`
 1. `brew services start mongodb`
 1. `npm install --prefix ~/rgbtv https://github.com/endquote/rgbtv`
 1. Run `~/rgbtv/node_modules/rgbtv/scripts/mac/install-config.sh` to set up the server config file

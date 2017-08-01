@@ -5,9 +5,5 @@
   "env": {
     "browser": true,
     "es6": true
-  },
-  "rules": {
-    "no-alert": "off",
-    "max-len": "off"
   }
 }
