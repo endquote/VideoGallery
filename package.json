@@ -1,6 +1,6 @@
 {
   "name": "rgbtv",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "description": "Downloads videos from the web and plays them in a random order.",
   "main": "server/main.js",
   "author": "Josh Santangelo <josh@endquote.com>",

@@ -1,6 +1,6 @@
 {
   "name": "rgbtv-client",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "main": "main.js",
   "author": "Josh Santangelo <josh@endquote.com>",
   "description": "Client for the Video Gallery application.",
