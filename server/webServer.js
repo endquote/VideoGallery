@@ -22,7 +22,7 @@ class WebServer {
     // Set up web server.
     const app = express();
     app.use(bodyParser.json());
-    app.use(bodyParser.urlencoded());
+    app.use(bodyParser.urlencoded({ extended: false }));
 
     // Set up authorization, but let localhost through.
     app.use(
