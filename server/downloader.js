@@ -139,8 +139,8 @@ class Downloader {
     const cmd = this.downloadCmd.split(" ")[0];
     const args = this.downloadCmd.split(" ").slice(1);
     if (videoFmt && audioFmt) {
-      args.unshift(`${videoFmt.format_id}+${audioFmt.format_id}`);
-      args.unshift("-f");
+      // args.unshift(`${videoFmt.format_id}+${audioFmt.format_id}`);
+      // args.unshift("-f");
     }
     args.push(`${this.target}/${video.id}/${video.id}.${videoFmt.ext}`);
     args.push(video.url);
@@ -199,7 +199,7 @@ class Downloader {
     }
     this._processes.forEach(p => p.kill());
     this._processes = [];
-    this.removeVideo(video);
+    this.removeVideo(video.id);
     this._adding = null;
     this._nextAdd();
   }
