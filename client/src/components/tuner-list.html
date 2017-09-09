@@ -1,0 +1,4 @@
+<select id="tuner-list" @change="onTunerChanged">
+    <option value="" :selected="tuner === undefined ? 'selected' : null">admin</option>
+    <option :value="i.name" v-for="i in tuners" :selected="i === tuner ? 'selected' : null">{{ i.name }}</option>
+</select>

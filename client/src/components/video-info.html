@@ -1,0 +1,14 @@
+<transition name="video-info-toggle">
+  <div id="video-info" class="video-info" v-if="showInfo">
+    <img id="video-qr-code" :src="qrcode" />
+    <div id="video-info-content-container">
+      <div id="video-info-content">
+        <div id="video-info-author-title">
+          <h2 id="video-info-author">by {{ video.author }}</h2>
+          <h1 id="video-info-title">{{ video.title }}</h1>
+        </div>
+        <div id="video-info-description">{{ createdDate }}<span v-html="$options.filters.linebreak(video.description)"></span></div>
+      </div>
+    </div>
+  </div>
+</transition>

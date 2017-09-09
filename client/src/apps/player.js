@@ -1,14 +1,13 @@
 const Vue = require('vue');
-const VueResource = require('vue-resource');
 const io = require('socket.io-client');
-const QRious = require('qrious');
+const Help = require('../help');
+const http = require('superagent');
 
-Vue.use(VueResource);
-
-function parseVideo(video) {
-  video.added = new Date(video.added);
-  video.created = new Date(video.created);
-}
+Vue.component('video-player', require('../components/video-player'));
+Vue.component('video-info', require('../components/video-info'));
+Vue.component('video-progress', require('../components/video-progress'));
+Vue.component('controller-status', require('../components/controller-status'));
+Vue.component('click-target', require('../components/click-target'));
 
 module.exports = new Vue({
   el: '#app',
@@ -26,6 +25,7 @@ module.exports = new Vue({
       controllerBattery: 0,
     };
   },
+
   mounted() {
     this.knobRate = 1; // Time in seconds to move when the knob turns
     this.doubleTapDelay = 300; // Time in ms to consider a double tap
@@ -33,15 +33,15 @@ module.exports = new Vue({
     this.parseLocation();
     window.addEventListener('popstate', this.parseLocation);
   },
+
   watch: {
     channel() {
       console.info(`Getting videos for ${this.channel}`);
-      Vue.resource(`/api/videos/${this.channel || ''}`)
-        .get()
+      http.get(`/api/videos/${this.channel || ''}`)
         .catch(() => window.alert("Couldn't load data."))
         .then((res) => {
           const videos = res.body;
-          videos.forEach(v => parseVideo(v));
+          videos.forEach(v => Help.parseVideo(v));
           this.videos = videos;
           this.video = this.videos.find(v => v._id === this.video);
 
@@ -121,7 +121,7 @@ module.exports = new Vue({
 
       // Add new videos to the beginning of the list.
       function addVideo(video) {
-        parseVideo(video);
+        Help.parseVideo(video);
         if (!this.channel || video.channels.find(c => c.name === this.channel)) {
           this.videos.unshift(video);
         }
@@ -147,7 +147,7 @@ module.exports = new Vue({
 
       // Update the entire video record.
       this.socket.on('videoUpdated', ({ video }) => {
-        parseVideo(video);
+        Help.parseVideo(video);
         const index = this.videos.findIndex(v => v._id === video._id);
         const inChannel =
           !this.channel || video.channels.find(c => c.name === this.channel);
@@ -186,7 +186,6 @@ module.exports = new Vue({
         this.controllerBattery = battery;
       });
     },
-
 
     // Select another random video
     nextVideo() {
@@ -264,115 +263,6 @@ module.exports = new Vue({
 
     onVideoError() {
       this.nextVideo();
-    },
-  },
-
-  components: {
-    // Component containing the actual <video> tag.
-    'video-player': {
-      props: ['video', 'playSound', 'channel'],
-      methods: {
-        // Set the volume on start.
-        onLoadStart() {
-          const videoNode = this.$el.getElementsByTagName('video')[0];
-          videoNode.volume = this.playSound ? 1 : 0;
-        },
-
-        // Update the progress bar.
-        onTimeUpdate() {
-          const videoNode = this.$el.getElementsByTagName('video')[0];
-          this.$emit('progress-changed', videoNode.currentTime / videoNode.duration);
-        },
-
-        // Go to the next video when the current one ends.
-        onEnded() {
-          this.$emit('video-ended');
-        },
-
-        onError(err) {
-          err = err.target.error;
-          if (!err) {
-            return;
-          }
-          const empty = 'MEDIA_ELEMENT_ERROR: Empty src attribute';
-          if (err.message === empty) {
-            return;
-          }
-          console.error(err);
-          this.$emit('videoError', err);
-        },
-      },
-
-      watch: {
-        playSound(newValue) {
-          const videoNode = this.$el.getElementsByTagName('video')[0];
-          videoNode.volume = newValue ? 1 : 0;
-        },
-      },
-    },
-
-    // Component which shows the video metadata and QR code.
-    'video-info': {
-      props: ['video', 'showInfo'],
-      computed: {
-        qrcode() {
-          return this.video._id
-            ? new QRious({ size: 300, value: this.video.url }).toDataURL()
-            : '';
-        },
-        createdDate() {
-          if (!this.video || !this.video.created) {
-            return '';
-          }
-          const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-          return `${months[this.video.created.getMonth()]} ${this.video.created.getDate()}, ${this.video.created.getFullYear()} - `;
-        },
-      },
-      filters: {
-        linebreak(value) {
-          return value && value.replace
-            ? value.replace(/[\r\n]/g, '<br>')
-            : value;
-        },
-      },
-    },
-
-    // Component which shows a progress bar.
-    'video-progress': {
-      props: ['progress'],
-    },
-
-    // Component which shows the battery level of a connected controller.
-    'controller-status': {
-      props: ['connected', 'battery'],
-    },
-
-    // Component on top of everything, trapping clicks and keypresses to change play mode.
-    'click-target': {
-      mounted() {
-        document.getElementById('click-target').focus();
-      },
-
-      methods: {
-        onKeyPress() {
-          this.$emit('play-mode-changed');
-        },
-
-        onPointerUp() {
-          if (this.$tapTimeout) {
-            // Double tap, go to next video
-            clearTimeout(this.$tapTimeout);
-            this.$tapTimeout = null;
-            this.$emit('next-requested');
-          } else {
-            this.$tapTimeout = setTimeout(() => {
-              // Single tap, toggle info
-              this.$tapTimeout = null;
-              this.$emit('play-mode-changed');
-            }, this.doubleTapDelay);
-          }
-        },
-      },
     },
   },
 });

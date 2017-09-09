@@ -29,40 +29,14 @@
 
 <div id="app">
 
-  <video-player inline-template :video="video" :channel="channel" :play-sound="playSound" v-on:progress-changed="onProgressChanged" v-on:video-ended="onVideoEnded" v-on:video-error="onVideoError">
-    <div id="video-player">
-      <video autoplay :src="(video && video._id ? '/content/' + video._id + '/video/' : '')" v-on:loadstart="onLoadStart" v-on:timeupdate="onTimeUpdate" v-on:durationchange="onTimeUpdate" v-on:ended="onEnded" v-on:error="onError"></video>
-    </div>
-  </video-player>
+  <video-player :video="video" :channel="channel" :play-sound="playSound" @progress-changed="onProgressChanged" @video-ended="onVideoEnded" @video-error="onVideoError"></video-player>
+  <video-info :video="video" :show-info="showInfo"></video-info>
 
-  <video-info inline-template :video="video" :show-info="showInfo">
-    <transition name="video-info-toggle">
-      <div id="video-info" class="video-info" v-if="showInfo">
-        <img id="video-qr-code" :src="qrcode" />
-        <div id="video-info-content-container">
-          <div id="video-info-content">
-            <div id="video-info-author-title">
-              <h2 id="video-info-author">by {{ video.author }}</h2>
-              <h1 id="video-info-title">{{ video.title }}</h1>
-            </div>
-            <div id="video-info-description">{{ createdDate }}<span v-html="$options.filters.linebreak(video.description)"></span></div>
-          </div>
-        </div>
-      </div>
-    </transition>
-  </video-info>
+  <video-progress :progress="progress"></video-progress>
 
-  <video-progress inline-template :progress="progress">
-    <div id="video-progress" :style="'width:' + (progress * 100) + 'vw'"></div>
-  </video-progress>
+  <controller-status :connected="controllerConnected" :battery="controllerBattery"></controller-status>
 
-  <controller-status inline-template :connected="controllerConnected" :battery="controllerBattery">
-    <div id="controller-status" :class="{ shown: connected, lowbatt: battery <= .1 }"></div>
-  </controller-status>
-
-  <click-target inline-template v-on:play-mode-changed="onPlayModeChanged" v-on:next-requested="onNextRequested">
-    <div id="click-target" v-on:pointerup="onPointerUp" v-on:keyup="onKeyPress" tabindex="0"></div>
-  </click-target>
+  <click-target @play-mode-changed="onPlayModeChanged" @next-requested="onNextRequested"></click-target>
 
 </div>
 
