@@ -1,6 +1,6 @@
 const Vue = require('vue');
 const io = require('socket.io-client');
-const Help = require('../help');
+const Help = require('../common/help');
 const http = require('superagent');
 
 Vue.component('video-player', require('../components/video-player'));
