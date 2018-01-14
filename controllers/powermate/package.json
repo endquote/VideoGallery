@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "config": "^1.26.1",
-    "noble": "^1.8.1",
+    "noble": "git://github.com/jacobrosenthal/noble.git#highsierra",
     "socket.io-client": "2.0.3"
   }
 }
