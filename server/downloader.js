@@ -103,6 +103,10 @@ class Downloader {
       .filter(f => f.height !== null)
       .sort((a, b) => a.height - b.height)
       .pop();
+    if (!bestVideo) {
+      this._failed(video);
+      return;
+    }
     const compatExts = compatSets.find(s => s.indexOf(bestVideo.ext) !== -1);
     let compatAudio = null;
     if (compatExts) {
