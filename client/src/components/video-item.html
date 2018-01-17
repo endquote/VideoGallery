@@ -1,0 +1,7 @@
+<li class="video-item" @click="selectVideo">
+  <a :name="video._id"></a>
+  <h1><a class="link-source" :href="video.url" target="_blank">{{ video.title ? video.title : 'Loading...' }}</a></h1>
+  <div class="video-thumbnail" :style="{ backgroundImage: 'url('+thumbnail+')' }">
+    <div class="video-delete" @click="removeVideo">✖</div>
+  </div>
+</li>

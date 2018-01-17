@@ -1,6 +1,8 @@
 {
   "recommendations": [
     "dbaeumer.vscode-eslint",
-    "sysoev.language-stylus"
+    "robinbentley.sass-indented",
+    "glen-84.sass-lint",
+    "wix.vscode-import-cost"
   ]
 }

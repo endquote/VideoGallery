@@ -1,0 +1,5 @@
+<select id="channel-list" @change="channelChanged">
+    <option value="" :selected="channel === null ? 'selected' : null">all</option>
+    <option :value="i" v-for="i in channels" :selected="i === channel ? 'selected' : null">{{ i }}</option>
+    <option value="new">new channel...</option>
+</select>

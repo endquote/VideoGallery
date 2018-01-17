@@ -1,0 +1,15 @@
+@import url('https://fonts.googleapis.com/css?family=PT+Sans');
+
+$font-body: 'PT Sans',
+sans-serif;
+$font-head: 'PT Sans',
+sans-serif;
+
+html,
+body {
+  font-family: $font-body;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}

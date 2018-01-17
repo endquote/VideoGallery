@@ -1,0 +1,38 @@
+.video-item {
+  float: left;
+  outline: 2px solid transparent;
+  overflow: hidden;
+  padding: 1vw;
+  white-space: nowrap;
+  width: 48vw;
+
+  .selected {
+    outline: 2px solid #000;
+  }
+}
+
+.video-thumbnail {
+  background-color: #000;
+  background-position: center center;
+  background-size: cover;
+  height: 28vw;
+  position: relative;
+  width: 100%;
+}
+
+.video-delete {
+  background-color: #fff;
+  bottom: 0;
+  cursor: default;
+  padding: .8rem;
+  position: absolute;
+  right: 0;
+  text-align: center;
+}
+
+a {
+  .link-source {
+    color: #000;
+    text-overflow: ellipsis;
+  }
+}

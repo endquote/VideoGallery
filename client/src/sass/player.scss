@@ -1,0 +1,19 @@
+@import 'main.scss';
+
+$onepxwide: .05208333333vw;
+$onepxhigh: .09259259259vh;
+$info-margin-w: 30 * $onepxwide;
+$info-margin-h: 30 * $onepxhigh;
+$qr-size: 8vw;
+
+body {
+  cursor: none;
+  overflow: hidden;
+  user-select: none;
+}
+
+@import '../components/video-player';
+@import '../components/video-info';
+@import '../components/video-progress';
+@import '../components/controller-status';
+@import '../components/click-target';

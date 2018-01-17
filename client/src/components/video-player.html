@@ -1,0 +1,3 @@
+<div id="video-player">
+  <video autoplay :src="(video && video._id ? '/content/' + video._id + '/video/' : '')" @loadstart="onLoadStart" @timeupdate="onTimeUpdate" @durationchange="onTimeUpdate" @ended="onEnded" @error="onError"></video>
+</div>

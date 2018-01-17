@@ -1,15 +1,24 @@
 {
-  "plugins": ["prettier"],
-  "extends": ["prettier"],
+  "plugins": [],
+  "extends": ["airbnb-base"],
   "parserOptions": {
-    "ecmaVersion": 6
+    "ecmaVersion": 2017
   },
   "env": {
     "node": true,
     "es6": true
   },
   "rules": {
-    "prettier/prettier": "error"
+    "no-underscore-dangle": "off",
+    "no-multi-assign": "off",
+    "no-console": "off",
+    "no-param-reassign": "off",
+    "arrow-body-style": "off",
+    "class-methods-use-this": "off",
+    "no-return-assign": ["error", "except-parens"],
+    "max-len": ["error", {
+      "code": 150
+    }]
   },
   "globals": {}
 }

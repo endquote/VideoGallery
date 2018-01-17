@@ -12,6 +12,7 @@
     "**/node_modules": true,
     "**/dist": true,
     "**/*.backup": true,
+    "**/.sass-cache": true,
     "output": true
   }
 }

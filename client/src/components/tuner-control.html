@@ -1,0 +1,10 @@
+<div id="tuner-control">
+  <div id="tuner-control-title" v-if="tuner.video"><a :href="'#' + tuner.video._id">{{ tuner.video.title }}</a></div>
+  <div id="tuner-control-buttons">
+    <button @click="nextVideo">⏭</button>
+    <button @click="seekBack">⏪</button>
+    <button @click="seekForward">⏩</button>
+    <button @click="toggleInfo" :class="{ off: !tuner.info }">ℹ️</button>
+    <button @click="toggleAudio" :class="{ off: !tuner.audio }">🔈</button>
+  </div>
+</div>
