@@ -1,6 +1,5 @@
 {
   "name": "rgbtv-server",
-  "version": "1.5.3",
   "main": "main.js",
   "author": "Josh Santangelo <josh@endquote.com>",
   "description": "Server for the Video Gallery application.",
