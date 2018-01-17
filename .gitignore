@@ -7,3 +7,4 @@ bin
 **/etc
 **/dist
 local.json
+.sass-cache
