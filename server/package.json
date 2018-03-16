@@ -13,17 +13,17 @@
     "dev": "node node_modules/nodemon/bin/nodemon.js main.js"
   },
   "devDependencies": {
-    "nodemon": "^1.11.0"
+    "nodemon": "1.17.2"
   },
   "dependencies": {
-    "body-parser": "^1.17.2",
-    "config": "^1.26.1",
-    "express": "^4.15.3",
-    "express-basic-auth": "^1.1.1",
-    "express-conditional-middleware": "^2.0.0",
-    "fs-extra": "4.0.0",
-    "mongoose": "^4.11.5",
-    "reload": "^2.2.0",
-    "socket.io": "^2.0.3"
+    "body-parser": "1.18.2",
+    "config": "1.30.0",
+    "express": "4.16.3",
+    "express-basic-auth": "1.1.4",
+    "express-conditional-middleware": "2.1.1",
+    "fs-extra": "5.0.0",
+    "mongoose": "5.0.10",
+    "reload": "2.2.2",
+    "socket.io": "2.0.4"
   }
 }

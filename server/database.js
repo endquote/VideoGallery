@@ -6,7 +6,7 @@ class Database {
   static init(url = 'mongodb://localhost/') {
     mongoose.Promise = global.Promise;
     mongoose
-      .connect(url, { useMongoClient: true })
+      .connect(url)
       .then(() => console.log('Database connected'))
       .catch(() => console.error('Database connection failed'));
 
