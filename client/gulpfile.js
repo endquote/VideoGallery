@@ -2,13 +2,12 @@ const gulp = require('gulp');
 const browserify = require('browserify');
 const sourcemaps = require('gulp-sourcemaps');
 const imagemin = require('gulp-imagemin');
-const sequence = require('gulp-sequence').use(gulp);
+const sequence = require('gulp-sequence');
 const del = require('del');
 const browserSync = require('browser-sync');
 const uglifyjs = require('uglify-es');
 const buffer = require('vinyl-buffer');
 const source = require('vinyl-source-stream');
-const pump = require('pump');
 const sass = require('gulp-sass');
 const fs = require('fs');
 const composer = require('gulp-uglify/composer');
@@ -17,14 +16,16 @@ const path = require('path');
 const cleanCSS = require('gulp-clean-css');
 const stringify = require('stringify');
 
+sequence.use(gulp);
 const minify = composer(uglifyjs, console);
 
 gulp.task('clean', () => {
-  return del('./dist');
+  return del('dist');
 });
 
 gulp.task('html', () => {
-  return pump([gulp.src('./src/*.html'), gulp.dest('./dist/')]);
+  return gulp.src('src/*.html')
+    .pipe(gulp.dest('dist/'));
 });
 
 let vendors = [];
@@ -34,136 +35,86 @@ gulp.task('scripts:vendor', () => {
   vendors = Object.keys(JSON.parse(fs.readFileSync('package.json')).dependencies);
   const b = browserify({ debug: true });
   vendors.forEach(lib => b.require(lib));
-  return pump([
-    b.bundle(),
-    source('vendor.js'),
-    buffer(),
-    sourcemaps.init({ loadMaps: true }),
-    minify({}),
-    sourcemaps.write('.'),
-    gulp.dest('./dist/scripts/'),
-  ]);
+  return b.bundle()
+    .pipe(source('vendor.js'))
+    .pipe(buffer())
+    .pipe(sourcemaps.init({ loadMaps: true }))
+    .pipe(minify({}))
+    .pipe(sourcemaps.write('.'))
+    .pipe(gulp.dest('dist/scripts/'));
 });
+
+let globalTasks = ['html', 'scripts:vendor', 'css', 'images'];
+let scriptTasks = [];
 
 // Build tasks for each script entry point, and then tasks which run all of those.
 (function buildScriptTasks() {
-  const entries = glob.sync('./src/apps/**.js');
+  const entries = glob.sync('src/apps/**.js');
   const entryNames = entries.map(entry => path.parse(entry).name);
-  const devTaskNames = entryNames.map(name => `scripts:apps:${name}:dev`);
-  const releaseTaskNames = entryNames.map(name => `scripts:apps:${name}:release`);
+  scriptTasks = entryNames.map(name => `scripts:apps:${name}`);
+  const sassTasks = entryNames.map(name => `sass:${name}`);
+  globalTasks = globalTasks.concat(sassTasks);
+
+  // Run all the entry point tasks.
+  gulp.task('scripts:apps', scriptTasks);
+  gulp.task('sass', sassTasks);
 
   entries.forEach((entry, i) => {
     // Browserify the entry point, with source maps.
-    gulp.task(devTaskNames[i], () => {
-      return pump([
-        browserify({
-          entries: [entry],
-          debug: true,
-        })
-          .transform(stringify)
-          .external(vendors)
-          .bundle(),
-        source(path.parse(entry).base),
-        buffer(),
-        sourcemaps.init({ loadMaps: true }),
-        sourcemaps.write('.'),
-        gulp.dest('./dist/scripts/'),
-      ]);
+    gulp.task(scriptTasks[i], () => {
+      return browserify({ entries: [entry], debug: true })
+        .transform(stringify)
+        .external(vendors)
+        .bundle()
+        .pipe(source(path.parse(entry).base))
+        .pipe(buffer())
+        .pipe(sourcemaps.init({ loadMaps: true }))
+        .pipe(minify({}))
+        .pipe(sourcemaps.write('.'))
+        .pipe(gulp.dest('dist/scripts/'));
     });
 
-    // Release is the same as dev, except for the minify() bit.
-    gulp.task(releaseTaskNames[i], () => {
-      return pump([
-        browserify({
-          entries: [entry],
-          debug: true,
-        })
-          .transform(stringify)
-          .external(vendors)
-          .bundle(),
-        source(path.parse(entry).base),
-        buffer(),
-        sourcemaps.init({ loadMaps: true }),
-        minify({}),
-        sourcemaps.write('.'),
-        gulp.dest('./dist/scripts/'),
-      ]);
+    // Compile sass files.
+    gulp.task(sassTasks[i], () => {
+      return gulp.src(entry.replace('apps', 'sass').replace('.js', '.scss'))
+        .pipe(sourcemaps.init())
+        .pipe(sass({ outputStyle: 'compressed' }))
+        .pipe(sourcemaps.write('.'))
+        .pipe(gulp.dest('dist/styles/'));
     });
   });
-
-  // Run all the entry point tasks.
-  gulp.task('scripts:apps:dev', devTaskNames);
-  gulp.task('scripts:apps:release', releaseTaskNames);
 }());
 
-// Compile Stylus files.
-gulp.task('sass', () => {
-  return pump([
-    gulp.src('./src/sass/**/*.scss'),
-    sourcemaps.init(),
-    sass({ outputStyle: 'compressed' }),
-    sourcemaps.write('.'),
-    gulp.dest('./dist/styles/'),
-  ]);
-});
-
-// Orinary CSS files, like the leaflet one.
+// Ordinary CSS files.
 gulp.task('css', () => {
-  return pump([
-    gulp.src(['./src/css/**/*.css', './node_modules/leaflet/dist/leaflet.css']),
-    sourcemaps.init(),
-    cleanCSS(),
-    sourcemaps.write('.'),
-    gulp.dest('./dist/styles/'),
-  ]);
+  return gulp.src(['src/css/**/*.css'])
+    .pipe(sourcemaps.init())
+    .pipe(cleanCSS())
+    .pipe(sourcemaps.write('.'))
+    .pipe(gulp.dest('dist/styles/'));
 });
 
 // Copy/compress images.
 gulp.task('images', () => {
-  return pump([
-    gulp.src(['./src/images/**/*', './node_modules/leaflet/dist/images/*']),
-    imagemin({ progressive: true }),
-    gulp.dest('./dist/images/'),
-  ]);
+  return gulp.src(['src/images/**/*'])
+    .pipe(imagemin({ progressive: true }))
+    .pipe(gulp.dest('dist/images/'));
 });
 
-// Maps are special SVG fiels, we don't want to treat them as images, because imagemin takes out stuff we need.
-gulp.task('maps', () => {
-  return pump([gulp.src('./src/maps/**/*'), gulp.dest('./dist/maps')]);
-});
-
-gulp.task('default', ['build:release']);
-
-gulp.task(
-  'build:release',
-  sequence('clean', 'scripts:vendor', [
-    'html',
-    'maps',
-    'scripts:apps:release',
-    'sass',
-    'css',
-    'images',
-  ]));
-
-gulp.task(
-  'build:dev',
-  sequence('clean', 'scripts:vendor', [
-    'html',
-    'maps',
-    'scripts:apps:dev',
-    'sass',
-    'css',
-    'images',
-  ]));
+gulp.task('build', sequence('clean', globalTasks.concat(scriptTasks)));
+gulp.task('default', ['build']);
 
 // Watch/sync drama below.
 
 // Set up Browser Sync. Don't do ghost mode, it is crazy.
 gulp.task('browser-sync', () => {
   browserSync.init({
-    proxy: 'localhost:8080',
-    open: false,
+    proxy: 'localhost:5000',
+    browser: 'google chrome',
     ghostMode: false,
+    notify: false,
+    ui: false,
+    open: false,
   });
 });
 
@@ -179,14 +130,17 @@ function watchTask(...names) {
   });
 }
 
-watchTask('html', 'scripts:vendor', 'scripts:apps:dev', 'sass', 'css', 'maps', 'images');
+watchTask('html', 'scripts:vendor', 'scripts:apps', 'sass', 'css', 'images');
 
-gulp.task('dev', ['build:dev', 'browser-sync'], () => {
-  gulp.watch('./src/**/*.html', ['html:watch']);
-  gulp.watch('./src/**/*.js', ['scripts:apps:dev:watch']);
-  gulp.watch('./src/**/*.scss', ['sass:watch']);
-  gulp.watch('./src/**/*.css', ['css:watch']);
-  gulp.watch('./src/images/**/*', ['images:watch']);
-  gulp.watch('./src/maps/**/*', ['maps:watch']);
-  gulp.watch('./package.json', ['scripts:vendor:watch', 'scripts:apps:dev:watch']);
+gulp.task('dev:watch', () => {
+  gulp.watch('src/*.html', ['html:watch']);
+  gulp.watch('src/**/*.js', ['scripts:apps:watch']);
+  gulp.watch('src/components/*.html', ['scripts:apps:watch']);
+  gulp.watch('src/**/*.scss', ['sass:watch']);
+  gulp.watch('src/**/*.css', ['css:watch']);
+  gulp.watch('src/images/**/*', ['images:watch']);
+  gulp.watch('package.json', ['scripts:vendor:watch', 'scripts:apps:watch']);
 });
+
+// The dev task builds, runs browser-sync, then watches everything.
+gulp.task('dev', sequence('build', 'browser-sync', 'dev:watch'));
