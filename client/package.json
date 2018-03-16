@@ -36,9 +36,9 @@
   },
   "dependencies": {
     "qrious": "4.0.2",
-    "socket.io-client": "2.0.3",
+    "socket.io-client": "2.0.4",
     "superagent": "3.8.2",
-    "vue": "2.4.2"
+    "vue": "2.5.16"
   },
   "browser": {
     "vue": "vue/dist/vue.common"
