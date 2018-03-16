@@ -14,11 +14,11 @@
     "dev": "node ./node_modules/nodemon/bin/nodemon.js powermate.js"
   },
   "devDependencies": {
-    "nodemon": "^1.11.0"
+    "nodemon": "1.17.2"
   },
   "dependencies": {
-    "config": "^1.26.1",
-    "noble": "git://github.com/jacobrosenthal/noble.git#highsierra",
-    "socket.io-client": "2.0.3"
+    "config": "1.30.0",
+    "noble": "1.9.0",
+    "socket.io-client": "2.0.4"
   }
 }
