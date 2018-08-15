@@ -109,7 +109,7 @@ gulp.task('default', ['build']);
 // Set up Browser Sync. Don't do ghost mode, it is crazy.
 gulp.task('browser-sync', () => {
   browserSync.init({
-    proxy: 'localhost:5000',
+    proxy: 'localhost:8080',
     browser: 'google chrome',
     ghostMode: false,
     notify: false,
