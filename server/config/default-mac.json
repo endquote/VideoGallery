@@ -3,7 +3,7 @@
   "port": 8080,
   "controlTuner": "default",
   "downloads": "~/rgbtv/downloads",
-  "database": "mongodb://localhost/rgbtv",
+  "database": "mongodb://localhost:27017/rgbtv",
   "username": "username",
   "password": "password"
 }
