@@ -4,8 +4,7 @@ module.exports = {
   template: require('./channel-list.html'),
   methods: {
     channelChanged(e) {
-      let newChannel =
-                  e.target.options[e.target.selectedIndex].value || null;
+      let newChannel = e.target.options[e.target.selectedIndex].value || null;
       if (newChannel === 'new') {
         newChannel = window.prompt("What's the name of the new channel?") || '';
         newChannel = newChannel.toLowerCase();
@@ -24,4 +23,3 @@ module.exports = {
     },
   },
 };
-

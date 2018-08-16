@@ -23,8 +23,7 @@ class Downloader {
 
     // https://github.com/rg3/youtube-dl/blob/master/README.md
     this.infoCmd = 'youtube-dl --dump-json --playlist-items 1';
-    this.downloadCmd =
-      'youtube-dl -v --write-thumbnail --no-progress --playlist-items 1 -o';
+    this.downloadCmd = 'youtube-dl -v --write-thumbnail --no-progress --playlist-items 1 -o';
 
     this.thumbnailWidth = 600;
 

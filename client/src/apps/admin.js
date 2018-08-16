@@ -1,7 +1,7 @@
 const Vue = require('vue');
 const io = require('socket.io-client');
-const Help = require('../common/help');
 const http = require('superagent');
+const Help = require('../common/help');
 
 Vue.component('channel-list', require('../components/channel-list'));
 Vue.component('tuner-list', require('../components/tuner-list'));
@@ -103,8 +103,7 @@ module.exports = new Vue({
       this.socket.on('videoUpdated', ({ video }) => {
         Help.parseVideo(video);
         const index = this.videos.findIndex(v => v._id === video._id);
-        const inChannel =
-        !this.channel || video.channels.find(c => c.name === this.channel);
+        const inChannel = !this.channel || video.channels.find(c => c.name === this.channel);
         if (index !== -1 && inChannel) {
         // Video properties changed
           Vue.set(this.videos, index, video);
@@ -163,4 +162,3 @@ module.exports = new Vue({
     },
   },
 });
-

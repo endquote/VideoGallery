@@ -130,15 +130,11 @@ class PowerMate {
         );
 
         // Subscribe to battery
-        this._batteryChar.notify(true, () =>
-          console.info('Signed up for battery notifications'),
-        );
+        this._batteryChar.notify(true, () => console.info('Signed up for battery notifications'));
         this._batteryChar.on('read', this._onBatteryReadHandler);
 
         // Subscribe to knob
-        this._knobChar.notify(true, () =>
-          console.info('Signed up for knob notifications'),
-        );
+        this._knobChar.notify(true, () => console.info('Signed up for knob notifications'));
         this._knobChar.on('read', this._onKnobReadHandler);
       },
     );
@@ -160,8 +156,8 @@ class PowerMate {
 
     // For some reason 'holdRelease' comes in pairs
     if (
-      parsedValue === 'holdrelease' &&
-      this._peripheral.lastKnobAction === 'holdrelease'
+      parsedValue === 'holdrelease'
+      && this._peripheral.lastKnobAction === 'holdrelease'
     ) {
       this._peripheral.lastKnobAction = null;
       return;

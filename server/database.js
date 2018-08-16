@@ -6,7 +6,7 @@ class Database {
   static init(url = 'mongodb://localhost/') {
     mongoose.Promise = global.Promise;
     mongoose
-      .connect(url)
+      .connect(url, { useNewUrlParser: true })
       .then(() => console.log('Database connected'))
       .catch(() => console.error('Database connection failed'));
 
@@ -30,7 +30,8 @@ class Database {
         type: String,
         default: 'default',
         required: true,
-        index: { unique: true },
+        unique: true,
+        sparse: true,
         validate: {
           validator(v) {
             return invalidChannels.indexOf(v.toLowerCase()) === -1;
@@ -106,12 +107,10 @@ class Database {
             added: new Date(),
             channels: channel !== null ? [{ name: channel }] : [],
           })
-          .then(doc =>
-            this.emitter.emit('videoAdded', {
-              video: doc,
-              channelName: channel,
-            }),
-          );
+          .then(doc => this.emitter.emit('videoAdded', {
+            video: doc,
+            channelName: channel,
+          }));
       }
 
       if (channel && !existingVideo.channels.find(c => c.name === channel)) {
@@ -147,12 +146,10 @@ class Database {
 
       if (!channel) {
         // Remove video entirely.
-        return this.Video.remove({ _id: id }).then(() =>
-          this.emitter.emit('videoRemoved', {
-            videoId: id,
-            channelName: channel,
-          }),
-        );
+        return this.Video.remove({ _id: id }).then(() => this.emitter.emit('videoRemoved', {
+          videoId: id,
+          channelName: channel,
+        }));
       }
 
       const channelIndex = existingVideo.channels.findIndex(

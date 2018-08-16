@@ -30,10 +30,9 @@ class WebServer {
         (req) => {
           const notIcon = req.path.indexOf('/images/icons') !== 0;
           const authConfiged = username !== '' || password !== '';
-          const isRemote =
-            ['127.0.0.1', '::ffff:127.0.0.1', '::1'].indexOf(
-              req.connection.remoteAddress,
-            ) === -1;
+          const isRemote = ['127.0.0.1', '::ffff:127.0.0.1', '::1'].indexOf(
+            req.connection.remoteAddress,
+          ) === -1;
           const doAuth = authConfiged && isRemote && notIcon;
           return doAuth;
         },
@@ -66,14 +65,12 @@ class WebServer {
         const method = parts.shift();
         if (method === 'channels') {
           // Get all channels.
-          return Database.getChannels().then(result =>
-            res.json({ current: result, invalid: Database.invalidChannels }),
-          );
-        } else if (method === 'videos') {
+          return Database.getChannels().then(result => res.json({ current: result, invalid: Database.invalidChannels }),);
+        } if (method === 'videos') {
           // Get all videos.
           const channel = parts.shift();
           return Database.getVideos(channel).then(result => res.json(result));
-        } else if (method === 'reprocess') {
+        } if (method === 'reprocess') {
           // Re-download everything.
           return Database.getVideos().then((result) => {
             result.forEach(doc => Downloader.addVideo(doc));

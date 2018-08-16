@@ -1,7 +1,7 @@
 const Vue = require('vue');
 const io = require('socket.io-client');
-const Help = require('../common/help');
 const http = require('superagent');
+const Help = require('../common/help');
 
 Vue.component('video-player', require('../components/video-player'));
 Vue.component('video-info', require('../components/video-info'));
@@ -104,7 +104,9 @@ module.exports = new Vue({
       });
 
       // Update the selected video
-      this.socket.on('tunerChanged', ({ channel, video, info, audio }) => {
+      this.socket.on('tunerChanged', ({
+        channel, video, info, audio,
+      }) => {
         console.info('receiving', 'tunerChanged', channel, video, info, audio);
         if (channel !== this.channel) {
           this.video = video;
@@ -141,16 +143,13 @@ module.exports = new Vue({
         }
       }
 
-      this.socket.on('videoRemoved', ({ videoId, channel }) =>
-        removeVideo(videoId, channel),
-      );
+      this.socket.on('videoRemoved', ({ videoId, channel }) => removeVideo(videoId, channel) );
 
       // Update the entire video record.
       this.socket.on('videoUpdated', ({ video }) => {
         Help.parseVideo(video);
         const index = this.videos.findIndex(v => v._id === video._id);
-        const inChannel =
-          !this.channel || video.channels.find(c => c.name === this.channel);
+        const inChannel = !this.channel || video.channels.find(c => c.name === this.channel);
         if (index !== -1 && inChannel) {
           // Video properties changed
           Vue.set(this.videos, index, video);
@@ -174,11 +173,9 @@ module.exports = new Vue({
 
       this.socket.on('seekForward', () => (player.currentTime += this.knobRate));
       this.socket.on('seekBack', () => (player.currentTime -= this.knobRate));
-      this.socket.on('nextMode', () =>
-        document
-          .getElementById('click-target')
-          .dispatchEvent(new Event('pointerup')),
-      );
+      this.socket.on('nextMode', () => document
+        .getElementById('click-target')
+        .dispatchEvent(new Event('pointerup')) );
 
       // Handle events from the hardware controller.
       this.socket.on('controller', ({ connected, battery }) => {

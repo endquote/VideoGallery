@@ -14,31 +14,31 @@
     "postinstall": "npm run build"
   },
   "devDependencies": {
-    "browser-sync": "2.23.6",
-    "browserify": "16.1.1",
-    "config": "1.30.0",
+    "browser-sync": "2.24.6",
+    "browserify": "16.2.2",
+    "config": "2.0.1",
     "del": "3.0.0",
     "glob-promise": "3.4.0",
     "gulp": "3.9.1",
     "gulp-batch": "1.0.5",
-    "gulp-clean-css": "3.9.3",
+    "gulp-clean-css": "3.10.0",
     "gulp-imagemin": "4.1.0",
-    "gulp-sass": "3.1.0",
+    "gulp-sass": "4.0.1",
     "gulp-sequence": "1.0.0",
     "gulp-sourcemaps": "2.6.4",
-    "gulp-uglify": "3.0.0",
-    "gulp-watch": "5.0.0",
+    "gulp-uglify": "3.0.1",
+    "gulp-watch": "5.0.1",
     "stringify": "5.2.0",
     "uglify-es": "3.3.9",
-    "uglify-js": "3.3.15",
+    "uglify-js": "3.4.7",
     "vinyl-buffer": "1.0.1",
     "vinyl-source-stream": "2.0.0"
   },
   "dependencies": {
     "qrious": "4.0.2",
-    "socket.io-client": "2.0.4",
-    "superagent": "3.8.2",
-    "vue": "2.5.16"
+    "socket.io-client": "2.1.1",
+    "superagent": "3.8.3",
+    "vue": "2.5.17"
   },
   "browser": {
     "vue": "vue/dist/vue.common"

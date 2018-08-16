@@ -62,7 +62,9 @@ class SocketServer {
       });
 
       // Whenever a tuner changes channels/videos, tell the other instances.
-      socket.on('tunerChanged', ({ tuner, channel, video, info, audio }) => {
+      socket.on('tunerChanged', ({
+        tuner, channel, video, info, audio,
+      }) => {
         tuner = tuner || SocketServer.defaultTunerName;
         const state = SocketServer.getTunerState(tuner, socket);
         state.video = video;
@@ -74,17 +76,11 @@ class SocketServer {
 
       // When the admin page connects, tell it about the tuners.
       // Send playback controls to tuners.
-      socket.on('tunerNext', tuner =>
-        this.getTunerState(tuner).sockets[0].emit('nextVideo'),
-      );
-      socket.on('seekForward', tuner =>
-        io.sockets.in(tuner).emit('seekForward'),
-      );
+      socket.on('tunerNext', tuner => this.getTunerState(tuner).sockets[0].emit('nextVideo'));
+      socket.on('seekForward', tuner => io.sockets.in(tuner).emit('seekForward'));
       socket.on('seekBack', tuner => io.sockets.in(tuner).emit('seekBack'));
       socket.on('nextMode', tuner => io.sockets.in(tuner).emit('nextMode'));
-      socket.on('controller', (tuner, state) =>
-        io.sockets.in(tuner).emit('controller', state),
-      );
+      socket.on('controller', (tuner, state) => io.sockets.in(tuner).emit('controller', state));
       socket.on('info', (tuner) => {
         const state = this.getTunerState(tuner);
         state.info = !state.info;
