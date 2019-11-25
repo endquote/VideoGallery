@@ -1,4 +1,4 @@
-Downloads videos from the web and plays them in a random order.
+Downloads videos from the web and plays them in a random order. [Demo video here.](https://endquote.com/project/rgbtv/)
 
 * [Features](#features)
 * [Controls](#features)
